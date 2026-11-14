@@ -429,7 +429,47 @@ fn path_is_pdf(path: &Path) -> bool {
         .is_some_and(|e| e.eq_ignore_ascii_case("pdf"))
 }
 
+#[cfg(all(target_os = "macos", debug_assertions))]
+fn apply_offline_test_profile() {
+    if !std::env::args_os().any(|arg| arg == "--verify-offline") {
+        return;
+    }
+    unsafe extern "C" {
+        fn sandbox_init(
+            profile: *const std::ffi::c_char,
+            flags: u64,
+            error: *mut *mut std::ffi::c_char,
+        ) -> std::ffi::c_int;
+        fn sandbox_free_error(error: *mut std::ffi::c_char);
+    }
+    let mut error = std::ptr::null_mut();
+    let result = unsafe {
+        sandbox_init(
+            c"(version 1) (allow default) (deny network*)".as_ptr(),
+            0,
+            &mut error,
+        )
+    };
+    if !error.is_null() {
+        unsafe { sandbox_free_error(error) };
+    }
+    assert_eq!(
+        result, 0,
+        "Das Offline-Testprofil konnte nicht aktiviert werden."
+    );
+    if std::net::TcpStream::connect_timeout(
+        &std::net::SocketAddr::from(([1, 1, 1, 1], 443)),
+        std::time::Duration::from_secs(2),
+    )
+    .is_ok()
+    {
+        panic!("Die Netzwerkblockade des Offline-Testprofils war unwirksam.");
+    }
+}
+
 fn main() {
+    #[cfg(all(target_os = "macos", debug_assertions))]
+    apply_offline_test_profile();
     Builder::default()
         .manage(Workspace::default())
         .plugin(tauri_plugin_dialog::init())

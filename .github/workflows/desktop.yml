@@ -49,6 +49,8 @@ jobs:
           cargo test --locked --manifest-path src-tauri/Cargo.toml --no-default-features --target ${{ matrix.target }}
           mkdir -p output/pdf
           cargo run --locked --manifest-path src-tauri/Cargo.toml --no-default-features --target ${{ matrix.target }} --example roots-check -- fixtures/synthetic-myheritage.txt output/pdf/roots-local-beispiel.pdf "$ROOTS_TEST_TYPST" --synthetic
+      - run: python -m pip install pypdf==7.1.0
+      - run: python scripts/verify_pdf.py output/pdf/roots-local-beispiel.pdf
       - run: npm run tauri -- build --target ${{ matrix.target }} --bundles ${{ matrix.bundles }}
       - if: runner.os == 'macOS'
         shell: bash

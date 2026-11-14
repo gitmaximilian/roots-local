@@ -59,7 +59,7 @@ pub fn chromosome(value: &str) -> Option<String> {
 
 fn canonical_call(raw: &str) -> Option<Option<String>> {
     let call = raw.trim().to_ascii_uppercase();
-    if ["", "-", "--", "0", "00", "NN", "N", ".", "NA", "NC"].contains(&call.as_str()) {
+    if ["", "-", "--", "—", "0", "00", "NN", "N", ".", "NA", "NC"].contains(&call.as_str()) {
         return Some(None);
     }
     if (1..=2).contains(&call.len()) && call.bytes().all(|c| b"ACGTID".contains(&c)) {
@@ -114,12 +114,26 @@ pub fn parse(input: impl Read, cancel: &AtomicBool) -> Result<Import, String> {
             .iter()
             .any(|token| metadata.contains(token))
         {
-            let old = ["grch37", "hg19", "build 37", "build=37", "build: 37"]
-                .iter()
-                .any(|t| metadata.contains(t));
-            let new = ["grch38", "hg38", "build 38", "build=38", "build: 38"]
-                .iter()
-                .any(|t| metadata.contains(t));
+            let old = [
+                "grch37",
+                "hg19",
+                "build 37",
+                "build=37",
+                "build37",
+                "build: 37",
+            ]
+            .iter()
+            .any(|t| metadata.contains(t));
+            let new = [
+                "grch38",
+                "hg38",
+                "build 38",
+                "build=38",
+                "build38",
+                "build: 38",
+            ]
+            .iter()
+            .any(|t| metadata.contains(t));
             if old && new {
                 return Err("Widersprüchliche Referenzgenome im Dateikopf.".into());
             }

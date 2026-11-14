@@ -8,7 +8,7 @@ use sha2::{Digest, Sha256};
 use std::{fs, io::Write, path::Path, sync::atomic::AtomicBool};
 
 const SAMPLE: &[u8] = include_bytes!("../../fixtures/synthetic-myheritage.txt");
-const COLUMNS: &str = "# reference=GRCh37\nRSID,CHROMOSOME,POSITION,RESULT\n";
+const COLUMNS: &str = "##reference=build37\nRSID,CHROMOSOME,POSITION,RESULT\n";
 
 #[test]
 fn full_taxonomy_and_four_reviewed_interpretations() {
