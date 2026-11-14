@@ -6,4 +6,4 @@ The desktop implementation and installers under development are tracked in [pull
 
 - [Implementation brief](docs/implementation-brief.md)
 - [Report outline](docs/report-structure.md)
-- [MIT license](LICENSE)
+- [Apache 2.0 license](LICENSE)
