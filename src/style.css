@@ -707,3 +707,21 @@ td small {
 .more-findings {
   margin-top: 10px;
 }
+
+.toolbar-actions,
+.language-control {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+.language-control {
+  font-size: 13px;
+  color: var(--muted);
+}
+.language-control select {
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: white;
+  color: var(--green);
+  padding: 7px 8px;
+}

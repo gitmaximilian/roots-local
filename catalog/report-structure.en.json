@@ -1,0 +1,501 @@
+[
+  {
+    "id": "01",
+    "title": "Ancestry, origins & human evolution",
+    "part": "I · Ancestry, family, and your genome",
+    "sections": [
+      {
+        "id": "01.1",
+        "title": "Geographic ancestry",
+        "scope": "Ancestry estimates, regions, genetic groups, maps, regional history, and suitable reference panel comparisons."
+      },
+      {
+        "id": "01.2",
+        "title": "Ancestry along chromosomes",
+        "scope": "Segment-level ancestry, comparisons with global estimates, competing assignments, and uncertainty."
+      },
+      {
+        "id": "01.3",
+        "title": "Direct maternal and paternal lines",
+        "scope": "Mitochondrial and Y-DNA haplogroups, lineage trees, geographic context, and resolution."
+      },
+      {
+        "id": "01.4",
+        "title": "Ancient and archaic ancestry",
+        "scope": "Imported Ancient Origins results, comparisons with archaeological reference genomes, and Neanderthal or Denisovan ancestry where appropriate methods exist."
+      },
+      {
+        "id": "01.5",
+        "title": "Evolution and adaptation",
+        "scope": "Historical adaptations such as milk consumption and altitude, with population context."
+      }
+    ]
+  },
+  {
+    "id": "02",
+    "title": "Relatives, shared DNA & inheritance",
+    "part": "I · Ancestry, family, and your genome",
+    "sections": [
+      {
+        "id": "02.1",
+        "title": "DNA matches",
+        "scope": "Imported matches, shared centimorgans, segment counts and lengths, and possible relationships."
+      },
+      {
+        "id": "02.2",
+        "title": "Chromosome comparison",
+        "scope": "Shared and triangulated segments, shared matches, and family-branch groups."
+      },
+      {
+        "id": "02.3",
+        "title": "Parental and family inheritance",
+        "scope": "Assignment to a parental side, comparisons with relatives, and inheritance of variants when supporting files are available."
+      },
+      {
+        "id": "02.4",
+        "title": "Genetic diversity",
+        "scope": "Homozygous and heterozygous positions, runs of homozygosity, and comparisons with appropriate references."
+      }
+    ]
+  },
+  {
+    "id": "03",
+    "title": "Your genome, variants & data quality",
+    "part": "I · Ancestry, family, and your genome",
+    "sections": [
+      {
+        "id": "03.1",
+        "title": "File and testing method",
+        "scope": "Provider, raw format, array or sequencing, reference assembly, marker count, chromosomes, and missing genotypes."
+      },
+      {
+        "id": "03.2",
+        "title": "Variant types",
+        "scope": "SNPs, small insertions and deletions, structural variants, copy number, repeat expansions, mitochondrial variants, and heteroplasmy when available."
+      },
+      {
+        "id": "03.3",
+        "title": "Location and function",
+        "scope": "Genes, transcripts, coding and regulatory regions, protein consequences, RNA splicing, and variants on the same copy."
+      },
+      {
+        "id": "03.4",
+        "title": "Coverage",
+        "scope": "Usable, missing, ambiguous, or conflicting positions, CRAM depth and quality, and measured or imputed genotypes where stated."
+      }
+    ]
+  },
+  {
+    "id": "04",
+    "title": "Appearance, skin, hair & body shape",
+    "part": "II · Body, senses, and everyday traits",
+    "sections": [
+      {
+        "id": "04.1",
+        "title": "Pigmentation",
+        "scope": "Eye, hair, and skin color, freckles, tanning, and sunburn tendency."
+      },
+      {
+        "id": "04.2",
+        "title": "Hair and skin traits",
+        "scope": "Hair texture, graying, hair loss, skin barrier and dryness, skin aging, wound healing, scars, and keloids."
+      },
+      {
+        "id": "04.3",
+        "title": "Face and visible traits",
+        "scope": "Facial and cranial proportions, nose, chin, ears, and earwax type."
+      },
+      {
+        "id": "04.4",
+        "title": "Growth and body composition",
+        "scope": "Height, proportions, body weight, fat distribution, muscle mass, and lean mass."
+      }
+    ]
+  },
+  {
+    "id": "05",
+    "title": "Senses, perception & motor traits",
+    "part": "II · Body, senses, and everyday traits",
+    "sections": [
+      {
+        "id": "05.1",
+        "title": "Taste and smell",
+        "scope": "Bitter taste, cilantro, asparagus odor, olfactory receptors, and individual odorants."
+      },
+      {
+        "id": "05.2",
+        "title": "Vision",
+        "scope": "Myopia, hyperopia, color vision, retina, lens, optic nerve, glaucoma, and other inherited eye traits."
+      },
+      {
+        "id": "05.3",
+        "title": "Hearing and balance",
+        "scope": "Hearing, hearing loss, tinnitus, inherited hearing disorders, and motion sickness."
+      },
+      {
+        "id": "05.4",
+        "title": "Motor and sensory traits",
+        "scope": "Handedness, coordination, temperature perception, pain sensitivity, and sensory processing."
+      }
+    ]
+  },
+  {
+    "id": "06",
+    "title": "Sport, muscles, bones & movement",
+    "part": "II · Body, senses, and everyday traits",
+    "sections": [
+      {
+        "id": "06.1",
+        "title": "Muscle biology",
+        "scope": "ACTN3, muscle fiber function, muscle metabolism, grip strength, and muscle mass."
+      },
+      {
+        "id": "06.2",
+        "title": "Performance and exertion",
+        "scope": "Studies on sprinting, strength, endurance, oxygen uptake, training response, and recovery."
+      },
+      {
+        "id": "06.3",
+        "title": "Bones, joints, and connective tissue",
+        "scope": "Bone density, osteoporosis, fractures, osteoarthritis, tendons, ligaments, Dupuytren disease, and inherited connective tissue disorders."
+      },
+      {
+        "id": "06.4",
+        "title": "Everyday activity",
+        "scope": "Organized and everyday movement, sedentary behavior, and sensor measurements as research traits."
+      }
+    ]
+  },
+  {
+    "id": "07",
+    "title": "Nutrition, tolerance & metabolism",
+    "part": "II · Body, senses, and everyday traits",
+    "sections": [
+      {
+        "id": "07.1",
+        "title": "Digestion of food components",
+        "scope": "Lactase activity, population-dependent markers, starch and other food components, and references to celiac disease and allergies."
+      },
+      {
+        "id": "07.2",
+        "title": "Caffeine, alcohol, and other compounds",
+        "scope": "Metabolism, enzyme function, and alcohol flushing."
+      },
+      {
+        "id": "07.3",
+        "title": "Vitamins, minerals, and trace elements",
+        "scope": "Vitamin D, B vitamins, iron uptake and storage, and other documented micronutrients."
+      },
+      {
+        "id": "07.4",
+        "title": "Sugar, fats, and energy balance",
+        "scope": "Glucose, insulin, type 2 diabetes, cholesterol, triglycerides, appetite, satiety, and weight."
+      },
+      {
+        "id": "07.5",
+        "title": "Gut microbiome",
+        "scope": "Research on human genetic variants and microbiome composition, plus optional separately measured data."
+      }
+    ]
+  },
+  {
+    "id": "08",
+    "title": "Sleep, behavior, cognition & aging",
+    "part": "II · Body, senses, and everyday traits",
+    "sections": [
+      {
+        "id": "08.1",
+        "title": "Sleep and the body clock",
+        "scope": "Chronotype, sleep duration and timing, insomnia, snoring, and sleep apnea."
+      },
+      {
+        "id": "08.2",
+        "title": "Personality and behavior",
+        "scope": "Research on the Big Five, habits, tobacco, alcohol, other substance use, and dependence."
+      },
+      {
+        "id": "08.3",
+        "title": "Memory, attention, and learning",
+        "scope": "Research on memory, attention, reaction time, and other cognitive traits."
+      },
+      {
+        "id": "08.4",
+        "title": "Aging and lifespan",
+        "scope": "Telomeres, lifespan, healthy aging, age-related traits, and optional measured biomarkers."
+      }
+    ]
+  },
+  {
+    "id": "09",
+    "title": "Heart, vessels, blood & breathing",
+    "part": "III · Health by body system",
+    "sections": [
+      {
+        "id": "09.1",
+        "title": "Heart",
+        "scope": "Heart attack, coronary artery disease, rhythm, atrial fibrillation, cardiomyopathy, and heart structure."
+      },
+      {
+        "id": "09.2",
+        "title": "Vessels and circulation",
+        "scope": "Blood pressure, arterial and venous disorders, vascular structure, and stroke."
+      },
+      {
+        "id": "09.3",
+        "title": "Blood clotting",
+        "scope": "Thrombosis, bleeding tendency, and inherited clotting disorders."
+      },
+      {
+        "id": "09.4",
+        "title": "Blood counts and blood groups",
+        "scope": "Red and white blood cells, hemoglobin, platelets, ABO, Rh, and other groups where data permit."
+      },
+      {
+        "id": "09.5",
+        "title": "Lungs and airways",
+        "scope": "Lung function, COPD, other airway conditions, and references to asthma, sleep-related breathing, and exposures."
+      }
+    ]
+  },
+  {
+    "id": "10",
+    "title": "Digestion, kidneys, hormones & other systems",
+    "part": "III · Health by body system",
+    "sections": [
+      {
+        "id": "10.1",
+        "title": "Mouth, teeth, and gums",
+        "scope": "Cavities, periodontitis, enamel, and inherited tooth traits."
+      },
+      {
+        "id": "10.2",
+        "title": "Stomach and bowel",
+        "scope": "Reflux, irritable bowel syndrome, diverticular disease, inflammatory bowel disease, and celiac disease."
+      },
+      {
+        "id": "10.3",
+        "title": "Liver, gallbladder, and pancreas",
+        "scope": "Liver enzymes, fatty liver, iron overload, gallstones, and pancreatic disorders."
+      },
+      {
+        "id": "10.4",
+        "title": "Kidneys, urinary tract, and pelvic floor",
+        "scope": "Kidney function, stones, uric acid, gout, bladder, urinary tract, and pelvic floor."
+      },
+      {
+        "id": "10.5",
+        "title": "Hormones and endocrine organs",
+        "scope": "Thyroid, adrenal glands, hormonal axes, hormone levels, and links to insulin."
+      },
+      {
+        "id": "10.6",
+        "title": "Dermatology",
+        "scope": "Acne, psoriasis, atopic and other skin conditions, skin barrier, and healing."
+      }
+    ]
+  },
+  {
+    "id": "11",
+    "title": "Immunity, inflammation, allergies & infections",
+    "part": "III · Health by body system",
+    "sections": [
+      {
+        "id": "11.1",
+        "title": "Immunogenetics",
+        "scope": "HLA, antigen presentation, immune regulation, antibodies, and cytokines."
+      },
+      {
+        "id": "11.2",
+        "title": "Allergies and atopy",
+        "scope": "Hay fever, atopic dermatitis, allergic asthma, and other allergic predispositions."
+      },
+      {
+        "id": "11.3",
+        "title": "Autoimmunity",
+        "scope": "Celiac disease, type 1 diabetes, thyroid autoimmunity, rheumatologic conditions, and other autoimmune diseases."
+      },
+      {
+        "id": "11.4",
+        "title": "Susceptibility and immune response",
+        "scope": "Observed associations between human variants, susceptibility to infection, and immune measurements."
+      },
+      {
+        "id": "11.5",
+        "title": "Inherited immune disorders and lymphatics",
+        "scope": "Inborn immune disorders, complement, primary lymphedema, and lymphatic vessels."
+      }
+    ]
+  },
+  {
+    "id": "12",
+    "title": "Brain, nerves, pain & mental health",
+    "part": "III · Health by body system",
+    "sections": [
+      {
+        "id": "12.1",
+        "title": "Neurology",
+        "scope": "Migraine and subtypes, epilepsy, movement disorders, inherited neurologic conditions, Parkinson's and Alzheimer's diseases."
+      },
+      {
+        "id": "12.2",
+        "title": "Pain and sensory processing",
+        "scope": "Chronic pain, neuropathic pain, and pain sensitivity."
+      },
+      {
+        "id": "12.3",
+        "title": "Neurodevelopment",
+        "scope": "Research on developmental traits, neurodevelopmental conditions, and rare syndromes."
+      },
+      {
+        "id": "12.4",
+        "title": "Mental health",
+        "scope": "Research on depression, anxiety, other psychiatric conditions, and shared genetic influences."
+      }
+    ]
+  },
+  {
+    "id": "13",
+    "title": "Reproduction, pregnancy & development",
+    "part": "III · Health by body system",
+    "sections": [
+      {
+        "id": "13.1",
+        "title": "Reproductive health",
+        "scope": "Reproductive organs, fertility, endometriosis, menstrual traits, and menopause."
+      },
+      {
+        "id": "13.2",
+        "title": "Pregnancy and birth",
+        "scope": "Pregnancy traits, birth weight, and genetic contributions from the mother and child."
+      },
+      {
+        "id": "13.3",
+        "title": "Congenital and early development",
+        "scope": "Organ development, growth, developmental syndromes, and multisystem traits."
+      },
+      {
+        "id": "13.4",
+        "title": "Family planning and carrier status",
+        "scope": "Recessive and X-linked variants, inheritance, tested positions, and confirmed comparison results when available."
+      }
+    ]
+  },
+  {
+    "id": "14",
+    "title": "Inherited conditions, cancer genetics & disease risk",
+    "part": "IV · Medical genetics and drugs",
+    "sections": [
+      {
+        "id": "14.1",
+        "title": "Inherited conditions and inheritance patterns",
+        "scope": "Monogenic conditions, dominant, recessive, X-linked and mitochondrial inheritance, and variant-specific evaluations."
+      },
+      {
+        "id": "14.2",
+        "title": "Rare disease groups",
+        "scope": "Inborn errors of metabolism, lysosomal and peroxisomal disorders, mitochondrial energy production, multisystem syndromes, and conditions involving complex variants."
+      },
+      {
+        "id": "14.3",
+        "title": "Cancer genetics",
+        "scope": "Inherited predisposition, familial syndromes, organ-specific studies, and separately imported confirmed findings."
+      },
+      {
+        "id": "14.4",
+        "title": "Common conditions and polygenic scores",
+        "scope": "Models by condition, genotype coverage, reference population, calibration, and links to relevant organ chapters."
+      }
+    ]
+  },
+  {
+    "id": "15",
+    "title": "Drugs, metabolism & anesthesia",
+    "part": "IV · Medical genetics and drugs",
+    "sections": [
+      {
+        "id": "15.1",
+        "title": "Pharmacogenetic profile",
+        "scope": "Genotype, haplotype, diplotype, copy number, enzyme activity, and drug transport."
+      },
+      {
+        "id": "15.2",
+        "title": "Drug groups",
+        "scope": "Cardiovascular drugs, anticoagulants, pain medicines, psychiatric, oncology, immune, and anti-infective treatments."
+      },
+      {
+        "id": "15.3",
+        "title": "Adverse effects",
+        "scope": "Documented variants, HLA types, and their associated drugs."
+      },
+      {
+        "id": "15.4",
+        "title": "Anesthesia",
+        "scope": "Selected genetic associations with reactions to anesthetics and requirements for confirmed findings."
+      }
+    ]
+  },
+  {
+    "id": "16",
+    "title": "Lab values, proteins, metabolites & imaging",
+    "part": "V · Molecular research and associations",
+    "sections": [
+      {
+        "id": "16.1",
+        "title": "Clinical lab values",
+        "scope": "Blood counts, lipids, glucose, liver, kidneys, hormones, vitamins, minerals, inflammation, and optional measured values."
+      },
+      {
+        "id": "16.2",
+        "title": "Proteins and signaling molecules",
+        "scope": "Proteome, immune proteins, cytokines, and other protein markers."
+      },
+      {
+        "id": "16.3",
+        "title": "Metabolites and lipids",
+        "scope": "Metabolome, amino acids, small metabolites, and the lipidome."
+      },
+      {
+        "id": "16.4",
+        "title": "Glycobiology",
+        "scope": "Sugar structures on proteins, including antibody glycosylation."
+      },
+      {
+        "id": "16.5",
+        "title": "Organ structure and medical imaging",
+        "scope": "Research on MRI, heart, brain, and retinal measurements, with optional personal measurements."
+      }
+    ]
+  },
+  {
+    "id": "17",
+    "title": "Gene regulation, epigenetics & environment",
+    "part": "V · Molecular research and associations",
+    "sections": [
+      {
+        "id": "17.1",
+        "title": "Gene activity by tissue",
+        "scope": "Gene expression, eQTLs, and tissue-specific associations."
+      },
+      {
+        "id": "17.2",
+        "title": "RNA processing and splicing",
+        "scope": "Transcripts, sQTLs, and associations with protein levels and clinical findings."
+      },
+      {
+        "id": "17.3",
+        "title": "Epigenetics",
+        "scope": "DNA methylation associations and optional separately measured methylation data."
+      },
+      {
+        "id": "17.4",
+        "title": "Genes and environment",
+        "scope": "Nutrition, movement, tobacco smoke, air pollution, altitude, and optional exposure information."
+      },
+      {
+        "id": "17.5",
+        "title": "Variants associated with several traits",
+        "scope": "Pleiotropy, traits that span organ systems, and links to related findings."
+      }
+    ]
+  }
+]

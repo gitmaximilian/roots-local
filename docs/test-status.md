@@ -1,0 +1,20 @@
+# Implementation and test status
+
+| Platform | Verified |
+|---|---|
+| **MacBook Air M4, macOS 15.6.1** | Native app built and installed. Imported a synthetic MyHeritage file with the native dialog, inspected results, previewed the full report, and exported a PDF. |
+| **M4 with network access denied** | Used the installed debug bundle with `--verify-offline` to evaluate synthetic data. Tested the native file import, preview, and export. The app process and spawned helpers were covered by the restriction. Independent macOS WebKit services were not separately instrumented. |
+| **Windows x64 and ARM64** | Native core and PDF tests passed on both [GitHub Actions runners](https://github.com/gitmaximilian/roots-local/actions/runs/43637748910), and both NSIS installers were built. Interactive offline Windows installation, update, and removal remain unverified. |
+| **Older macOS versions and Intel** | The configured macOS minimum is 15.6. Earlier releases and Intel Macs have not been tested. |
+
+English is the default for the app and its PDF report. The language switch was tested in the native M4 app with the same synthetic profile, and the German PDF preview rendered with network access denied. Verified exports in both languages contained 24 pages, 17 chapters, 76 sections, and 151 links. The starter reference report included embedded fonts. Representative pages were visually inspected. On the M4, the debug smoke test imported 700,015 synthetic rows and exported a PDF in 2.84 seconds, with approximately 165 MiB peak RSS. The benchmark used the command-line harness.
+
+## Milestones
+
+1. **Offline workflow.** Import, analysis, chapter navigation, preview, and full report work on synthetic genotypes. Four personal trait rules and selected research associations are available.
+2. **Catalog breadth.** All chapters, search, filters, coverage, signed packages, and basic ancestry, match, and segment imports are available. The GWAS importer was verified against a full EMBL-EBI export. Its test package contained 4,153 associations across 46 topics. The installed M4 app matched 52 supplemental associations and rendered a 41-page preview. Clinical imports and curated rules for more chapters remain open. Companion CSV fixtures are synthetic and export schemas may vary.
+3. **Sequencing and family.** CRAM coverage was tested against synthetic reads with known quality and bases. The family comparison checks shared autosomal alleles. Real MyHeritage CRAM validation, parental phasing, haplogroups, and relationship estimation are pending.
+4. **Advanced interpretation.** TAS2R38 homozygous combinations, strict additive research scores, and selected gene–drug study links are available. Complex clinically validated haplotypes, copy-number analysis, broader pharmacogenetics, and calibrated disease risks are pending.
+5. **Packages.** The native macOS app and DMG were built and checked. Separate Windows installers are available as CI artifacts. Stable releases require signing and the remaining platform acceptance tests.
+
+Tests use synthetic genotype data. The repository contains no personal DNA files.

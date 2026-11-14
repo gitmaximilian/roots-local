@@ -1,10 +1,12 @@
 #let report = json("report.json")
+#let lang = report.options.language
+#let tr(de, en) = if lang == "de" { de } else { en }
 #let theme = rgb("#15443c")
 #let ink = rgb("#202f2c")
 #let secondary = rgb("#526861")
 #let paper = rgb("#ecf4ef")
-#set document(title: "Roots Local · DNA-Report")
-#set text(font: "Libertinus Serif", lang: "de", size: 11pt, fill: ink)
+#set document(title: "Roots Local · " + tr("DNA-Report", "DNA report"))
+#set text(font: "Libertinus Serif", lang: lang, size: 11pt, fill: ink)
 #set par(leading: 0.67em, justify: false)
 #set heading(numbering: none)
 #show heading.where(level: 1): set text(size: 22pt, fill: theme)
@@ -12,14 +14,14 @@
 #set page(
   paper: "a4", margin: (left: 20mm, right: 20mm, top: 21mm, bottom: 20mm),
   header: context if counter(page).get().first() > 1 {
-    text(size: 9pt, fill: secondary)[Roots Local #h(1fr) DNA-Report]
+    text(size: 9pt, fill: secondary)[Roots Local #h(1fr) #tr("DNA-Report", "DNA report")]
     line(length: 100%, stroke: 0.5pt + rgb("#dbe4df"))
   },
   footer: context if counter(page).get().first() > 1 {
-    text(size: 9pt, fill: secondary)[Referenzkatalog #report.catalog_version #h(1fr) #counter(page).display()]
+    text(size: 9pt, fill: secondary)[#tr("Referenzkatalog", "Reference catalog") #report.catalog_version #h(1fr) #counter(page).display()]
   }
 )
-#let status(value) = (personal: "Persönlich auswertbar", research: "Studienbezug", missing: "Nicht beurteilbar").at(value)
+#let status(value) = (personal: tr("Persönlich auswertbar", "Interpretable"), research: tr("Studienbezug", "Research association"), missing: tr("Nicht beurteilbar", "Unresolved")).at(value)
 #let box-stat(number, title) = block(width: 100%, fill: paper, inset: 12pt, radius: 5pt)[
   #text(size: 20pt, fill: theme, weight: "bold")[#number]
   #linebreak()
@@ -32,16 +34,16 @@
     #parbreak()
     #finding.summary #finding.message
     #parbreak()
-    #caption([Evidenz · #finding.evidence \
-      Studienpopulation · #finding.population \
+    #caption([#tr("Evidenz", "Evidence") · #finding.evidence \
+      #tr("Studienpopulation", "Study population") · #finding.population \
       #finding.limits])
     #parbreak()
     #if "study" in finding [
-      #caption([Merkmal in der Studie · #finding.study.reported_trait \
-        Signifikanz in der Studie · p = #finding.study.p_value])
+      #caption([#tr("Merkmal in der Studie", "Reported trait") · #finding.study.reported_trait \
+        #tr("Signifikanz in der Studie", "Study significance") · p = #finding.study.p_value])
       #if finding.study.effect != "" [
         #linebreak()
-        #caption([Berichteter Effekt (OR oder Beta) · #finding.study.effect #finding.study.effect_context])
+        #caption([#tr("Berichteter Effekt (OR oder Beta)", "Reported effect (OR or beta)") · #finding.study.effect #finding.study.effect_context])
       ]
       #parbreak()
     ]
@@ -56,58 +58,58 @@
 #v(22mm)
 #text(size: 11pt, weight: "bold", fill: theme, tracking: 0.1em)[ROOTS LOCAL]
 #v(11mm)
-#text(size: 41pt, fill: theme, weight: "bold")[Dein DNA-Report]
+#text(size: 41pt, fill: theme, weight: "bold")[#tr("Dein DNA-Report", "Your DNA report")]
 #v(4mm)
-#text(size: 16pt, fill: secondary)[Explore your DNA. Offline.]
+#text(size: 16pt, fill: secondary)[#tr("Entdecke deine DNA. Offline.", "Explore your DNA. Offline.")]
 #v(16mm)
 #if report.options.name != none { text(size: 17pt, report.options.name); v(4mm) }
-#if report.example { block(fill: paper, inset: 8pt, radius: 4pt)[Synthetisches Profil] }
+#if report.example { block(fill: paper, inset: 8pt, radius: 4pt)[#tr("Synthetisches Profil", "Synthetic profile")] }
 #grid(columns: (1fr, 1fr, 1fr), gutter: 7pt,
-  box-stat(report.personal, "Auswertbare Merkmale"),
-  box-stat(report.research, "Studienbezüge"),
-  box-stat(report.summary.rows, "Genotypzeilen")
+  box-stat(report.personal, tr("Auswertbare Merkmale", "Interpretable traits")),
+  box-stat(report.research, tr("Studienbezüge", "Research associations")),
+  box-stat(report.summary.rows, tr("Genotypzeilen", "Genotype rows"))
 )
 #v(11mm)
-#caption([MyHeritage-Format · #report.summary.format · Referenzgenom #(if report.summary.build == none { "unbekannt" } else { report.summary.build }) \
-  Roots Local #report.version · Referenzkatalog #report.catalog_version])
+#caption([#tr("MyHeritage-Format", "MyHeritage format") · #report.summary.format · #tr("Referenzgenom", "Reference genome") #(if report.summary.build == none { tr("unbekannt", "unknown") } else { report.summary.build }) \
+  Roots Local #report.version · #tr("Referenzkatalog", "Reference catalog") #report.catalog_version])
 #pagebreak()
 
-#outline(title: [Inhalt], depth: 1, indent: auto)
+#outline(title: [#tr("Inhalt", "Contents")], depth: 1, indent: auto)
 #if not report.options.short [
   #pagebreak(weak: true)
-  #outline(title: [Unterkapitel], depth: 2, indent: auto)
+  #outline(title: [#tr("Unterkapitel", "Sections")], depth: 2, indent: auto)
 ]
 #pagebreak(weak: true)
 
-= Datenübersicht
+#heading(level: 1, [#tr("Datenübersicht", "Data overview")])
 #grid(columns: (1fr, 1fr, 1fr), gutter: 7pt,
-  box-stat(report.missing, "Offene Merkmalsregeln"),
-  box-stat(report.summary.no_call, "Zeilen ohne Genotyp"),
-  box-stat(report.summary.conflicts, "Widersprüchliche Positionen")
+  box-stat(report.missing, tr("Offene Merkmalsregeln", "Unresolved trait rules")),
+  box-stat(report.summary.no_call, tr("Zeilen ohne Genotyp", "Rows without a genotype")),
+  box-stat(report.summary.conflicts, tr("Widersprüchliche Positionen", "Conflicting positions"))
 )
 
 #v(5mm)
-Der Bericht wertet die importierten Positionen anhand des dokumentierten Referenzkatalogs aus. Die Quellen sind bei den Befunden verlinkt.
+#tr("Der Bericht wertet die importierten Positionen anhand des dokumentierten Referenzkatalogs aus. Die Quellen sind bei den Befunden verlinkt.", "The report evaluates imported positions using the documented reference catalog. Sources are linked alongside each finding.")
 
 #if report.gwas_total > 0 [
-  GWAS-Katalog · #report.findings.filter(f => "study" in f).len() passende Studienassoziationen von #report.gwas_total Katalogeinträgen.
+  #tr("GWAS-Katalog", "GWAS Catalog") · #report.findings.filter(f => "study" in f).len() #tr("passende Studienassoziationen von", "matching research associations out of") #report.gwas_total #tr("Katalogeinträgen.", "catalog entries.")
   #parbreak()
 ]
-#if report.summary.skipped > 0 [#report.summary.skipped ungültige Rohdatenzeilen wurden übersprungen.]
-#if report.summary.duplicates > 0 [#report.summary.duplicates zusätzliche Zeilen lagen an bereits erfassten Positionen.]
+#if report.summary.skipped > 0 [#report.summary.skipped #tr("ungültige Rohdatenzeilen wurden übersprungen.", "invalid rows were skipped.")]
+#if report.summary.duplicates > 0 [#report.summary.duplicates #tr("zusätzliche Zeilen lagen an bereits erfassten Positionen.", "extra rows repeated previously recorded positions.")]
 #if report.family != none [
-  == Familiendatei
-  #report.family.compared gemeinsam auswertbare autosomale Positionen.
-  #report.family.compatible mit mindestens einem geteilten Allel.
-  #report.family.discordant ohne geteiltes Allel.
-  Dieser Vergleich ist keine Verwandtschaftsbestimmung.
+  #heading(level: 2, [#tr("Familiendatei", "Family DNA file")])
+  #report.family.compared #tr("gemeinsam auswertbare autosomale Positionen.", "comparable autosomal positions.")
+  #report.family.compatible #tr("mit mindestens einem geteilten Allel.", "with at least one shared allele.")
+  #report.family.discordant #tr("ohne geteiltes Allel.", "without a shared allele.")
+  #tr("Dieser Vergleich ist keine Verwandtschaftsbestimmung.", "This comparison on its own cannot determine a family relationship.")
 ]
 #if report.sequence != none [
-  == Sequenzierdaten
-  #report.sequence.reads untersuchte Reads. #report.sequence.targets.len() geprüfte Referenzpositionen.
-  Die Lesetiefe bezieht sich auf die ausgewählten Positionen. Sie liefert hier keine Genotypen.
+  #heading(level: 2, [#tr("Sequenzierdaten", "Sequencing data")])
+  #report.sequence.reads #tr("untersuchte Reads.", "reads examined.") #report.sequence.targets.len() #tr("geprüfte Referenzpositionen.", "reference positions checked.")
+  #tr("Die Lesetiefe bezieht sich auf die ausgewählten Positionen. Sie liefert hier keine Genotypen.", "Read depth is reported for the selected positions. The analysis does not call genotypes.")
   #for target in report.sequence.targets [
-    #caption([#target.id · #target.coordinate · #target.depth qualifizierte Basen])
+    #caption([#target.id · #target.coordinate · #target.depth #tr("qualifizierte Basen", "bases passing quality filters")])
     #linebreak()
   ]
 ]
@@ -119,14 +121,14 @@ Der Bericht wertet die importierten Positionen anhand des dokumentierten Referen
     if not report.options.short { pagebreak(weak: true) }
     heading(level: 1, [#chapter.id · #chapter.title])
     if chapter.id == "01" and report.external.origins.len() > 0 {
-      heading(level: 2, "Übernommene Herkunftsangaben")
+      heading(level: 2, tr("Übernommene Herkunftsangaben", "Imported ancestry results"))
       for origin in report.external.origins {
         [#origin.label#if origin.percent != none [ · #origin.percent %] \
         ]
       }
     }
     if chapter.id == "02" and (report.external.matches.len() + report.external.segments.len() > 0) {
-      heading(level: 2, "Importierte Begleitdaten")
+      heading(level: 2, tr("Importierte Begleitdaten", "Imported companion data"))
       for person in report.external.matches {
         [#person.name · #person.cm cM#if person.relationship != none [ · #person.relationship] \
         ]
@@ -146,25 +148,25 @@ Der Bericht wertet die importierten Positionen anhand des dokumentierten Referen
           if section.id == "14.4" and report.scores.len() > 0 {
             for score in report.scores [
               *#score.title* · #score.id \
-              #score.matched / #score.total Modellpositionen.
-              #if score.raw != none [Rohscore #str(calc.round(score.raw, digits: 5)).] else [Kein Rohscore bei unvollständiger Abdeckung.]
-              Studienpopulation · #score.population. #link(score.source, [Quelle]). \
-              Forschungswert ohne Perzentil oder persönliche Erkrankungswahrscheinlichkeit.
+              #score.matched / #score.total #tr("Modellpositionen.", "model positions.")
+              #if score.raw != none [#tr("Rohscore", "Raw score") #str(calc.round(score.raw, digits: 5)).] else [#tr("Kein Rohscore bei unvollständiger Abdeckung.", "A raw score requires complete coverage.")]
+              #tr("Studienpopulation", "Study population") · #score.population. #link(score.source, [#tr("Quelle", "Source")]). \
+              #tr("Forschungswert ohne Perzentil oder persönliche Erkrankungswahrscheinlichkeit.", "Research score without a percentile or individual disease risk estimate.")
               #parbreak()
             ]
           } else if section.id == "03.1" {
-            [#report.summary.rows Zeilen aus #report.summary.format · Referenzgenom #(if report.summary.build == none { "unbekannt" } else { report.summary.build }).]
+            [#report.summary.rows #tr("Zeilen aus", "rows from") #report.summary.format · #tr("Referenzgenom", "Reference genome") #(if report.summary.build == none { tr("unbekannt", "unknown") } else { report.summary.build }).]
           } else if section.id == "03.4" {
-            link(label("method"), [Siehe Methodik und Abdeckung.])
+            link(label("method"), [#tr("Siehe Methodik und Abdeckung.", "See methods and coverage.")])
           } else {
-            caption([Der aktuelle Katalog enthält hier keine anwendbare Auswertungsregel.])
+            caption([#tr("Der aktuelle Katalog enthält hier keine anwendbare Auswertungsregel.", "The active catalog has no applicable rule for this section.")])
           }
         }
         for finding in own {
           [#card(finding) #label("finding-" + finding.id)]
         }
         for finding in cross {
-          caption(link(label("finding-" + finding.id), [Siehe #finding.title]))
+          caption(link(label("finding-" + finding.id), [#tr("Siehe", "See") #finding.title]))
         }
       }
     }
@@ -172,21 +174,21 @@ Der Bericht wertet die importierten Positionen anhand des dokumentierten Referen
 }
 
 #pagebreak(weak: true)
-= Methodik & Abdeckung <method>
-#if report.provenance != none [Referenzkatalog · #report.provenance.origin · #report.provenance.license. #parbreak()]
-- Analysiert werden nur die im Referenzkatalog beschriebenen Positionen. Zuordnung anhand von Referenzbuild, Chromosom, Koordinate und unterstützten Allelen.
-- Fehlende und widersprüchliche Positionen bleiben offen. Die Messmethode einzelner Genotypen ist ohne entsprechende Daten im Export unbekannt.
-- GWAS-Studienbezüge erscheinen für übereinstimmende rsIDs und Koordinaten. Der Abgleich berücksichtigt keine Effektallele. Der Bericht weist fehlende Marker bei den kuratierten Einzelregeln aus.
-- Studienbezüge beschreiben veröffentlichte Zusammenhänge. Medizinisch relevante Consumer-Befunde benötigen klinische Bestätigung.
-- Bei ausgeschalteter Genotypanzeige bleiben Aussagen im Report erhalten. Sie können indirekt Hinweise auf Varianten enthalten.
+#heading(level: 1, [#tr("Methodik & Abdeckung", "Methods & coverage")]) <method>
+#if report.provenance != none [#tr("Referenzkatalog", "Reference catalog") · #report.provenance.origin · #report.provenance.license. #parbreak()]
+- #tr("Analysiert werden nur die im Referenzkatalog beschriebenen Positionen. Zuordnung anhand von Referenzbuild, Chromosom, Koordinate und unterstützten Allelen.", "The analysis covers positions documented in the active catalog. Rules match on assembly, chromosome, position, and supported alleles.")
+- #tr("Fehlende und widersprüchliche Positionen bleiben offen. Die Messmethode einzelner Genotypen ist ohne entsprechende Daten im Export unbekannt.", "Missing or conflicting positions remain unresolved. The source of a genotype call is unknown unless the export provides it.")
+- #tr("GWAS-Studienbezüge erscheinen für übereinstimmende rsIDs und Koordinaten. Der Abgleich berücksichtigt keine Effektallele. Der Bericht weist fehlende Marker bei den kuratierten Einzelregeln aus.", "GWAS associations require matching rsIDs and positions. The match does not consider effect alleles. The report identifies missing markers for curated rules.")
+- #tr("Studienbezüge beschreiben veröffentlichte Zusammenhänge. Medizinisch relevante Consumer-Befunde benötigen klinische Bestätigung.", "Research associations summarize published findings. Clinically relevant consumer findings require clinical confirmation.")
+- #tr("Bei ausgeschalteter Genotypanzeige bleiben Aussagen im Report erhalten. Sie können indirekt Hinweise auf Varianten enthalten.", "Hiding explicit genotypes preserves the report's conclusions, which may indirectly identify variants.")
 
 #if not report.options.short {
-  heading(level: 2, "Erfasste Chromosomen")
+  heading(level: 2, tr("Erfasste Chromosomen", "Chromosomes in the input"))
   for (chromosome, count) in report.summary.chromosomes {
     caption([#chromosome · #count]); h(9pt)
   }
   parbreak()
-  heading(level: 1, "Variantenregister")
+  heading(level: 1, tr("Variantenregister", "Variant index"))
   for entry in report.variant_index {
     link(label("finding-" + entry.at(2)), [#entry.at(0) · #entry.at(1)])
     linebreak()

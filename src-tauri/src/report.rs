@@ -2,6 +2,7 @@ use crate::{
     analysis::{Finding, Status, Summary},
     catalog::{structure, write_atomic, Chapter},
     external::{External, Family},
+    locale::{self, Language},
 };
 use serde::{Deserialize, Serialize};
 use std::{
@@ -17,6 +18,7 @@ pub struct Options {
     pub name: Option<String>,
     pub include_calls: bool,
     pub include_relatives: bool,
+    pub language: Language,
 }
 
 #[derive(Clone, Serialize)]
@@ -117,6 +119,28 @@ pub fn render(model: &Model, mut options: Options, typst: &Path) -> Result<Vec<u
         })
         .filter(|s: &String| !s.is_empty());
     let mut model = model.clone();
+    model.chapters = crate::catalog::localized_structure(options.language);
+    if options.language == Language::En {
+        for finding in &mut model.findings {
+            locale::translate(&mut finding.item.title);
+            locale::translate(&mut finding.item.evidence);
+            locale::translate(&mut finding.item.summary);
+            locale::translate(&mut finding.item.population);
+            locale::translate(&mut finding.item.limits);
+            locale::translate(&mut finding.message);
+            for (label, _) in &mut finding.item.sources {
+                locale::translate(label);
+            }
+            for check in &mut finding.checks {
+                check.status = locale::english(check.status);
+                locale::translate(&mut check.gene);
+            }
+        }
+        for score in &mut model.scores {
+            locale::translate(&mut score.title);
+            locale::translate(&mut score.population);
+        }
+    }
     let personal = model
         .findings
         .iter()
@@ -130,7 +154,15 @@ pub fn render(model: &Model, mut options: Options, typst: &Path) -> Result<Vec<u
     let missing = model.findings.len() - personal - research;
     if !options.include_relatives {
         for (i, relative) in model.external.matches.iter_mut().enumerate() {
-            relative.name = format!("Treffer {}", i + 1);
+            relative.name = format!(
+                "{} {}",
+                if options.language == Language::En {
+                    "Match"
+                } else {
+                    "Treffer"
+                },
+                i + 1
+            );
         }
         for (i, segment) in model.external.segments.iter_mut().enumerate() {
             segment.name = format!("Segment {}", i + 1);

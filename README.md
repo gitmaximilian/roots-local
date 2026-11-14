@@ -2,20 +2,20 @@
 
 *Explore your DNA. Offline.*
 
-Roots Local ist eine Open-Source-Desktop-App zur lokalen Auswertung von MyHeritage-Rohdaten. Sie verbindet ausgewählte Genotypen mit einem versionierten Referenzkatalog und erstellt einen PDF-Vollreport mit 17 Hauptkapiteln und 76 Unterkapiteln.
+Roots Local is an open-source desktop app for analyzing MyHeritage raw DNA exports on your own computer. It matches selected genotypes against a versioned reference catalog and creates a PDF report with 17 chapters and 76 sections.
 
-## Ausprobieren
+## Try it
 
-Auf Apple Silicon wird die App als natives macOS-Bundle gebaut. Öffne **Roots Local**, wähle **Beispiel ansehen** oder importiere [die synthetische MyHeritage-Datei](fixtures/synthetic-myheritage.txt). Unter **PDF-Report** kannst du den Vollreport in der App ansehen und lokal speichern.
+Open the app and select **View example** or import the [synthetic MyHeritage file](fixtures/synthetic-myheritage.txt). Open **PDF report** to preview or save the report locally. The app and PDF default to English. Select **Deutsch** from the language menu to switch both while keeping the current analysis.
 
-- [Plattformen, Abnahme und offene Meilensteine](docs/teststatus.md)
-- [Verbindliche Gliederung](docs/reportstruktur.md)
-- [Masterprompt](docs/umsetzungsprompt.md)
-- [Referenzkataloge erstellen oder importieren](docs/kataloge.md)
+- [Platform verification and remaining milestones](docs/test-status.md)
+- [Report outline](docs/report-structure.md)
+- [Implementation brief](docs/implementation-brief.md)
+- [Build and import reference catalogs](docs/catalogs.md)
 
-## Aus dem Quellcode bauen
+## Build from source
 
-Voraussetzungen sind die [Tauri-Systemabhängigkeiten](https://v2.tauri.app/start/prerequisites/), Rust stable, Node.js 22 und Python 3.13. Auf Windows kannst du für die Skripte `python` verwenden. Der erste Build lädt Abhängigkeiten und die anhand eines SHA-256-Digests geprüfte Typst-Komponente. Danach braucht die installierte App keinen Download für Import, Vorschau oder PDF-Export.
+Install the [Tauri system prerequisites](https://v2.tauri.app/start/prerequisites/), stable Rust, Node.js 22, and Python 3.13. Use `python` in place of `python3` on Windows if needed. The initial build downloads dependencies and verifies the bundled Typst compiler with SHA-256. The installed app imports files, previews reports, and exports PDFs offline.
 
 ```sh
 npm ci
@@ -23,29 +23,30 @@ python3 scripts/prepare_tools.py
 npm run tauri -- dev
 ```
 
-Für ein macOS-App-Bundle verwende `npm run tauri -- build --bundles app`. Das Skript `scripts/package_macos.sh` erstellt daraus ein DMG. Für Windows verwende auf der Zielarchitektur `npm run tauri -- build --bundles nsis`. Die [Build-Matrix](.github/workflows/desktop.yml) beschreibt die genauen Build-Ziele.
+Use `npm run tauri -- build --bundles app` for macOS. The script `scripts/package_macos.sh` creates a DMG from the app bundle. Use `npm run tauri -- build --bundles nsis` on the target Windows architecture. See the [build matrix](.github/workflows/desktop.yml) for the exact targets and available artifacts.
 
-## Was die App auswertet
+## What the app analyzes
 
-- **Standardexport.** CSV, TSV, TXT und ZIP. Unterstützt deklarierte Builds GRCh37 und GRCh38. Ein unbekannter Build, fehlende Marker und widersprüchliche Einträge erscheinen als offen.
-- **Startkatalog.** Regeln zu Laktaseaktivität, Ohrenschmalztyp, Bitterwahrnehmung und ACTN3 sowie Forschungsbezüge zu ausgewählten weiteren Markern. Die App zeigt Datenqualität und wissenschaftliche Evidenz getrennt.
-- **Begleitdaten.** Manuell übernommene Herkunftsangaben, Match- und Segmenttabellen sowie ein Vergleich autosomaler Positionen mit einer angegebenen Eltern- oder Familiendatei. Der Vergleich liefert geteilte Allele.
-- **CRAM.** Liest ausgerichtete Reads mit einer passenden lokalen, indexierten FASTA. Zeigt die Abdeckung für Katalogpositionen. Die CRAM-Auswertung liefert derzeit keine Genotypen oder Haplogruppen.
-- **GWAS-Studien.** Optionale lokal gebaute Kataloge verknüpfen passende Genomorte mit Studien, Stichproben und berichteten Effekten.
-- **Fortgeschrittene Forschung.** Ein separat importiertes, signiertes Katalogpaket kann additive PGS enthalten. Für einen Rohscore ist hier die vollständige, passende Abdeckung nötig. Die App führt keine Kalibrierung auf absolutes Krankheitsrisiko durch.
-- **PDF-Export.** Voll- oder Kurzreport, klickbare Inhaltsverzeichnisse und Quellen. Der Vollreport weist auch Kapitel ohne verfügbare Merkmalsregel aus. Name, konkrete Genotypen und Namen von DNA-Matches sind optional.
+- **Raw exports.** CSV, TSV, TXT, and ZIP with declared GRCh37 or GRCh38 assemblies. Unknown assemblies, missing markers, and conflicting entries remain unresolved.
+- **Starter catalog.** Rules for lactase activity, earwax type, bitter taste, and ACTN3 alongside selected studies. Data quality and scientific evidence are shown separately.
+- **Companion data.** Manually entered ancestry results, match and shared segment lists, and comparison of autosomal alleles against a family file.
+- **CRAM.** Measures catalog marker coverage using aligned reads and a matching, indexed local FASTA. Genotype and haplogroup inference are pending.
+- **GWAS research.** Optional local packages associate matching loci with published studies, samples, and reported effects.
+- **Polygenic research.** Signed catalog packages can contain additive scores. The app requires complete marker coverage and displays a raw score without personal disease-risk calibration.
+- **PDF export.** Full and summary reports, clickable contents, sources, and coverage. Names and explicit genotypes are optional. The full report shows sections that have no applicable rule.
 
-Rohdaten werden in der Sitzung gehalten. PDF-Erstellung verwendet einen privaten temporären Ordner, den die App nach dem Vorgang aufräumt. Der Zielordner für den PDF-Export kann durch das Betriebssystem oder andere Software synchronisiert werden. Medizinisch relevante Consumer-Befunde brauchen eine unabhängige klinische Bestätigung.
+Raw DNA stays in the active session. PDF generation uses a temporary directory and cleans it up after rendering. The chosen PDF destination may be synchronized by other software. Clinically relevant findings from consumer data require independent clinical confirmation.
 
 ## Tests
 
 ```sh
+python3 -m unittest discover -s scripts -p 'test_*.py'
 cargo test --locked --manifest-path src-tauri/Cargo.toml --no-default-features
 npm run build
 ```
 
-Setze `ROOTS_TEST_TYPST` auf den absoluten Pfad zur vorbereiteten Typst-Datei, um auch die vollständigen PDF-Tests auszuführen. Die App und CI verwenden synthetische DNA für Beispiele und Tests. Verwende in öffentlichen Issues, Pull Requests und CI keine privaten DNA-Dateien oder persönlichen Berichte.
+Set `ROOTS_TEST_TYPST` to the absolute path of the prepared Typst binary to include PDF rendering tests. Please use synthetic data in GitHub issues, pull requests, and CI.
 
-## Lizenz
+## License
 
-[Apache 2.0](LICENSE) für den Projektcode. Externe Komponenten und Daten behalten ihre jeweiligen Bedingungen. [Drittanbieterhinweise](licenses/README.md)
+[Apache 2.0](LICENSE) covers the project code. External components and datasets retain their respective terms. [Third-party notices](licenses/README.md)

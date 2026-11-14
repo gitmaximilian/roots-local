@@ -5,17 +5,17 @@ use sha2::{Digest, Sha256};
 use std::{collections::HashSet, fs, io::Read, path::Path};
 use tempfile::NamedTempFile;
 
-pub const STRUCTURE: &str = include_str!("../../docs/reportstruktur.md");
+use crate::locale::Language;
 pub const STARTER: &str = include_str!("../../catalog/starter.json");
 const MAX_PAYLOAD: u64 = 32 * 1024 * 1024;
 
-#[derive(Clone, Debug, Serialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Section {
     pub id: String,
     pub title: String,
     pub scope: String,
 }
-#[derive(Clone, Debug, Serialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Chapter {
     pub id: String,
     pub title: String,
@@ -23,42 +23,15 @@ pub struct Chapter {
     pub sections: Vec<Section>,
 }
 pub fn structure() -> Vec<Chapter> {
-    let mut result: Vec<Chapter> = Vec::new();
-    let mut part = "";
-    for line in STRUCTURE.lines() {
-        if let Some(title) = line.strip_prefix("## Teil ") {
-            part = title;
-        }
-        if let Some((id, title)) = line
-            .strip_prefix("### ")
-            .and_then(|line| line.split_once(" · "))
-        {
-            result.push(Chapter {
-                id: id.into(),
-                title: title.into(),
-                part: part.into(),
-                sections: Vec::new(),
-            });
-        }
-        if let Some((heading, scope)) = line
-            .strip_prefix("- **")
-            .and_then(|line| line.split_once("** · "))
-        {
-            if let Some((id, title)) = heading
-                .split_once(' ')
-                .filter(|(id, _)| id.as_bytes().get(2) == Some(&b'.'))
-            {
-                if let Some(chapter) = result.last_mut() {
-                    chapter.sections.push(Section {
-                        id: id.into(),
-                        title: title.into(),
-                        scope: scope.into(),
-                    });
-                }
-            }
-        }
-    }
-    result
+    localized_structure(Language::De)
+}
+
+pub fn localized_structure(language: Language) -> Vec<Chapter> {
+    let data = match language {
+        Language::En => include_str!("../../catalog/report-structure.en.json"),
+        Language::De => include_str!("../../catalog/report-structure.de.json"),
+    };
+    serde_json::from_str(data).expect("valid built-in chapter structure")
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]

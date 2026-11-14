@@ -6,6 +6,7 @@ use roots_local::{
     cram,
     external::{self, External},
     import::{self, Import},
+    locale::Language,
     report::{self, Model, Options},
 };
 use serde::Serialize;
@@ -129,6 +130,7 @@ async fn import_dna(
     handle: AppHandle,
     workspace: State<'_, Workspace>,
     example: bool,
+    language: Language,
 ) -> Result<Option<Model>, String> {
     let workspace = workspace.inner().clone();
     background(move || {
@@ -138,7 +140,7 @@ async fn import_dna(
         } else {
             let Some(path) = choose(
                 &handle,
-                "MyHeritage-Rohdaten",
+                language.select("MyHeritage raw data", "MyHeritage-Rohdaten"),
                 &["csv", "tsv", "txt", "zip"],
             )?
             else {
@@ -209,6 +211,7 @@ async fn import_extra(
     handle: AppHandle,
     workspace: State<'_, Workspace>,
     kind: String,
+    language: Language,
 ) -> Result<Option<Model>, String> {
     let workspace = workspace.inner().clone();
     background(move || {
@@ -227,8 +230,11 @@ async fn import_extra(
         }
         let extra = match kind.as_str() {
             "relatives" => {
-                let Some(path) =
-                    choose(&handle, "Match- oder Segmentliste", &["csv", "tsv", "txt"])?
+                let Some(path) = choose(
+                    &handle,
+                    language.select("DNA matches or shared segments", "Match- oder Segmentliste"),
+                    &["csv", "tsv", "txt"],
+                )?
                 else {
                     return Ok(None);
                 };
@@ -237,7 +243,10 @@ async fn import_extra(
             "family" => {
                 let Some(path) = choose(
                     &handle,
-                    "Vergleichsdatei eines Elternteils",
+                    language.select(
+                        "Parent comparison file",
+                        "Vergleichsdatei eines Elternteils",
+                    ),
                     &["csv", "tsv", "txt", "zip"],
                 )?
                 else {
@@ -254,12 +263,20 @@ async fn import_extra(
                 )?)
             }
             "cram" => {
-                let Some(path) = choose(&handle, "Sequenzierdaten", &["cram"])? else {
+                let Some(path) = choose(
+                    &handle,
+                    language.select("Sequencing data", "Sequenzierdaten"),
+                    &["cram"],
+                )?
+                else {
                     return Ok(None);
                 };
                 let Some(reference) = choose(
                     &handle,
-                    "Passende lokale FASTA mit .fai",
+                    language.select(
+                        "Matching local FASTA with .fai",
+                        "Passende lokale FASTA mit .fai",
+                    ),
                     &["fa", "fasta", "fna", "gz"],
                 )?
                 else {
@@ -324,11 +341,17 @@ async fn load_catalog(
     handle: AppHandle,
     workspace: State<'_, Workspace>,
     trusted_key: String,
+    language: Language,
 ) -> Result<Option<CatalogState>, String> {
     let workspace = workspace.inner().clone();
     background(move || {
         let job = workspace.start_job()?;
-        let Some(path) = choose(&handle, "Signiertes Katalogpaket", &["json", "rootscat"])? else {
+        let Some(path) = choose(
+            &handle,
+            language.select("Signed catalog package", "Signiertes Katalogpaket"),
+            &["json", "rootscat"],
+        )?
+        else {
             return Ok(None);
         };
         let new_catalog = catalog::package(&path, &trusted_key)?;

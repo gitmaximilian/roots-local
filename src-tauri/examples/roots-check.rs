@@ -4,22 +4,24 @@ use std::{env, path::Path, sync::atomic::AtomicBool};
 fn run() -> Result<(), String> {
     let mut args = env::args_os().skip(1);
     let [Some(input), Some(output), Some(typst)] = [args.next(), args.next(), args.next()] else {
-        return Err("Verwendung: roots-check <Rohdatei> <report.pdf> <typst> [--synthetic] [--catalog <Paket> <öffentlicher Schlüssel>]".into());
+        return Err("Usage: roots-check <raw-data> <report.pdf> <typst> [--synthetic] [--german] [--catalog <package> <public-key>]".into());
     };
     let mut example = false;
+    let mut language = roots_local::locale::Language::En;
     let mut catalog = None;
     while let Some(option) = args.next() {
         match option.to_str() {
             Some("--synthetic") if !example => example = true,
+            Some("--german") => language = roots_local::locale::Language::De,
             Some("--catalog") if catalog.is_none() => {
-                let path = args.next().ok_or("Katalogdatei fehlt.")?;
+                let path = args.next().ok_or("Missing catalog file.")?;
                 let key = args
                     .next()
                     .and_then(|v| v.into_string().ok())
-                    .ok_or("Öffentlicher Katalogschlüssel fehlt.")?;
+                    .ok_or("Missing catalog public key.")?;
                 catalog = Some(roots_local::catalog::package(Path::new(&path), &key)?);
             }
-            _ => return Err("Unbekannte oder doppelte Option.".into()),
+            _ => return Err("Unknown or repeated option.".into()),
         }
     }
     let data = import::file(Path::new(&input), &AtomicBool::new(false))?;
@@ -36,12 +38,15 @@ fn run() -> Result<(), String> {
     model.apply_catalog(&data, &catalog)?;
     report::export(
         &model,
-        report::Options::default(),
+        report::Options {
+            language,
+            ..Default::default()
+        },
         Path::new(&typst),
         Path::new(&output),
     )?;
     println!(
-        "{} Kapitel · {} Unterkapitel · {} Ergebniseinträge · {} Genotypzeilen",
+        "{} chapters · {} sections · {} results · {} genotype rows",
         model.chapters.len(),
         model
             .chapters
@@ -58,7 +63,7 @@ fn run() -> Result<(), String> {
             .filter(|f| f.item.study.is_some())
             .count();
         println!(
-            "{hits} passende GWAS-Einträge von {} Katalogassoziationen",
+            "{hits} matching GWAS entries out of {} catalog associations",
             model.gwas_total
         );
     }

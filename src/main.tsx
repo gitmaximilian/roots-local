@@ -1,3 +1,12 @@
+import {
+  t,
+  getLanguage,
+  setLanguage,
+  resultText,
+  type Language,
+} from "./locale";
+import englishChapters from "../catalog/report-structure.en.json";
+import germanChapters from "../catalog/report-structure.de.json";
 import React, { lazy, Suspense, useEffect, useMemo, useState } from "react";
 import { createRoot } from "react-dom/client";
 import { invoke } from "@tauri-apps/api/core";
@@ -122,25 +131,31 @@ type Options = {
   include_relatives: boolean;
 };
 
-const number = new Intl.NumberFormat("de-AT");
-const statuses = {
-  personal: "Auswertbar",
-  research: "Studienbezug",
-  missing: "Offen",
+const number = {
+  format(value: number) {
+    return new Intl.NumberFormat(
+      getLanguage() === "de" ? "de-AT" : "en-US",
+    ).format(value);
+  },
 };
-const navigation: { id: Page; label: string; Icon: LucideIcon }[] = [
-  { id: "home", label: "Übersicht", Icon: Layers },
-  { id: "chapters", label: "Kapitel", Icon: BookOpen },
-  { id: "variants", label: "Varianten", Icon: ScanLine },
-  { id: "report", label: "PDF-Report", Icon: FileText },
-  { id: "data", label: "Datenquellen", Icon: Database },
+const statusLabels = () => ({
+  personal: t("Auswertbar"),
+  research: t("Studienbezug"),
+  missing: t("Offen"),
+});
+const navigation = (): { id: Page; label: string; Icon: LucideIcon }[] => [
+  { id: "home", label: t("Übersicht"), Icon: Layers },
+  { id: "chapters", label: t("Kapitel"), Icon: BookOpen },
+  { id: "variants", label: t("Varianten"), Icon: ScanLine },
+  { id: "report", label: t("PDF-Report"), Icon: FileText },
+  { id: "data", label: t("Datenquellen"), Icon: Database },
 ];
 
 function StatusLabel({ status }: { status: Status }) {
   return (
     <span className={`status ${status}`}>
       <i />
-      {statuses[status]}
+      {statusLabels()[status]}
     </span>
   );
 }
@@ -163,27 +178,27 @@ function FindingDetail({ finding }: { finding: Finding }) {
   return (
     <details className="finding" id={`finding-${finding.id}`}>
       <summary>
-        <span>{finding.title}</span>
+        <span>{resultText(finding.title)}</span>
         <StatusLabel status={finding.status} />
         <ChevronDown size={16} />
       </summary>
       <div className="finding-content">
-        <p>{finding.summary}</p>
-        <p className="interpretation">{finding.message}</p>
+        <p>{resultText(finding.summary)}</p>
+        <p className="interpretation">{resultText(finding.message)}</p>
         <dl className="definition">
-          <dt>Evidenz</dt>
-          <dd>{finding.evidence}</dd>
-          <dt>Studienpopulation</dt>
-          <dd>{finding.population}</dd>
+          <dt>{t("Evidenz")}</dt>
+          <dd>{resultText(finding.evidence)}</dd>
+          <dt>{t("Studienpopulation")}</dt>
+          <dd>{resultText(finding.population)}</dd>
           {finding.study && (
             <>
-              <dt>Merkmal in der Studie</dt>
+              <dt>{t("Merkmal in der Studie")}</dt>
               <dd>{finding.study.reported_trait}</dd>
-              <dt>Signifikanz in der Studie</dt>
+              <dt>{t("Signifikanz in der Studie")}</dt>
               <dd>p = {finding.study.p_value}</dd>
               {finding.study.effect && (
                 <>
-                  <dt>Berichteter Effekt (OR oder Beta)</dt>
+                  <dt>{t("Berichteter Effekt (OR oder Beta)")}</dt>
                   <dd>
                     {finding.study.effect} {finding.study.effect_context}
                   </dd>
@@ -191,16 +206,16 @@ function FindingDetail({ finding }: { finding: Finding }) {
               )}
             </>
           )}
-          <dt>Grenzen</dt>
-          <dd>{finding.limits}</dd>
+          <dt>{t("Grenzen")}</dt>
+          <dd>{resultText(finding.limits)}</dd>
         </dl>
         <table>
           <thead>
             <tr>
               <th>Marker</th>
               <th>Position</th>
-              <th>Genotyp</th>
-              <th>Datenqualität</th>
+              <th>{t("Genotyp")}</th>
+              <th>{t("Datenqualität")}</th>
             </tr>
           </thead>
           <tbody>
@@ -208,11 +223,11 @@ function FindingDetail({ finding }: { finding: Finding }) {
               <tr key={c.id}>
                 <td>
                   <span className="mono">{c.id}</span>
-                  <small>{c.gene}</small>
+                  <small>{resultText(c.gene)}</small>
                 </td>
                 <td>{c.coordinate || "–"}</td>
                 <td className="mono">{c.call || "–"}</td>
-                <td>{c.status}</td>
+                <td>{resultText(c.status)}</td>
               </tr>
             ))}
           </tbody>
@@ -220,7 +235,7 @@ function FindingDetail({ finding }: { finding: Finding }) {
         <div className="sources">
           {finding.sources.map(([label, url]) => (
             <div key={url}>
-              <span>{label}</span>
+              <span>{resultText(label)}</span>
               <button
                 className="text-button"
                 onClick={async () => {
@@ -232,7 +247,7 @@ function FindingDetail({ finding }: { finding: Finding }) {
                   }
                 }}
               >
-                {copied === url ? "Kopiert" : "Link kopieren"}
+                {copied === url ? t("Kopiert") : t("Link kopieren")}
               </button>
             </div>
           ))}
@@ -264,7 +279,8 @@ function FindingList({
           className="text-button more-findings"
           onClick={() => setLimit(shown + 30)}
         >
-          Weitere Einträge anzeigen ({number.format(findings.length - shown)})
+          {t("Weitere Einträge anzeigen (")}
+          {number.format(findings.length - shown)})
         </button>
       )}
     </>
@@ -292,7 +308,7 @@ function VariantRegister({ active }: { active: boolean }) {
         })
         .catch(() => {
           if (mounted)
-            setError("Das Variantenregister konnte nicht geladen werden.");
+            setError(t("Das Variantenregister konnte nicht geladen werden."));
         });
     }, 120);
     return () => {
@@ -303,8 +319,8 @@ function VariantRegister({ active }: { active: boolean }) {
   return (
     <>
       <Heading
-        title="Variantenregister"
-        description="Positionen und Genotypen aus der importierten Datei."
+        title={t("Variantenregister")}
+        description={t("Positionen und Genotypen aus der importierten Datei.")}
       />
       <label className="search">
         <Search size={17} />
@@ -314,7 +330,7 @@ function VariantRegister({ active }: { active: boolean }) {
             setQuery(e.target.value);
             setOffset(0);
           }}
-          placeholder="Nach rsID oder Chromosom:Position suchen"
+          placeholder={t("Nach rsID oder Chromosom:Position suchen")}
         />
       </label>
       {error && <p role="alert">{error}</p>}
@@ -323,9 +339,9 @@ function VariantRegister({ active }: { active: boolean }) {
           <thead>
             <tr>
               <th>Marker</th>
-              <th>Chromosom</th>
+              <th>{t("Chromosom")}</th>
               <th>Position</th>
-              <th>Genotyp</th>
+              <th>{t("Genotyp")}</th>
             </tr>
           </thead>
           <tbody>
@@ -334,7 +350,7 @@ function VariantRegister({ active }: { active: boolean }) {
                 <td className="mono">{row.id || "–"}</td>
                 <td>{row.chromosome}</td>
                 <td>{number.format(row.position)}</td>
-                <td className="mono">{row.alleles || "Fehlt"}</td>
+                <td className="mono">{row.alleles || t("Fehlt")}</td>
               </tr>
             ))}
           </tbody>
@@ -342,20 +358,20 @@ function VariantRegister({ active }: { active: boolean }) {
         <div className="pagination">
           <span>
             {result.total ? offset + 1 : 0}–
-            {Math.min(offset + 50, result.total)} von{" "}
-            {number.format(result.total)}
+            {Math.min(offset + 50, result.total)}
+            {t("von")} {number.format(result.total)}
           </span>
           <button
             onClick={() => setOffset(Math.max(offset - 50, 0))}
             disabled={offset === 0}
-            aria-label="Vorige Seite"
+            aria-label={t("Vorige Seite")}
           >
             <ArrowLeft size={16} />
           </button>
           <button
             onClick={() => setOffset(offset + 50)}
             disabled={offset + 50 >= result.total}
-            aria-label="Nächste Seite"
+            aria-label={t("Nächste Seite")}
           >
             <ArrowRight size={16} />
           </button>
@@ -367,8 +383,17 @@ function VariantRegister({ active }: { active: boolean }) {
 
 function App() {
   const [page, setPage] = useState<Page>("home");
-  const [chapters, setChapters] = useState<Chapter[]>([]);
+  const [language, setUiLanguage] = useState<Language>(getLanguage);
+  const chapters: Chapter[] =
+    language === "de" ? germanChapters : englishChapters;
   const [model, setModel] = useState<Report>();
+  function switchLanguage(value: Language) {
+    setLanguage(value);
+    setUiLanguage(value);
+    setPreview(undefined);
+    setError("");
+    setNotice("");
+  }
   const [activeChapter, setActiveChapter] = useState("01");
   const [filter, setFilter] = useState<Status | "all">("all");
   const [query, setQuery] = useState("");
@@ -386,13 +411,6 @@ function App() {
   });
   const [preview, setPreview] = useState<ArrayBuffer>();
   const [anchor, setAnchor] = useState("");
-  useEffect(() => {
-    invoke<Chapter[]>("chapters")
-      .then(setChapters)
-      .catch(() =>
-        setError("Die Kapitelübersicht konnte nicht geladen werden."),
-      );
-  }, []);
   useEffect(() => {
     if (!anchor || page !== "chapters") return;
     const element = document.getElementById(`finding-${anchor}`);
@@ -422,8 +440,8 @@ function App() {
       (filter === "all" || f.status === filter) &&
       (!search ||
         [
-          f.title,
-          f.summary,
+          resultText(f.title),
+          resultText(f.summary),
           f.section,
           f.study?.reported_trait ?? "",
           f.study?.accession ?? "",
@@ -464,8 +482,8 @@ function App() {
     } catch (e) {
       setError(
         typeof e === "string"
-          ? e
-          : "Der Vorgang konnte nicht abgeschlossen werden.",
+          ? resultText(e)
+          : t("Der Vorgang konnte nicht abgeschlossen werden."),
       );
     } finally {
       setBusy("");
@@ -473,8 +491,8 @@ function App() {
   }
   function importData(example: boolean) {
     void run(
-      "DNA-Datei einlesen",
-      () => invoke<Report | null>("import_dna", { example }),
+      t("DNA-Datei einlesen"),
+      () => invoke<Report | null>("import_dna", { example, language }),
       (result) => {
         if (result) {
           setReport(result);
@@ -493,19 +511,22 @@ function App() {
   function extra(kind: string, label: string) {
     void run(
       label,
-      () => invoke<Report | null>("import_extra", { kind }),
+      () => invoke<Report | null>("import_extra", { kind, language }),
       (result) => {
         if (result) {
           setReport(result);
-          setNotice("Begleitdaten übernommen.");
+          setNotice(t("Begleitdaten übernommen."));
         }
       },
     );
   }
   function renderPdf() {
     void run(
-      "PDF-Vorschau erstellen",
-      () => invoke<ArrayBuffer>("preview_pdf", { options }),
+      t("PDF-Vorschau erstellen"),
+      () =>
+        invoke<ArrayBuffer>("preview_pdf", {
+          options: { ...options, language },
+        }),
       (bytes) => {
         setPreview(bytes);
       },
@@ -513,10 +534,11 @@ function App() {
   }
   function savePdf() {
     void run(
-      "PDF exportieren",
-      () => invoke<boolean>("export_pdf", { options }),
+      t("PDF exportieren"),
+      () =>
+        invoke<boolean>("export_pdf", { options: { ...options, language } }),
       (saved) => {
-        if (saved) setNotice("Der PDF-Report wurde gespeichert.");
+        if (saved) setNotice(t("Der PDF-Report wurde gespeichert."));
       },
     );
   }
@@ -530,8 +552,8 @@ function App() {
           </span>
           <strong>Roots Local</strong>
         </button>
-        <nav aria-label="Hauptnavigation">
-          {navigation.map(({ id, label, Icon }) => (
+        <nav aria-label={t("Hauptnavigation")}>
+          {navigation().map(({ id, label, Icon }) => (
             <button
               key={id}
               className={page === id ? "selected" : ""}
@@ -546,22 +568,45 @@ function App() {
         </nav>
         <div className="sidebar-bottom">
           <LockKeyhole size={16} />
-          <span>Lokal auf diesem Gerät</span>
+          <span>{t("Lokal auf diesem Gerät")}</span>
         </div>
       </aside>
       <main>
         <div className="topbar">
           <span>
-            {navigation.find((n) => n.id === page)?.label}
-            {model?.example && <span className="example">Beispielprofil</span>}
+            {navigation().find((n) => n.id === page)?.label}
+            {model?.example && (
+              <span className="example">{t("Beispielprofil")}</span>
+            )}
           </span>
-          <button
-            className="button secondary compact"
-            onClick={() => importData(false)}
-            disabled={!!busy}
-          >
-            Datei öffnen <ArrowRight size={15} />
-          </button>
+          <div className="toolbar-actions">
+            <label className="language-control">
+              <span>{language === "de" ? "Sprache" : "Language"}</span>
+              <select
+                aria-label={language === "de" ? "Sprache" : "Language"}
+                value={language}
+                disabled={!!busy}
+                onChange={(event) =>
+                  switchLanguage(event.target.value as Language)
+                }
+              >
+                <option value="en" lang="en">
+                  English
+                </option>
+                <option value="de" lang="de">
+                  Deutsch
+                </option>
+              </select>
+            </label>
+            <button
+              className="button secondary compact"
+              onClick={() => importData(false)}
+              disabled={!!busy}
+            >
+              {t("Datei öffnen")}
+              <ArrowRight size={15} />
+            </button>
+          </div>
         </div>
         <div className="content">
           {(busy || error || notice) && (
@@ -576,13 +621,13 @@ function App() {
                     className="text-button"
                     onClick={() => void invoke("cancel_job")}
                   >
-                    Abbrechen
+                    {t("Abbrechen")}
                   </button>
                 )
               ) : (
                 <button
                   className="text-button"
-                  aria-label="Meldung schließen"
+                  aria-label={t("Meldung schließen")}
                   onClick={() => {
                     setError("");
                     setNotice("");
@@ -597,28 +642,28 @@ function App() {
             (model ? (
               <>
                 <Heading
-                  title="Dein DNA-Profil"
-                  description={`MyHeritage-Format · ${model.summary.format} · ${model.summary.build || "Referenzgenom unbekannt"}`}
+                  title={t("Dein DNA-Profil")}
+                  description={`${t("MyHeritage-Format")} · ${model.summary.format} · ${model.summary.build || t("Referenzgenom unbekannt")}`}
                 />
                 <div className="stats">
                   <div>
                     <Check size={20} />
                     <strong>{totals.personal}</strong>
-                    <span>Auswertbare Merkmale</span>
+                    <span>{t("Auswertbare Merkmale")}</span>
                   </div>
                   <div>
                     <FlaskConical size={20} />
                     <strong>{totals.research}</strong>
-                    <span>Studienbezüge</span>
+                    <span>{t("Studienbezüge")}</span>
                   </div>
                   <div>
                     <List size={20} />
                     <strong>{number.format(model.summary.rows)}</strong>
-                    <span>Genotypzeilen</span>
+                    <span>{t("Genotypzeilen")}</span>
                   </div>
                 </div>
                 <header className="section-heading">
-                  <h2>Ergebnisse</h2>
+                  <h2>{t("Ergebnisse")}</h2>
                   <button
                     className="text-button"
                     onClick={() => {
@@ -627,7 +672,8 @@ function App() {
                       navigate("chapters");
                     }}
                   >
-                    Alle Kapitel <ArrowRight size={15} />
+                    {t("Alle Kapitel")}
+                    <ArrowRight size={15} />
                   </button>
                 </header>
                 <div className="result-grid">
@@ -641,8 +687,8 @@ function App() {
                         onClick={() => openFinding(f)}
                       >
                         <StatusLabel status={f.status} />
-                        <strong>{f.title}</strong>
-                        <span>{f.message}</span>
+                        <strong>{resultText(f.title)}</strong>
+                        <span>{resultText(f.message)}</span>
                         <ChevronRight size={17} />
                       </button>
                     ))}
@@ -650,25 +696,26 @@ function App() {
                 {!totals.personal && !totals.research && (
                   <div className="empty">
                     <CircleHelp size={20} />
-                    Die Datenbasis für die vorhandenen Merkmalsregeln ist nicht
-                    ausreichend.
+                    {t(
+                      "Die Datenbasis für die vorhandenen Merkmalsregeln ist nicht ausreichend.",
+                    )}
                   </div>
                 )}
                 <header className="section-heading">
-                  <h2>Datenqualität</h2>
+                  <h2>{t("Datenqualität")}</h2>
                 </header>
                 <div className="panel quality">
                   <span>
-                    <strong>{number.format(model.summary.no_call)}</strong> ohne
-                    Genotyp
+                    <strong>{number.format(model.summary.no_call)}</strong>
+                    {t("ohne Genotyp")}
                   </span>
                   <span>
                     <strong>{number.format(model.summary.conflicts)}</strong>{" "}
-                    widersprüchlich
+                    {t("widersprüchlich")}
                   </span>
                   <span>
                     <strong>{number.format(model.summary.skipped)}</strong>{" "}
-                    übersprungen
+                    {t("übersprungen")}
                   </span>
                 </div>
               </>
@@ -679,8 +726,10 @@ function App() {
                     <Dna size={30} />
                   </div>
                   <Heading
-                    title="Deine DNA. Dein Gerät."
-                    description="Öffne deinen MyHeritage-Rohdatenexport und erkunde Herkunft, Merkmale und Forschungsbefunde."
+                    title={t("Deine DNA. Dein Gerät.")}
+                    description={t(
+                      "Öffne deinen MyHeritage-Rohdatenexport und erkunde Herkunft, Merkmale und Forschungsbefunde.",
+                    )}
                   />
                   <div className="actions">
                     <button
@@ -688,17 +737,18 @@ function App() {
                       disabled={!!busy}
                       onClick={() => importData(false)}
                     >
-                      DNA-Datei öffnen <ArrowRight size={16} />
+                      {t("DNA-Datei öffnen")}
+                      <ArrowRight size={16} />
                     </button>
                     <button
                       className="button secondary"
                       disabled={!!busy}
                       onClick={() => importData(true)}
                     >
-                      Beispiel ansehen
+                      {t("Beispiel ansehen")}
                     </button>
                   </div>
-                  <p className="formats">CSV, TSV, TXT oder ZIP</p>
+                  <p className="formats">{t("CSV, TSV, TXT oder ZIP")}</p>
                 </div>
                 <div className="helix" aria-hidden="true">
                   <Dna size={210} strokeWidth={0.72} />
@@ -708,11 +758,11 @@ function App() {
           {page === "chapters" && (
             <>
               <Heading
-                title="Kapitel"
-                description="17 Hauptkapitel für deinen DNA-Vollreport."
+                title={t("Kapitel")}
+                description={t("17 Hauptkapitel für deinen DNA-Vollreport.")}
               />
               <div className="browse">
-                <nav className="chapter-list" aria-label="Reportkapitel">
+                <nav className="chapter-list" aria-label={t("Reportkapitel")}>
                   {groups.map((group) => (
                     <div key={group}>
                       <h3>{group}</h3>
@@ -741,28 +791,28 @@ function App() {
                       <label className="search">
                         <Search size={16} />
                         <input
-                          placeholder="Merkmal, Gen oder rsID"
+                          placeholder={t("Merkmal, Gen oder rsID")}
                           value={query}
                           onChange={(e) => setQuery(e.target.value)}
                         />
                       </label>
                       <select
-                        aria-label="Auswertungsstatus"
+                        aria-label={t("Auswertungsstatus")}
                         value={filter}
                         onChange={(e) =>
                           setFilter(e.target.value as typeof filter)
                         }
                       >
-                        <option value="all">Alle Status</option>
-                        <option value="personal">Auswertbar</option>
-                        <option value="research">Studienbezug</option>
-                        <option value="missing">Offen</option>
+                        <option value="all">{t("Alle Status")}</option>
+                        <option value="personal">{t("Auswertbar")}</option>
+                        <option value="research">{t("Studienbezug")}</option>
+                        <option value="missing">{t("Offen")}</option>
                       </select>
                     </div>
                   )}
                   {search ? (
                     <>
-                      <h2>Suchergebnisse</h2>
+                      <h2>{t("Suchergebnisse")}</h2>
                       {visible.length ? (
                         <FindingList
                           key={search + filter}
@@ -770,7 +820,7 @@ function App() {
                           anchor={anchor}
                         />
                       ) : (
-                        <p>Keine passenden Merkmale gefunden.</p>
+                        <p>{t("Keine passenden Merkmale gefunden.")}</p>
                       )}
                     </>
                   ) : (
@@ -794,18 +844,20 @@ function App() {
                               {section.id === "14.4" &&
                                 model?.scores.map((score) => (
                                   <div className="score" key={score.id}>
-                                    <strong>{score.title}</strong>
+                                    <strong>{resultText(score.title)}</strong>
                                     <p>
                                       {score.matched} / {score.total}{" "}
-                                      Modellpositionen ·{" "}
+                                      {t("Modellpositionen ·")}{" "}
                                       {score.raw === null
-                                        ? "Kein Rohscore"
-                                        : `Rohscore ${number.format(score.raw)}`}
+                                        ? t("Kein Rohscore")
+                                        : `${t("Rohscore")} ${number.format(score.raw)}`}
                                     </p>
                                     <p>
-                                      Vergleichspopulation der Studie:{" "}
-                                      {score.population}. Forschungswert ohne
-                                      persönliches Risiko.
+                                      {t("Vergleichspopulation der Studie:")}{" "}
+                                      {resultText(score.population)}
+                                      {t(
+                                        ". Forschungswert ohne persönliches Risiko.",
+                                      )}
                                     </p>
                                     <small>
                                       {score.id} · {score.source}
@@ -822,13 +874,15 @@ function App() {
                                   key={f.id}
                                   onClick={() => openFinding(f)}
                                 >
-                                  Siehe {f.title} <ArrowRight size={14} />
+                                  {t("Siehe")}
+                                  {resultText(f.title)} <ArrowRight size={14} />
                                 </button>
                               ))}
                               {model && !findings.length && !cross.length && (
                                 <small>
-                                  Für diesen Abschnitt liegt aktuell keine
-                                  passende Merkmalsregel vor.
+                                  {t(
+                                    "Für diesen Abschnitt liegt aktuell keine passende Merkmalsregel vor.",
+                                  )}
                                 </small>
                               )}
                             </section>
@@ -845,13 +899,15 @@ function App() {
           {page === "report" && (
             <>
               <Heading
-                title="PDF-Report"
-                description="Gestalteter Export mit Inhaltsverzeichnis, Quellen und Abdeckung."
+                title={t("PDF-Report")}
+                description={t(
+                  "Gestalteter Export mit Inhaltsverzeichnis, Quellen und Abdeckung.",
+                )}
               />
               {model ? (
                 <div className="report-layout">
                   <div className="panel report-settings">
-                    <h2>Umfang</h2>
+                    <h2>{t("Umfang")}</h2>
                     <label className="choice">
                       <input
                         type="radio"
@@ -863,8 +919,10 @@ function App() {
                         }}
                       />
                       <span>
-                        <strong>Vollreport</strong>
-                        <small>17 Hauptkapitel und Variantenanhang</small>
+                        <strong>{t("Vollreport")}</strong>
+                        <small>
+                          {t("17 Hauptkapitel und Variantenanhang")}
+                        </small>
                       </span>
                     </label>
                     <label className="choice">
@@ -878,13 +936,15 @@ function App() {
                         }}
                       />
                       <span>
-                        <strong>Kurzreport</strong>
-                        <small>Auswertbare Merkmale und Studienbezüge</small>
+                        <strong>{t("Kurzreport")}</strong>
+                        <small>
+                          {t("Auswertbare Merkmale und Studienbezüge")}
+                        </small>
                       </span>
                     </label>
-                    <h2>Persönliche Angaben</h2>
+                    <h2>{t("Persönliche Angaben")}</h2>
                     <label className="field">
-                      Name im Report{" "}
+                      {t("Name im Report")}{" "}
                       <input
                         value={options.name || ""}
                         placeholder="Optional"
@@ -907,7 +967,7 @@ function App() {
                           setPreview(undefined);
                         }}
                       />
-                      Konkrete Genotypen anzeigen
+                      {t("Konkrete Genotypen anzeigen")}
                     </label>
                     <label className="choice">
                       <input
@@ -921,7 +981,7 @@ function App() {
                           setPreview(undefined);
                         }}
                       />
-                      Namen von DNA-Matches anzeigen
+                      {t("Namen von DNA-Matches anzeigen")}
                     </label>
                     <div className="actions">
                       <button
@@ -929,21 +989,24 @@ function App() {
                         disabled={!!busy}
                         onClick={savePdf}
                       >
-                        PDF exportieren <ArrowDownToLine size={16} />
+                        {t("PDF exportieren")}
+                        <ArrowDownToLine size={16} />
                       </button>
                       <button
                         className="button secondary"
                         disabled={!!busy}
                         onClick={renderPdf}
                       >
-                        Vorschau
+                        {t("Vorschau")}
                       </button>
                     </div>
                   </div>
                   <div className="preview">
                     {preview ? (
                       <Suspense
-                        fallback={<p role="status">PDF wird geöffnet …</p>}
+                        fallback={
+                          <p role="status">{t("PDF wird geöffnet …")}</p>
+                        }
                       >
                         <PdfPreview bytes={preview} />
                       </Suspense>
@@ -951,16 +1014,16 @@ function App() {
                       <div className="mock-report">
                         <span>ROOTS LOCAL</span>
                         <strong>
-                          Dein
+                          {t("Dein")}
                           <br />
-                          DNA-Report
+                          {t("DNA-Report")}
                         </strong>
                         <i />
-                        <p>Explore your DNA. Offline.</p>
+                        <p>{t("Entdecke deine DNA. Offline.")}</p>
                         <small>
                           {options.short
-                            ? "Kurzreport"
-                            : "Vollreport · 17 Kapitel"}
+                            ? t("Kurzreport")
+                            : t("Vollreport · 17 Kapitel")}
                         </small>
                       </div>
                     )}
@@ -969,7 +1032,7 @@ function App() {
               ) : (
                 <div className="empty">
                   <FileText size={22} />
-                  Öffne eine DNA-Datei, um einen Report zu erstellen.
+                  {t("Öffne eine DNA-Datei, um einen Report zu erstellen.")}
                 </div>
               )}
             </>
@@ -977,17 +1040,19 @@ function App() {
           {page === "data" && (
             <>
               <Heading
-                title="Datenquellen"
-                description="Lokale Begleitdateien und Referenzkataloge für deine Auswertung."
+                title={t("Datenquellen")}
+                description={t(
+                  "Lokale Begleitdateien und Referenzkataloge für deine Auswertung.",
+                )}
               />
               <div className="data-grid">
                 <section className="panel data-card">
                   <Dna size={22} />
-                  <h2>Genotypdatei</h2>
+                  <h2>{t("Genotypdatei")}</h2>
                   <p>
                     {model
-                      ? `${model.summary.format} · ${model.summary.build || "Build unbekannt"} · ${model.summary.strand}`
-                      : "Keine Datei geöffnet."}
+                      ? `${model.summary.format} · ${model.summary.build || t("Build unbekannt")} · ${resultText(model.summary.strand)}`
+                      : t("Keine Datei geöffnet.")}
                   </p>
                   <div className="actions">
                     <button
@@ -995,7 +1060,7 @@ function App() {
                       disabled={!!busy}
                       onClick={() => importData(false)}
                     >
-                      Öffnen
+                      {t("Öffnen")}
                     </button>
                     {model && (
                       <button
@@ -1003,7 +1068,7 @@ function App() {
                         disabled={!!busy}
                         onClick={() =>
                           void run(
-                            "Sitzung schließen",
+                            t("Sitzung schließen"),
                             () => invoke("reset"),
                             () => {
                               setModel(undefined);
@@ -1014,24 +1079,25 @@ function App() {
                           )
                         }
                       >
-                        Sitzung schließen
+                        {t("Sitzung schließen")}
                       </button>
                     )}
                   </div>
                 </section>
                 <section className="panel data-card">
                   <Database size={22} />
-                  <h2>Referenzkatalog</h2>
+                  <h2>{t("Referenzkatalog")}</h2>
                   <p>
-                    Aktiver Katalog {version}. Signierte Pakete können lokal
-                    geladen werden.
+                    {t("Aktiver Katalog")}
+                    {version}
+                    {t(". Signierte Pakete können lokal geladen werden.")}
                   </p>
                   <label className="field">
-                    Öffentlicher Ed25519-Schlüssel
+                    {t("Öffentlicher Ed25519-Schlüssel")}
                     <input
                       value={key}
                       maxLength={64}
-                      placeholder="64 Hex-Zeichen"
+                      placeholder={t("64 Hex-Zeichen")}
                       onChange={(e) => setKey(e.target.value)}
                     />
                   </label>
@@ -1040,23 +1106,26 @@ function App() {
                     disabled={!!busy || !/^[0-9a-f]{64}$/i.test(key)}
                     onClick={() =>
                       void run(
-                        "Katalog überprüfen",
+                        t("Katalog überprüfen"),
                         () =>
                           invoke<{
                             version: string;
                             model: Report | null;
-                          } | null>("load_catalog", { trustedKey: key }),
+                          } | null>("load_catalog", {
+                            trustedKey: key,
+                            language,
+                          }),
                         (value) => {
                           if (value) {
                             setVersion(value.version);
                             if (value.model) setReport(value.model);
-                            setNotice("Der Katalog wurde übernommen.");
+                            setNotice(t("Der Katalog wurde übernommen."));
                           }
                         },
                       )
                     }
                   >
-                    Paket öffnen
+                    {t("Paket öffnen")}
                   </button>
                   {model && model.gwas_total > 0 && (
                     <p>
@@ -1064,8 +1133,9 @@ function App() {
                         model.findings.filter((finding) => finding.study)
                           .length,
                       )}{" "}
-                      passende Studienassoziationen von{" "}
-                      {number.format(model.gwas_total)} GWAS-Katalogeinträgen.
+                      {t("passende Studienassoziationen von")}{" "}
+                      {number.format(model.gwas_total)}
+                      {t("GWAS-Katalogeinträgen.")}
                     </p>
                   )}
                 </section>
@@ -1073,13 +1143,13 @@ function App() {
                   <>
                     <section className="panel data-card">
                       <GitBranch size={22} />
-                      <h2>Herkunft & Familie</h2>
+                      <h2>{t("Herkunft & Familie")}</h2>
                       <label className="field">
-                        Vorhandene Herkunftsergebnisse
+                        {t("Vorhandene Herkunftsergebnisse")}
                         <textarea
                           value={origins}
                           onChange={(e) => setOrigins(e.target.value)}
-                          placeholder={"Region; 42.5\nGenetische Gruppe"}
+                          placeholder={t("Region; 42.5\nGenetische Gruppe")}
                           rows={3}
                           maxLength={18000}
                         />
@@ -1090,74 +1160,77 @@ function App() {
                           disabled={!!busy}
                           onClick={() =>
                             void run(
-                              "Herkunft übernehmen",
+                              t("Herkunft übernehmen"),
                               () =>
                                 invoke<Report>("save_origins", {
                                   entries: origins,
                                 }),
                               (result) => {
                                 setReport(result);
-                                setNotice("Herkunftsangaben übernommen.");
+                                setNotice(t("Herkunftsangaben übernommen."));
                               },
                             )
                           }
                         >
-                          Herkunft speichern
+                          {t("Herkunft speichern")}
                         </button>
                         <button
                           className="button secondary"
                           disabled={!!busy}
                           onClick={() =>
-                            extra("relatives", "Begleitdatei einlesen")
+                            extra("relatives", t("Begleitdatei einlesen"))
                           }
                         >
-                          Matches oder Segmente
+                          {t("Matches oder Segmente")}
                         </button>
                         <button
                           className="button secondary"
                           disabled={!!busy}
                           onClick={() =>
-                            extra("family", "Familiendatei vergleichen")
+                            extra("family", t("Familiendatei vergleichen"))
                           }
                         >
-                          Familiendatei
+                          {t("Familiendatei")}
                         </button>
                       </div>
                       <small>
-                        {model.external.origins.length} Herkunftsangaben ·{" "}
+                        {model.external.origins.length}
+                        {t("Herkunftsangaben ·")}{" "}
                         {model.external.matches.length} Matches ·{" "}
-                        {model.external.segments.length} Segmente
+                        {model.external.segments.length}
+                        {t("Segmente")}
                       </small>
                       {model.family && (
                         <p>
-                          {number.format(model.family.compared)} gemeinsam
-                          ausgewertete Positionen ·{" "}
-                          {number.format(model.family.discordant)} ohne
-                          gemeinsames Allel
+                          {number.format(model.family.compared)}
+                          {t("gemeinsam ausgewertete Positionen ·")}{" "}
+                          {number.format(model.family.discordant)}
+                          {t("ohne gemeinsames Allel")}
                         </p>
                       )}
                     </section>
                     <section className="panel data-card">
                       <ScanLine size={22} />
-                      <h2>Sequenzierdaten</h2>
+                      <h2>{t("Sequenzierdaten")}</h2>
                       <p>
-                        CRAM und passende lokale FASTA mit Index. Die App
-                        ermittelt die Abdeckung der Katalogmarker.
+                        {t(
+                          "CRAM und passende lokale FASTA mit Index. Die App ermittelt die Abdeckung der Katalogmarker.",
+                        )}
                       </p>
                       <button
                         className="button secondary"
                         disabled={!!busy}
                         onClick={() =>
-                          extra("cram", "CRAM-Abdeckung berechnen")
+                          extra("cram", t("CRAM-Abdeckung berechnen"))
                         }
                       >
-                        CRAM öffnen
+                        {t("CRAM öffnen")}
                       </button>
                       {model.sequence && (
                         <p>
                           {number.format(model.sequence.reads)} Reads ·{" "}
-                          {model.sequence.targets.length} Positionen ·{" "}
-                          {model.sequence.build}
+                          {model.sequence.targets.length}
+                          {t("Positionen ·")} {model.sequence.build}
                         </p>
                       )}
                     </section>
@@ -1172,6 +1245,7 @@ function App() {
   );
 }
 
+document.documentElement.lang = getLanguage();
 createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
     <App />

@@ -1,3 +1,4 @@
+import { t } from "./locale";
 import { useEffect, useRef, useState } from "react";
 import {
   getDocument,
@@ -66,20 +67,25 @@ export function PdfPreview({ bytes }: { bytes: ArrayBuffer }) {
   }, [document, page]);
 
   if (error)
-    return <p role="alert">Die PDF-Vorschau konnte nicht angezeigt werden.</p>;
+    return (
+      <p role="alert">{t("Die PDF-Vorschau konnte nicht angezeigt werden.")}</p>
+    );
   return (
     <div className="pdf-pages">
       {document ? (
-        <canvas ref={canvas} aria-label={`PDF-Vorschau, Seite ${page}`} />
+        <canvas
+          ref={canvas}
+          aria-label={`${t("PDF-Vorschau, Seite")} ${page}`}
+        />
       ) : (
-        <span role="status">PDF wird geöffnet …</span>
+        <span role="status">{t("PDF wird geöffnet …")}</span>
       )}
       {document && (
         <div className="pagination">
           <button
             onClick={() => setPage(page - 1)}
             disabled={page <= 1}
-            aria-label="Vorige PDF-Seite"
+            aria-label={t("Vorige PDF-Seite")}
           >
             <ArrowLeft size={16} />
           </button>
@@ -89,7 +95,7 @@ export function PdfPreview({ bytes }: { bytes: ArrayBuffer }) {
           <button
             onClick={() => setPage(page + 1)}
             disabled={page >= document.numPages}
-            aria-label="Nächste PDF-Seite"
+            aria-label={t("Nächste PDF-Seite")}
           >
             <ArrowRight size={16} />
           </button>
