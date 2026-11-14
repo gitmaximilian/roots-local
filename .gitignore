@@ -29,3 +29,8 @@ reports/
 *.db
 *.sqlite
 *.sqlite3
+src-tauri/binaries/
+src-tauri/gen/
+__pycache__/
+
+tmp/

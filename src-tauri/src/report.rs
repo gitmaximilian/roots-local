@@ -1,0 +1,191 @@
+use crate::{
+    analysis::{Finding, Status, Summary},
+    catalog::{structure, write_atomic, Chapter},
+    external::{External, Family},
+};
+use serde::{Deserialize, Serialize};
+use std::{
+    fs,
+    path::{Path, PathBuf},
+    process::Command,
+};
+
+#[derive(Clone, Default, Deserialize, Serialize)]
+#[serde(default, deny_unknown_fields)]
+pub struct Options {
+    pub short: bool,
+    pub name: Option<String>,
+    pub include_calls: bool,
+    pub include_relatives: bool,
+}
+
+#[derive(Clone, Serialize)]
+pub struct Model {
+    pub summary: Summary,
+    pub catalog_version: String,
+    pub findings: Vec<Finding>,
+    pub chapters: Vec<Chapter>,
+    pub external: External,
+    pub family: Option<Family>,
+    pub sequence: Option<crate::cram::Coverage>,
+    pub example: bool,
+}
+#[derive(Serialize)]
+struct Document {
+    #[serde(flatten)]
+    model: Model,
+    options: Options,
+    personal: usize,
+    research: usize,
+    missing: usize,
+    variant_index: Vec<(String, String, String)>,
+    version: &'static str,
+}
+
+impl Model {
+    pub fn new(
+        summary: Summary,
+        catalog_version: String,
+        findings: Vec<Finding>,
+        example: bool,
+    ) -> Self {
+        Self {
+            summary,
+            catalog_version,
+            findings,
+            chapters: structure(),
+            external: External::default(),
+            family: None,
+            sequence: None,
+            example,
+        }
+    }
+}
+
+pub fn typst_binary() -> Result<PathBuf, String> {
+    let filename = if cfg!(windows) { "typst.exe" } else { "typst" };
+    let native = std::env::current_exe()
+        .ok()
+        .and_then(|p| p.parent().map(|p| p.join(filename)));
+    let dev = Path::new(env!("CARGO_MANIFEST_DIR"))
+        .join("binaries")
+        .join(if cfg!(windows) {
+            format!("typst-{}.exe", env!("ROOTS_TARGET"))
+        } else {
+            format!("typst-{}", env!("ROOTS_TARGET"))
+        });
+    native
+        .into_iter()
+        .chain(cfg!(debug_assertions).then_some(dev))
+        .find(|path| path.is_file())
+        .ok_or_else(|| "Das gebündelte PDF-Werkzeug wurde nicht gefunden.".into())
+}
+
+pub fn render(model: &Model, mut options: Options, typst: &Path) -> Result<Vec<u8>, String> {
+    let directory = tempfile::tempdir()
+        .map_err(|_| "Der temporäre Exportordner konnte nicht geöffnet werden.")?;
+    let view = directory.path().join("report.typ");
+    let data = directory.path().join("report.json");
+    options.name = options
+        .name
+        .take()
+        .map(|v| {
+            v.trim()
+                .chars()
+                .filter(|c| !c.is_control())
+                .take(120)
+                .collect()
+        })
+        .filter(|s: &String| !s.is_empty());
+    let mut model = model.clone();
+    let personal = model
+        .findings
+        .iter()
+        .filter(|f| f.status == Status::Personal)
+        .count();
+    let research = model
+        .findings
+        .iter()
+        .filter(|f| f.status == Status::Research)
+        .count();
+    let missing = model.findings.len() - personal - research;
+    if !options.include_relatives {
+        for (i, relative) in model.external.matches.iter_mut().enumerate() {
+            relative.name = format!("Treffer {}", i + 1);
+        }
+        for (i, segment) in model.external.segments.iter_mut().enumerate() {
+            segment.name = format!("Segment {}", i + 1);
+        }
+    }
+    if !options.include_calls {
+        for finding in &mut model.findings {
+            for check in &mut finding.checks {
+                check.call = None;
+            }
+        }
+    }
+    let mut variant_index: Vec<_> = model
+        .findings
+        .iter()
+        .flat_map(|item| {
+            item.checks
+                .iter()
+                .map(|c| (c.id.clone(), c.gene.clone(), item.item.id.clone()))
+        })
+        .collect();
+    variant_index.sort();
+    variant_index.dedup();
+    let document = Document {
+        model,
+        options,
+        personal,
+        research,
+        missing,
+        variant_index,
+        version: env!("CARGO_PKG_VERSION"),
+    };
+    fs::write(&view, include_str!("../../report/report.typ"))
+        .map_err(|_| "Die PDF-Vorlage konnte nicht geöffnet werden.")?;
+    fs::write(
+        &data,
+        serde_json::to_vec(&document).map_err(|_| "Das Reportmodell ist ungültig.")?,
+    )
+    .map_err(|_| "Die Daten konnten nicht für den PDF-Export vorbereitet werden.")?;
+    let output = directory.path().join("report.pdf");
+    let mut renderer = Command::new(typst);
+    renderer
+        .current_dir(directory.path())
+        .arg("compile")
+        .arg("--root")
+        .arg(directory.path())
+        .arg("--ignore-system-fonts")
+        .arg(&view)
+        .arg(&output);
+    #[cfg(windows)]
+    {
+        use std::os::windows::process::CommandExt;
+        renderer.creation_flags(0x08000000);
+    }
+    let result = renderer
+        .output()
+        .map_err(|_| "Das lokale PDF-Werkzeug konnte nicht gestartet werden.")?;
+    if !result.status.success() {
+        #[cfg(debug_assertions)]
+        eprintln!(
+            "{}",
+            String::from_utf8_lossy(&result.stderr)
+                .replace(&directory.path().display().to_string(), "[temporär]")
+        );
+        return Err("Der Report konnte nicht gerendert werden.".into());
+    }
+    fs::read(output).map_err(|_| "Das erzeugte PDF konnte nicht gelesen werden.".into())
+}
+
+pub fn export(
+    model: &Model,
+    options: Options,
+    typst: &Path,
+    destination: &Path,
+) -> Result<(), String> {
+    write_atomic(destination, &render(model, options, typst)?)
+}

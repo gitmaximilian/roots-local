@@ -1,0 +1,446 @@
+#![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
+
+use roots_local::{
+    analysis,
+    catalog::{self, Catalog, Chapter},
+    cram,
+    external::{self, External},
+    import::{self, Import},
+    report::{self, Model, Options},
+};
+use serde::Serialize;
+use std::{
+    path::{Path, PathBuf},
+    sync::{
+        atomic::{AtomicBool, Ordering::Relaxed},
+        Arc, Mutex,
+    },
+};
+use tauri::{AppHandle, Builder, State};
+use tauri_plugin_dialog::DialogExt;
+
+const SAMPLE: &[u8] = include_bytes!("../../fixtures/synthetic-myheritage.txt");
+
+#[derive(Default)]
+struct Session {
+    catalog: Option<Catalog>,
+    imported: Option<Import>,
+    model: Option<Model>,
+}
+#[derive(Clone, Default)]
+struct Workspace {
+    session: Arc<Mutex<Session>>,
+    job: Arc<Mutex<Option<Arc<AtomicBool>>>>,
+}
+impl Workspace {
+    fn start_job(&self) -> Result<Job, String> {
+        let mut current = self
+            .job
+            .lock()
+            .map_err(|_| "Die Sitzung ist nicht verfügbar.")?;
+        if current.is_some() {
+            return Err("Eine Verarbeitung läuft bereits.".into());
+        }
+        let cancel = Arc::new(AtomicBool::new(false));
+        *current = Some(cancel.clone());
+        Ok(Job {
+            cancel,
+            active: self.job.clone(),
+        })
+    }
+}
+struct Job {
+    cancel: Arc<AtomicBool>,
+    active: Arc<Mutex<Option<Arc<AtomicBool>>>>,
+}
+impl Drop for Job {
+    fn drop(&mut self) {
+        if let Ok(mut current) = self.active.lock() {
+            *current = None;
+        }
+    }
+}
+fn state_error<T>(_: std::sync::PoisonError<T>) -> &'static str {
+    "Die Sitzung ist nicht verfügbar."
+}
+
+#[tauri::command]
+fn chapters() -> Vec<Chapter> {
+    catalog::structure()
+}
+
+#[tauri::command]
+fn cancel_job(workspace: State<'_, Workspace>) -> Result<(), String> {
+    if let Some(cancel) = workspace.job.lock().map_err(state_error)?.as_ref() {
+        cancel.store(true, Relaxed);
+    }
+    Ok(())
+}
+
+#[tauri::command]
+async fn reset(workspace: State<'_, Workspace>) -> Result<(), String> {
+    let _job = workspace.start_job()?;
+    let mut state = workspace.session.lock().map_err(state_error)?;
+    state.model = None;
+    state.imported = None;
+    Ok(())
+}
+
+fn choose(handle: &AppHandle, label: &str, extensions: &[&str]) -> Result<Option<PathBuf>, String> {
+    handle
+        .dialog()
+        .file()
+        .add_filter(label, extensions)
+        .blocking_pick_file()
+        .map(|file| {
+            file.into_path()
+                .map_err(|_| "Es wird eine lokale Datei benötigt.".into())
+        })
+        .transpose()
+}
+async fn background<T: Send + 'static>(
+    work: impl FnOnce() -> Result<T, String> + Send + 'static,
+) -> Result<T, String> {
+    tauri::async_runtime::spawn_blocking(work)
+        .await
+        .map_err(|_| "Die lokale Verarbeitung konnte nicht abgeschlossen werden.".into())
+        .and_then(|result| result)
+}
+fn make_model(data: &Import, catalog: Option<&Catalog>, example: bool) -> Result<Model, String> {
+    let starter;
+    let active = if let Some(catalog) = catalog {
+        catalog
+    } else {
+        starter = Catalog::starter()?;
+        &starter
+    };
+    Ok(Model::new(
+        analysis::summary(data),
+        active.version.clone(),
+        analysis::evaluate(data, active)?,
+        example,
+    ))
+}
+
+#[tauri::command]
+async fn import_dna(
+    handle: AppHandle,
+    workspace: State<'_, Workspace>,
+    example: bool,
+) -> Result<Option<Model>, String> {
+    let workspace = workspace.inner().clone();
+    background(move || {
+        let job = workspace.start_job()?;
+        let data = if example {
+            import::parse(SAMPLE, &job.cancel)?
+        } else {
+            let Some(path) = choose(
+                &handle,
+                "MyHeritage-Rohdaten",
+                &["csv", "tsv", "txt", "zip"],
+            )?
+            else {
+                return Ok(None);
+            };
+            import::file(&path, &job.cancel)?
+        };
+        let mut state = workspace.session.lock().map_err(state_error)?;
+        let model = make_model(&data, state.catalog.as_ref(), example)?;
+        if job.cancel.load(Relaxed) {
+            return Err("Import abgebrochen.".into());
+        }
+        state.imported = Some(data);
+        state.model = Some(model.clone());
+        Ok(Some(model))
+    })
+    .await
+}
+
+#[derive(Serialize)]
+struct VariantPage {
+    total: usize,
+    rows: Vec<import::Variant>,
+}
+#[tauri::command]
+fn variants(
+    workspace: State<'_, Workspace>,
+    query: String,
+    offset: usize,
+) -> Result<VariantPage, String> {
+    let state = workspace.session.lock().map_err(state_error)?;
+    let query = query.trim().to_ascii_lowercase();
+    let data = state
+        .imported
+        .as_ref()
+        .ok_or("Bitte zuerst eine DNA-Datei importieren.")?;
+    let mut total = 0usize;
+    let mut rows = Vec::new();
+    for row in &data.rows {
+        if query.is_empty()
+            || row.id.to_ascii_lowercase().contains(&query)
+            || query.split_once(':').is_some_and(|(chr, pos)| {
+                row.chromosome.eq_ignore_ascii_case(chr)
+                    && row.position.to_string().starts_with(pos)
+            })
+        {
+            if total >= offset && rows.len() < 50 {
+                rows.push(row.clone());
+            }
+            total += 1;
+        }
+    }
+    Ok(VariantPage { total, rows })
+}
+
+#[tauri::command]
+async fn import_extra(
+    handle: AppHandle,
+    workspace: State<'_, Workspace>,
+    kind: String,
+) -> Result<Option<Model>, String> {
+    let workspace = workspace.inner().clone();
+    background(move || {
+        let job = workspace.start_job()?;
+        if !["relatives", "family", "cram"].contains(&kind.as_str()) {
+            return Err("Unbekannter Importtyp.".into());
+        }
+        if workspace
+            .session
+            .lock()
+            .map_err(state_error)?
+            .model
+            .is_none()
+        {
+            return Err("Bitte zuerst eine DNA-Datei importieren.".into());
+        }
+        let extra = match kind.as_str() {
+            "relatives" => {
+                let Some(path) =
+                    choose(&handle, "Match- oder Segmentliste", &["csv", "tsv", "txt"])?
+                else {
+                    return Ok(None);
+                };
+                Extra::Relatives(external::supporting_file(&path)?)
+            }
+            "family" => {
+                let Some(path) = choose(
+                    &handle,
+                    "Vergleichsdatei eines Elternteils",
+                    &["csv", "tsv", "txt", "zip"],
+                )?
+                else {
+                    return Ok(None);
+                };
+                let relative = import::file(&path, &job.cancel)?;
+                let state = workspace.session.lock().map_err(state_error)?;
+                Extra::Family(external::compare(
+                    state
+                        .imported
+                        .as_ref()
+                        .ok_or("Keine Genotypdatei importiert.")?,
+                    &relative,
+                )?)
+            }
+            "cram" => {
+                let Some(path) = choose(&handle, "Sequenzierdaten", &["cram"])? else {
+                    return Ok(None);
+                };
+                let Some(reference) = choose(
+                    &handle,
+                    "Passende lokale FASTA mit .fai",
+                    &["fa", "fasta", "fna", "gz"],
+                )?
+                else {
+                    return Ok(None);
+                };
+                let markers = {
+                    let state = workspace.session.lock().map_err(state_error)?;
+                    if let Some(catalog) = &state.catalog {
+                        catalog.markers()?
+                    } else {
+                        Catalog::starter()?.markers()?
+                    }
+                };
+                Extra::Cram(cram::coverage(&path, &reference, &markers, &job.cancel)?)
+            }
+            _ => unreachable!(),
+        };
+        if job.cancel.load(Relaxed) {
+            return Err("Import abgebrochen.".into());
+        }
+        let mut state = workspace.session.lock().map_err(state_error)?;
+        let model = state
+            .model
+            .as_mut()
+            .ok_or("Bitte zuerst eine DNA-Datei importieren.")?;
+        match extra {
+            Extra::Relatives(mut extra) => {
+                if !extra.matches.is_empty() {
+                    std::mem::swap(&mut model.external.matches, &mut extra.matches);
+                }
+                if !extra.segments.is_empty() {
+                    std::mem::swap(&mut model.external.segments, &mut extra.segments);
+                }
+            }
+            Extra::Family(family) => model.family = Some(family),
+            Extra::Cram(coverage) => model.sequence = Some(coverage),
+        }
+        Ok(Some(model.clone()))
+    })
+    .await
+}
+enum Extra {
+    Relatives(External),
+    Family(external::Family),
+    Cram(cram::Coverage),
+}
+
+#[tauri::command]
+fn save_origins(workspace: State<'_, Workspace>, entries: String) -> Result<Model, String> {
+    let _job = workspace.start_job()?;
+    let mut state = workspace.session.lock().map_err(state_error)?;
+    let model = state
+        .model
+        .as_mut()
+        .ok_or("Bitte zuerst eine DNA-Datei importieren.")?;
+    model.external.origins = external::origins(&entries)?.origins;
+    Ok(model.clone())
+}
+
+#[tauri::command]
+async fn load_catalog(
+    handle: AppHandle,
+    workspace: State<'_, Workspace>,
+    trusted_key: String,
+) -> Result<Option<CatalogState>, String> {
+    let workspace = workspace.inner().clone();
+    background(move || {
+        let job = workspace.start_job()?;
+        let Some(path) = choose(&handle, "Signiertes Katalogpaket", &["json", "rootscat"])? else {
+            return Ok(None);
+        };
+        let new_catalog = catalog::package(&path, &trusted_key)?;
+        if job.cancel.load(Relaxed) {
+            return Err("Katalogimport abgebrochen.".into());
+        }
+        let mut state = workspace.session.lock().map_err(state_error)?;
+        if let (Some(data), Some(model)) = (&state.imported, &state.model) {
+            let mut fresh = model.clone();
+            fresh.findings = analysis::evaluate(data, &new_catalog)?;
+            fresh.catalog_version = new_catalog.version.clone();
+            fresh.sequence = None;
+            state.model = Some(fresh);
+        }
+        let version = new_catalog.version.clone();
+        state.catalog = Some(new_catalog);
+        Ok(Some(CatalogState {
+            version,
+            model: state.model.clone(),
+        }))
+    })
+    .await
+}
+#[derive(Serialize)]
+struct CatalogState {
+    version: String,
+    model: Option<Model>,
+}
+
+#[tauri::command]
+async fn preview_pdf(
+    workspace: State<'_, Workspace>,
+    options: Options,
+) -> Result<tauri::ipc::Response, String> {
+    let workspace = workspace.inner().clone();
+    background(move || {
+        let _job = workspace.start_job()?;
+        let model = workspace
+            .session
+            .lock()
+            .map_err(state_error)?
+            .model
+            .clone()
+            .ok_or("Bitte zuerst eine DNA-Datei importieren.")?;
+        Ok(tauri::ipc::Response::new(report::render(
+            &model,
+            options,
+            &report::typst_binary()?,
+        )?))
+    })
+    .await
+}
+#[tauri::command]
+async fn export_pdf(
+    handle: AppHandle,
+    workspace: State<'_, Workspace>,
+    options: Options,
+) -> Result<bool, String> {
+    let workspace = workspace.inner().clone();
+    background(move || {
+        let _job = workspace.start_job()?;
+        let model = workspace
+            .session
+            .lock()
+            .map_err(state_error)?
+            .model
+            .clone()
+            .ok_or("Bitte zuerst eine DNA-Datei importieren.")?;
+        let Some(file) = handle
+            .dialog()
+            .file()
+            .set_file_name("Roots Local Report.pdf")
+            .add_filter("PDF", &["pdf"])
+            .blocking_save_file()
+        else {
+            return Ok(false);
+        };
+        let path = file
+            .into_path()
+            .map_err(|_| "Der Export benötigt eine lokale Datei.")?;
+        if !path_is_pdf(&path) {
+            return Err("Bitte einen Dateinamen mit .pdf wählen.".into());
+        }
+        report::export(&model, options, &report::typst_binary()?, &path)?;
+        Ok(true)
+    })
+    .await
+}
+fn path_is_pdf(path: &Path) -> bool {
+    path.extension()
+        .and_then(|e| e.to_str())
+        .is_some_and(|e| e.eq_ignore_ascii_case("pdf"))
+}
+
+fn main() {
+    Builder::default()
+        .manage(Workspace::default())
+        .plugin(tauri_plugin_dialog::init())
+        .setup(|app| {
+            tauri::WebviewWindowBuilder::from_config(app, &app.config().app.windows[0])?
+                .on_navigation(|url| {
+                    matches!(
+                        (url.scheme(), url.host_str()),
+                        ("tauri", Some("localhost")) | ("http", Some("tauri.localhost"))
+                    ) || (cfg!(debug_assertions)
+                        && url.scheme() == "http"
+                        && url.host_str() == Some("127.0.0.1")
+                        && url.port() == Some(1420))
+                })
+                .build()?;
+            Ok(())
+        })
+        .invoke_handler(tauri::generate_handler![
+            chapters,
+            cancel_job,
+            reset,
+            import_dna,
+            variants,
+            import_extra,
+            save_origins,
+            load_catalog,
+            preview_pdf,
+            export_pdf
+        ])
+        .run(tauri::generate_context!())
+        .expect("Roots Local konnte nicht gestartet werden");
+}
