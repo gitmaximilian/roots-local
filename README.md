@@ -1,4 +1,6 @@
-# Genome Local
+# Roots Local
+
+*Explore your DNA. Offline.*
 
 Geplante Open-Source-Desktop-App zur lokalen Auswertung persönlicher DNA-Exporte. Startformat ist der Standard-Rohdatenexport von MyHeritage. Ein erweiterbarer Referenzkatalog verbindet auswertbare Positionen mit Forschungsbefunden, Merkmalen und gegebenenfalls geeigneten Modellen. Die App erstellt daraus einen vollständigen PDF-Report mit 17 Hauptkapiteln.
 

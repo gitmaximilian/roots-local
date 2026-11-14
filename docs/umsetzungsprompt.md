@@ -1,14 +1,16 @@
-# Umsetzungsprompt für Genome Local
+# Masterprompt für Roots Local
 
-Kopiere den folgenden Auftrag in einen Coding-Agenten, der das Repository Genome Local geöffnet hat. Die verlinkte Gliederung ist Bestandteil des Auftrags.
+Kopiere den folgenden Auftrag in einen Coding-Agenten, der das [Repository Roots Local](https://github.com/gitmaximilian/roots-local) geöffnet hat. Die verlinkte Gliederung ist Bestandteil des Auftrags.
 
 ## Auftrag
 
-Implementiere **Genome Local**, eine distributionsfähige Open-Source-Desktop-App zur lokalen Analyse von MyHeritage-DNA-Exporten. Zielplattformen sind **macOS auf Apple Silicon (arm64, einschließlich M4)** und **Windows 11 auf x64**. Plane einen getrennten **Windows-11-ARM64-Build**. Führe seinen Abnahmetest auf der passenden Architektur aus, bevor du ihn als unterstützt kennzeichnest. Verwende plattformneutrale Dateipfade und keine Voraussetzung für Rosetta oder x64-Emulation bei den nativen ARM64-Builds. Wähle und dokumentiere die kleinste tatsächlich unterstützte macOS-Version anhand der Abhängigkeiten und des getesteten Installers.
+Implementiere **Roots Local**, eine distributionsfähige Open-Source-Desktop-App zur lokalen Analyse von MyHeritage-DNA-Exporten. Zielplattformen sind **macOS auf Apple Silicon (arm64, einschließlich M4)** und **Windows 11 auf x64**. Plane einen getrennten **Windows-11-ARM64-Build**. Führe seinen Abnahmetest auf der passenden Architektur aus, bevor du ihn als unterstützt kennzeichnest. Verwende plattformneutrale Dateipfade und keine Voraussetzung für Rosetta oder x64-Emulation bei den nativen ARM64-Builds. Wähle und dokumentiere die kleinste tatsächlich unterstützte macOS-Version anhand der Abhängigkeiten und des getesteten Installers.
 
 Nimm [reportstruktur.md](reportstruktur.md) als verbindliche Produktspezifikation. Alle 17 Hauptkapitel und deren Unterkapitel erscheinen in der App und im Vollreport. Implementiere Fähigkeiten nach den Meilensteinen unten und kennzeichne den Status pro Merkmal. Lies vor Änderungen den vorhandenen Code und die Repo-Anweisungen. Arbeite den ersten Meilenstein bis zu einer benutzbaren, geprüften Version durch. Setze weitere Meilensteine jeweils vollständig um und aktualisiere ihren Status im Repository. Dokumentiere konkrete Blocker und liefere die unabhängig davon funktionsfähigen Teile.
 
 Die Tests verwenden ausschließlich synthetische oder ausdrücklich für diesen Zweck geeignete, lizenzierte Referenzdaten ohne private Nutzerinformationen. Das Projekt und seine Codebeispiele stehen unter Apache 2.0. Halte Drittanbieter-Lizenzen getrennt und dokumentiere sie.
+
+Verwende **Roots Local** als sichtbaren Produktnamen, **roots-local** für Repository und Paketnamen und **Explore your DNA. Offline.** als englischen Untertitel.
 
 ## 1. Architektur
 

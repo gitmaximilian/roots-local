@@ -1,4 +1,4 @@
-# Vollreport zur persönlichen DNA-Analyse
+# Roots Local · Gliederung des DNA-Vollreports
 
 Diese Datei ist die kanonische Gliederung für App, PDF und Merkmalskatalog. Die 17 Hauptkapitel bilden die zuvor gesammelten 70 Themen sowie die ergänzten Bereiche Genomstruktur, Vererbung entlang der Chromosomen und genetische Vielfalt ab. Die Nummern dienen als stabile Hauptkapitel-IDs. Konkrete Merkmale erhalten eigene stabile IDs. Die Beispiele sind geplante Inhalte. Ob ein Merkmal persönlich auswertbar ist, hängt von Eingabedaten, Methode und Evidenz ab.
 
