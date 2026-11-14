@@ -145,7 +145,41 @@ fn signed_catalog_rejects_tampering() {
             .collect::<String>()
     };
     let pubkey = hex(key.verifying_key().as_bytes());
-    let payload = catalog::STARTER;
+    let mut payload: serde_json::Value = serde_json::from_str(catalog::STARTER).unwrap();
+    payload["markers"]
+        .as_array_mut()
+        .unwrap()
+        .push(serde_json::json!([
+            "rs90000001",
+            "GWAS-Lokus",
+            "1",
+            12000,
+            14000,
+            "ACGT"
+        ]));
+    payload["traits"]
+        .as_array_mut()
+        .unwrap()
+        .push(serde_json::json!({
+            "id": "gwas-synthetic",
+            "section": "09.1",
+            "title": "Synthetischer Test",
+            "markers": ["rs90000001"],
+            "method": "gwas",
+            "evidence": "Test",
+            "summary": "Test",
+            "limits": "Test",
+            "population": "Test",
+            "sources": [["Test", "https://example.org"]],
+            "study": {
+                "reported_trait": "Synthetischer Test",
+                "accession": "GCST000001",
+                "p_value": "2E-28539",
+                "effect": "1.4",
+                "effect_context": "OR"
+            }
+        }));
+    let payload = payload.to_string();
     let manifest = serde_json::json!({"schema":1,"version":"1.0.0","origin":"Test",
         "license":"Apache-2.0","builds":["GRCh37","GRCh38"],"sha256":format!("{:x}",Sha256::digest(payload.as_bytes()))}).to_string();
     let signature = hex(&key.sign(manifest.as_bytes()).to_bytes());
@@ -154,7 +188,24 @@ fn signed_catalog_rejects_tampering() {
     let mut package =
         serde_json::json!({"manifest":manifest,"payload":payload,"signature":signature});
     fs::write(&path, package.to_string()).unwrap();
-    assert_eq!(catalog::package(&path, &pubkey).unwrap().version, "1.0.0");
+    let verified = catalog::package(&path, &pubkey).unwrap();
+    assert_eq!(verified.version, "1.0.0");
+    for (row, matched) in [
+        ("rs90000001,1,12000,AG", true),
+        ("rs90000001,1,12001,AG", false),
+        (",1,12000,AG", false),
+        ("rs90000001,1,12000,--", false),
+    ] {
+        let input = format!("{COLUMNS}{row}\n");
+        let data = import::parse(input.as_bytes(), &AtomicBool::new(false)).unwrap();
+        let (total, findings) = analysis::evaluate_with_coverage(&data, &verified).unwrap();
+        assert_eq!(total, 1);
+        let hit = findings.iter().find(|finding| finding.item.study.is_some());
+        assert_eq!(
+            hit.map(|finding| &finding.status),
+            matched.then_some(&Status::Research)
+        );
+    }
     package["payload"] = serde_json::Value::String(format!("{payload} "));
     fs::write(&path, package.to_string()).unwrap();
     assert!(catalog::package(&path, &pubkey).is_err());

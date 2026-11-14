@@ -10,6 +10,8 @@ import re
 import subprocess
 import tempfile
 
+from gwas_catalog import add_associations
+
 ROOT = Path(__file__).resolve().parents[1]
 KNOWN_SCORES = {
     "PGS000001": ("Brustkrebs · PRS77", "Europäische Validierungskohorte", 77),
@@ -58,6 +60,9 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--input", type=Path, default=ROOT / "catalog/starter.json")
     parser.add_argument("--add-pgs", metavar="HARMONIZED_TSV", type=Path)
+    parser.add_argument("--add-gwas", metavar="EBI_TSV_OR_ZIP", type=Path)
+    parser.add_argument("--gwas-limit-per-topic", type=int, default=100)
+    parser.add_argument("--hg38-to-hg19-chain", type=Path)
     parser.add_argument("--version", required=True)
     parser.add_argument("--origin", required=True)
     parser.add_argument("--license", required=True)
@@ -71,6 +76,14 @@ def main():
     data["version"] = args.version
     if args.add_pgs:
         data.setdefault("scores", []).append(load_pgs(args.add_pgs))
+    if not 1 <= args.gwas_limit_per_topic <= 300:
+        parser.error("Je GWAS-Thema sind 1 bis 300 Katalogeinträge möglich")
+    if args.hg38_to_hg19_chain and not args.add_gwas:
+        parser.error("Die Chain-Datei benötigt --add-gwas")
+    if args.add_gwas:
+        if not args.origin.strip() or not args.license.strip():
+            parser.error("GWAS-Pakete benötigen Herkunft und Lizenz")
+        print(f"{add_associations(data, args.add_gwas, args.gwas_limit_per_topic, args.hg38_to_hg19_chain)} GWAS-Studieneinträge")
     body = compact(data)
     manifest = compact({"schema": 1, "version": args.version, "origin": args.origin, "license": args.license,
                         "builds": ["GRCh37", "GRCh38"], "sha256": hashlib.sha256(body.encode()).hexdigest()})
@@ -82,8 +95,11 @@ def main():
     prefix = bytes.fromhex("302a300506032b6570032100")
     if not public.startswith(prefix) or len(public) != len(prefix) + 32 or len(signature) != 64:
         raise ValueError("Ed25519 ist für dieses Paket erforderlich")
+    package = compact({"manifest": manifest, "payload": body, "signature": signature.hex()})
+    if len(package.encode("utf-8")) > 32 * 1024 * 1024:
+        parser.error("Das Paket überschreitet das App-Limit. Wähle weniger Einträge pro Thema.")
     with args.output.open("x", encoding="utf-8") as output:
-        output.write(compact({"manifest": manifest, "payload": body, "signature": signature.hex()}))
+        output.write(package)
     print(f"Öffentlicher Schlüssel für Roots Local: {public[len(prefix):].hex()}")
 
 if __name__ == "__main__":

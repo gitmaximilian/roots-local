@@ -31,6 +31,7 @@ pub struct Model {
     pub example: bool,
     pub scores: Vec<crate::pgs::Result>,
     pub provenance: Option<crate::catalog::Manifest>,
+    pub gwas_total: usize,
 }
 #[derive(Serialize)]
 struct Document {
@@ -62,7 +63,21 @@ impl Model {
             example,
             scores: Vec::new(),
             provenance: None,
+            gwas_total: 0,
         }
+    }
+    pub fn apply_catalog(
+        &mut self,
+        data: &crate::import::Import,
+        catalog: &crate::catalog::Catalog,
+    ) -> Result<(), String> {
+        let (gwas_total, findings) = crate::analysis::evaluate_with_coverage(data, catalog)?;
+        self.findings = findings;
+        self.gwas_total = gwas_total;
+        self.catalog_version = catalog.version.clone();
+        self.scores = crate::pgs::calculate(data, &catalog.scores);
+        self.provenance = catalog.provenance.clone();
+        Ok(())
     }
 }
 

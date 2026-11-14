@@ -85,11 +85,13 @@ fn check(
     data: &Import,
     at_pos: &HashMap<(&str, u32), Vec<&Variant>>,
     ids: &HashSet<&str>,
+    require_identifier: bool,
 ) -> Check {
     let Marker(id, gene, chromosome, old, new, allowed) = marker;
     let position = data
         .build
-        .map(|build| if build == Build::Grch37 { *old } else { *new });
+        .map(|build| if build == Build::Grch37 { *old } else { *new })
+        .filter(|position| *position > 0);
     let mut check = Check {
         id: id.clone(),
         gene: gene.clone(),
@@ -98,6 +100,9 @@ fn check(
         status: "Referenzgenom unbekannt",
     };
     let Some(position) = position else {
+        if data.build.is_some() {
+            check.status = "Keine Zuordnung zu diesem Referenzgenom";
+        }
         return check;
     };
     if data.strand == "Rückwärtsstrang" {
@@ -111,6 +116,8 @@ fn check(
             .any(|row| row.alleles != first.alleles || (row.id.starts_with("rs") && row.id != *id))
         {
             check.status = "Widersprüchliche Einträge";
+        } else if require_identifier && !rows.iter().any(|row| row.id == *id) {
+            check.status = "Genomort ohne bestätigte rsID";
         } else if let Some(alleles) = &first.alleles {
             if alleles.len() == 2 && alleles.bytes().all(|c| allowed.as_bytes().contains(&c)) {
                 check.call = Some(alleles.to_owned());
@@ -156,6 +163,13 @@ fn interpretation(item: &Trait, checks: &[Check]) -> Option<String> {
 }
 
 pub fn evaluate(data: &Import, catalog: &Catalog) -> Result<Vec<Finding>, String> {
+    Ok(evaluate_with_coverage(data, catalog)?.1)
+}
+
+pub fn evaluate_with_coverage(
+    data: &Import,
+    catalog: &Catalog,
+) -> Result<(usize, Vec<Finding>), String> {
     let markers = catalog.markers()?;
     let by_id: HashMap<_, _> = markers
         .iter()
@@ -167,6 +181,7 @@ pub fn evaluate(data: &Import, catalog: &Catalog) -> Result<Vec<Finding>, String
             data.build
                 .map(|b| (m.2.as_str(), if b == Build::Grch37 { m.3 } else { m.4 }))
         })
+        .filter(|(_, position)| *position > 0)
         .collect();
     let mut at_pos = HashMap::<_, Vec<_>>::new();
     let mut ids = HashSet::new();
@@ -180,13 +195,31 @@ pub fn evaluate(data: &Import, catalog: &Catalog) -> Result<Vec<Finding>, String
         }
     }
     let mut findings = Vec::new();
+    let mut gwas_total = 0;
     for item in catalog.traits()? {
         let checks: Vec<_> = item
             .markers
             .iter()
-            .map(|id| check(by_id[id.as_str()], data, &at_pos, &ids))
+            .map(|id| {
+                check(
+                    by_id[id.as_str()],
+                    data,
+                    &at_pos,
+                    &ids,
+                    item.method == Method::Gwas,
+                )
+            })
             .collect();
-        let (status, message) = if checks.iter().any(|c| c.call.is_none()) {
+        let complete = checks.iter().all(|c| c.call.is_some());
+        gwas_total += usize::from(item.method == Method::Gwas);
+        // Large catalogs contribute observed loci to the report. Existing curated
+        // rules still show missing markers explicitly.
+        if item.method == Method::Gwas && !complete {
+            continue;
+        }
+        let (status, message) = if item.method == Method::Gwas {
+            (Status::Research, "rsID und Koordinate stimmen mit dem Katalog überein. Die Effektallel-Zuordnung wurde nicht geprüft.".into())
+        } else if !complete {
             (
                 Status::Missing,
                 "Mindestens eine benötigte Position ist für diese Regel nicht auswertbar.".into(),
@@ -205,5 +238,5 @@ pub fn evaluate(data: &Import, catalog: &Catalog) -> Result<Vec<Finding>, String
             checks,
         });
     }
-    Ok(findings)
+    Ok((gwas_total, findings))
 }

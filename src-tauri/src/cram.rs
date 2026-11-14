@@ -82,6 +82,9 @@ pub fn coverage(
             } else {
                 marker.4
             } as usize;
+            if pos == 0 {
+                continue;
+            }
             sites.push((
                 index,
                 pos,

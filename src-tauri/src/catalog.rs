@@ -85,13 +85,51 @@ pub struct Trait {
     pub sources: Vec<(String, String)>,
     #[serde(default)]
     pub cross: Vec<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub study: Option<Study>,
 }
+#[derive(Clone, Debug, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct Study {
+    pub reported_trait: String,
+    pub accession: String,
+    pub p_value: String,
+    pub effect: String,
+    pub effect_context: String,
+}
+impl Study {
+    fn valid(&self) -> bool {
+        !self.reported_trait.trim().is_empty()
+            && self.reported_trait.chars().count() <= 250
+            && self.accession.strip_prefix("GCST").is_some_and(|n| {
+                (6..=12).contains(&n.len()) && n.bytes().all(|c| c.is_ascii_digit())
+            })
+            && self.p_value.len() <= 32
+            && self.p_value.parse::<f64>().is_ok_and(|p| {
+                // The catalog can report positive p-values below f64's range.
+                (p > 0.0 && p <= 5e-8)
+                    || (p == 0.0
+                        && self.p_value.split_once(['e', 'E']).is_some_and(
+                            |(mantissa, exponent)| {
+                                mantissa
+                                    .parse::<f64>()
+                                    .is_ok_and(|v| v.is_finite() && v > 0.0)
+                                    && exponent.parse::<i32>().is_ok_and(|v| v < 0)
+                            },
+                        ))
+            })
+            && self.effect.chars().count() <= 40
+            && self.effect_context.chars().count() <= 160
+    }
+}
+
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
 #[serde(rename_all = "snake_case")]
 pub enum Method {
     Single,
     Bitter,
     Research,
+    Gwas,
 }
 #[derive(Debug, Deserialize, Serialize)]
 #[serde(deny_unknown_fields)]
@@ -161,14 +199,23 @@ impl Catalog {
         {
             return Err("Katalogversion oder IDs sind ungültig.".into());
         }
+        let research_loci = payload
+            .markers
+            .iter()
+            .filter(|marker| marker.5 == "ACGT")
+            .map(|marker| marker.0.as_str())
+            .collect::<HashSet<_>>();
         for Marker(id, gene, chr, old, new, alleles) in &payload.markers {
             if !id
                 .strip_prefix("rs")
                 .is_some_and(|n| !n.is_empty() && n.bytes().all(|c| c.is_ascii_digit()))
                 || crate::import::chromosome(chr).as_ref() != Some(chr)
-                || *old == 0
+                || (*old == 0 && alleles != "ACGT")
                 || *new == 0
-                || !matches!(alleles.as_str(), "AC" | "AG" | "AT" | "CG" | "CT" | "GT")
+                || !matches!(
+                    alleles.as_str(),
+                    "AC" | "AG" | "AT" | "CG" | "CT" | "GT" | "ACGT"
+                )
                 || gene.is_empty()
                 || gene.len() > 150
             {
@@ -186,6 +233,9 @@ impl Catalog {
                     item.id == "bitter" && item.markers == ["rs713598", "rs1726866", "rs10246939"]
                 }
                 Method::Research => true,
+                Method::Gwas => {
+                    item.markers.len() == 1 && item.study.as_ref().is_some_and(Study::valid)
+                }
             };
             if !valid_id(&item.id)
                 || !sections.contains(&item.section)
@@ -203,6 +253,12 @@ impl Catalog {
                         && url.starts_with("https://")
                         && !url.contains(char::is_whitespace)
                 })
+                || (item.method != Method::Gwas
+                    && (item.study.is_some()
+                        || item
+                            .markers
+                            .iter()
+                            .any(|marker| research_loci.contains(marker.as_str()))))
                 || !signature_ok
             {
                 return Err("Eine Merkmalsregel hat ein ungültiges Schema.".into());

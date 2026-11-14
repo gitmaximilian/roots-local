@@ -51,6 +51,13 @@ type Finding = {
   checks: MarkerCheck[];
   sources: [string, string][];
   cross: string[];
+  study?: {
+    reported_trait: string;
+    accession: string;
+    p_value: string;
+    effect: string;
+    effect_context: string;
+  };
 };
 type Report = {
   scores: {
@@ -63,6 +70,7 @@ type Report = {
     raw: number | null;
   }[];
   catalog_version: string;
+  gwas_total: number;
   example: boolean;
   chapters: Chapter[];
   findings: Finding[];
@@ -167,6 +175,22 @@ function FindingDetail({ finding }: { finding: Finding }) {
           <dd>{finding.evidence}</dd>
           <dt>Studienpopulation</dt>
           <dd>{finding.population}</dd>
+          {finding.study && (
+            <>
+              <dt>Merkmal in der Studie</dt>
+              <dd>{finding.study.reported_trait}</dd>
+              <dt>Signifikanz in der Studie</dt>
+              <dd>p = {finding.study.p_value}</dd>
+              {finding.study.effect && (
+                <>
+                  <dt>Berichteter Effekt (OR oder Beta)</dt>
+                  <dd>
+                    {finding.study.effect} {finding.study.effect_context}
+                  </dd>
+                </>
+              )}
+            </>
+          )}
           <dt>Grenzen</dt>
           <dd>{finding.limits}</dd>
         </dl>
@@ -217,6 +241,36 @@ function FindingDetail({ finding }: { finding: Finding }) {
     </details>
   );
 }
+function FindingList({
+  findings,
+  anchor,
+}: {
+  findings: Finding[];
+  anchor: string;
+}) {
+  const [limit, setLimit] = useState(30);
+  const anchorIndex = findings.findIndex((finding) => finding.id === anchor);
+  const shown = Math.max(limit, anchorIndex + 1);
+  useEffect(() => {
+    if (anchorIndex >= limit) setLimit(anchorIndex + 1);
+  }, [anchorIndex, limit]);
+  return (
+    <>
+      {findings.slice(0, shown).map((finding) => (
+        <FindingDetail key={finding.id} finding={finding} />
+      ))}
+      {shown < findings.length && (
+        <button
+          className="text-button more-findings"
+          onClick={() => setLimit(shown + 30)}
+        >
+          Weitere Einträge anzeigen ({number.format(findings.length - shown)})
+        </button>
+      )}
+    </>
+  );
+}
+
 function VariantRegister({ active }: { active: boolean }) {
   const [query, setQuery] = useState("");
   const [offset, setOffset] = useState(0);
@@ -371,6 +425,8 @@ function App() {
           f.title,
           f.summary,
           f.section,
+          f.study?.reported_trait ?? "",
+          f.study?.accession ?? "",
           ...f.checks.flatMap((c) => [c.gene, c.id]),
         ].some((v) => v.toLowerCase().includes(search))),
   );
@@ -708,9 +764,11 @@ function App() {
                     <>
                       <h2>Suchergebnisse</h2>
                       {visible.length ? (
-                        visible.map((f) => (
-                          <FindingDetail key={f.id} finding={f} />
-                        ))
+                        <FindingList
+                          key={search + filter}
+                          findings={visible}
+                          anchor={anchor}
+                        />
                       ) : (
                         <p>Keine passenden Merkmale gefunden.</p>
                       )}
@@ -754,9 +812,10 @@ function App() {
                                     </small>
                                   </div>
                                 ))}
-                              {findings.map((f) => (
-                                <FindingDetail key={f.id} finding={f} />
-                              ))}
+                              <FindingList
+                                findings={findings}
+                                anchor={anchor}
+                              />
                               {cross.map((f) => (
                                 <button
                                   className="text-button"
@@ -999,6 +1058,16 @@ function App() {
                   >
                     Paket öffnen
                   </button>
+                  {model && model.gwas_total > 0 && (
+                    <p>
+                      {number.format(
+                        model.findings.filter((finding) => finding.study)
+                          .length,
+                      )}{" "}
+                      passende Studienassoziationen von{" "}
+                      {number.format(model.gwas_total)} GWAS-Katalogeinträgen.
+                    </p>
+                  )}
                 </section>
                 {model && (
                   <>

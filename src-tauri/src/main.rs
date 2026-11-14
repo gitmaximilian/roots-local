@@ -117,16 +117,11 @@ fn make_model(data: &Import, catalog: Option<&Catalog>, example: bool) -> Result
     let mut model = Model::new(
         analysis::summary(data),
         active.version.clone(),
-        analysis::evaluate(data, active)?,
+        Vec::new(),
         example,
     );
-    apply_research(&mut model, data, active);
+    model.apply_catalog(data, active)?;
     Ok(model)
-}
-
-fn apply_research(model: &mut Model, data: &Import, catalog: &Catalog) {
-    model.scores = roots_local::pgs::calculate(data, &catalog.scores);
-    model.provenance = catalog.provenance.clone();
 }
 
 #[tauri::command]
@@ -343,9 +338,7 @@ async fn load_catalog(
         let mut state = workspace.session.lock().map_err(state_error)?;
         if let (Some(data), Some(model)) = (&state.imported, &state.model) {
             let mut fresh = model.clone();
-            fresh.findings = analysis::evaluate(data, &new_catalog)?;
-            fresh.catalog_version = new_catalog.version.clone();
-            apply_research(&mut fresh, data, &new_catalog);
+            fresh.apply_catalog(data, &new_catalog)?;
             fresh.sequence = None;
             state.model = Some(fresh);
         }

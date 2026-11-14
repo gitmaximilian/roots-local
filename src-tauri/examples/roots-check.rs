@@ -3,27 +3,37 @@ use std::{env, path::Path, sync::atomic::AtomicBool};
 
 fn run() -> Result<(), String> {
     let mut args = env::args_os().skip(1);
-    let [Some(input), Some(output), Some(typst), example] =
-        [args.next(), args.next(), args.next(), args.next()]
-    else {
-        return Err("Verwendung: roots-check <synthetische-oder-lokale-rohdatei> <report.pdf> <typst-binary>".into());
+    let [Some(input), Some(output), Some(typst)] = [args.next(), args.next(), args.next()] else {
+        return Err("Verwendung: roots-check <Rohdatei> <report.pdf> <typst> [--synthetic] [--catalog <Paket> <öffentlicher Schlüssel>]".into());
     };
-    if example
-        .as_deref()
-        .is_some_and(|value| value != "--synthetic")
-        || args.next().is_some()
-    {
-        return Err("Option: --synthetic für gekennzeichnete Beispieldaten.".into());
+    let mut example = false;
+    let mut catalog = None;
+    while let Some(option) = args.next() {
+        match option.to_str() {
+            Some("--synthetic") if !example => example = true,
+            Some("--catalog") if catalog.is_none() => {
+                let path = args.next().ok_or("Katalogdatei fehlt.")?;
+                let key = args
+                    .next()
+                    .and_then(|v| v.into_string().ok())
+                    .ok_or("Öffentlicher Katalogschlüssel fehlt.")?;
+                catalog = Some(roots_local::catalog::package(Path::new(&path), &key)?);
+            }
+            _ => return Err("Unbekannte oder doppelte Option.".into()),
+        }
     }
     let data = import::file(Path::new(&input), &AtomicBool::new(false))?;
-    let catalog = Catalog::starter()?;
-    let summary = analysis::summary(&data);
-    let model = report::Model::new(
-        summary,
+    let catalog = match catalog {
+        Some(catalog) => catalog,
+        None => Catalog::starter()?,
+    };
+    let mut model = report::Model::new(
+        analysis::summary(&data),
         catalog.version.clone(),
-        analysis::evaluate(&data, &catalog)?,
-        example.is_some(),
+        Vec::new(),
+        example,
     );
+    model.apply_catalog(&data, &catalog)?;
     report::export(
         &model,
         report::Options::default(),
@@ -31,7 +41,7 @@ fn run() -> Result<(), String> {
         Path::new(&output),
     )?;
     println!(
-        "{} Kapitel · {} Unterkapitel · {} Merkmale · {} Genotypzeilen",
+        "{} Kapitel · {} Unterkapitel · {} Ergebniseinträge · {} Genotypzeilen",
         model.chapters.len(),
         model
             .chapters
@@ -41,6 +51,17 @@ fn run() -> Result<(), String> {
         model.findings.len(),
         model.summary.rows
     );
+    if model.gwas_total > 0 {
+        let hits = model
+            .findings
+            .iter()
+            .filter(|f| f.item.study.is_some())
+            .count();
+        println!(
+            "{hits} passende GWAS-Einträge von {} Katalogassoziationen",
+            model.gwas_total
+        );
+    }
     Ok(())
 }
 

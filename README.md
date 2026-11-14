@@ -31,6 +31,7 @@ Für ein macOS-App-Bundle verwende `npm run tauri -- build --bundles app`. Das S
 - **Startkatalog.** Regeln zu Laktaseaktivität, Ohrenschmalztyp, Bitterwahrnehmung und ACTN3 sowie Forschungsbezüge zu ausgewählten weiteren Markern. Die App zeigt Datenqualität und wissenschaftliche Evidenz getrennt.
 - **Begleitdaten.** Manuell übernommene Herkunftsangaben, Match- und Segmenttabellen sowie ein Vergleich autosomaler Positionen mit einer angegebenen Eltern- oder Familiendatei. Der Vergleich liefert geteilte Allele.
 - **CRAM.** Liest ausgerichtete Reads mit einer passenden lokalen, indexierten FASTA. Zeigt die Abdeckung für Katalogpositionen. Die CRAM-Auswertung liefert derzeit keine Genotypen oder Haplogruppen.
+- **GWAS-Studien.** Optionale lokal gebaute Kataloge verknüpfen passende Genomorte mit Studien, Stichproben und berichteten Effekten.
 - **Fortgeschrittene Forschung.** Ein separat importiertes, signiertes Katalogpaket kann additive PGS enthalten. Für einen Rohscore ist hier die vollständige, passende Abdeckung nötig. Die App führt keine Kalibrierung auf absolutes Krankheitsrisiko durch.
 - **PDF-Export.** Voll- oder Kurzreport, klickbare Inhaltsverzeichnisse und Quellen. Der Vollreport weist auch Kapitel ohne verfügbare Merkmalsregel aus. Name, konkrete Genotypen und Namen von DNA-Matches sind optional.
 

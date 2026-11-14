@@ -36,6 +36,15 @@
       Studienpopulation · #finding.population \
       #finding.limits])
     #parbreak()
+    #if "study" in finding [
+      #caption([Merkmal in der Studie · #finding.study.reported_trait \
+        Signifikanz in der Studie · p = #finding.study.p_value])
+      #if finding.study.effect != "" [
+        #linebreak()
+        #caption([Berichteter Effekt (OR oder Beta) · #finding.study.effect #finding.study.effect_context])
+      ]
+      #parbreak()
+    ]
     #for check in finding.checks {
       caption([#check.id · #check.gene#if check.coordinate != none [ · #check.coordinate] · #check.status#if check.call != none [ · #check.call]])
       linebreak()
@@ -80,6 +89,10 @@
 #v(5mm)
 Der Bericht wertet die importierten Positionen anhand des dokumentierten Referenzkatalogs aus. Die Quellen sind bei den Befunden verlinkt.
 
+#if report.gwas_total > 0 [
+  GWAS-Katalog · #report.findings.filter(f => "study" in f).len() passende Studienassoziationen von #report.gwas_total Katalogeinträgen.
+  #parbreak()
+]
 #if report.summary.skipped > 0 [#report.summary.skipped ungültige Rohdatenzeilen wurden übersprungen.]
 #if report.summary.duplicates > 0 [#report.summary.duplicates zusätzliche Zeilen lagen an bereits erfassten Positionen.]
 #if report.family != none [
@@ -163,6 +176,7 @@ Der Bericht wertet die importierten Positionen anhand des dokumentierten Referen
 #if report.provenance != none [Referenzkatalog · #report.provenance.origin · #report.provenance.license. #parbreak()]
 - Analysiert werden nur die im Referenzkatalog beschriebenen Positionen. Zuordnung anhand von Referenzbuild, Chromosom, Koordinate und unterstützten Allelen.
 - Fehlende und widersprüchliche Positionen bleiben offen. Die Messmethode einzelner Genotypen ist ohne entsprechende Daten im Export unbekannt.
+- GWAS-Studienbezüge erscheinen für übereinstimmende rsIDs und Koordinaten. Der Abgleich berücksichtigt keine Effektallele. Der Bericht weist fehlende Marker bei den kuratierten Einzelregeln aus.
 - Studienbezüge beschreiben veröffentlichte Zusammenhänge. Medizinisch relevante Consumer-Befunde benötigen klinische Bestätigung.
 - Bei ausgeschalteter Genotypanzeige bleiben Aussagen im Report erhalten. Sie können indirekt Hinweise auf Varianten enthalten.
 
