@@ -34,3 +34,6 @@ src-tauri/gen/
 __pycache__/
 
 tmp/
+output/
+*.pem
+*.rootscat

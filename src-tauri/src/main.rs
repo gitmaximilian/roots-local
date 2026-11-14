@@ -114,12 +114,19 @@ fn make_model(data: &Import, catalog: Option<&Catalog>, example: bool) -> Result
         starter = Catalog::starter()?;
         &starter
     };
-    Ok(Model::new(
+    let mut model = Model::new(
         analysis::summary(data),
         active.version.clone(),
         analysis::evaluate(data, active)?,
         example,
-    ))
+    );
+    apply_research(&mut model, data, active);
+    Ok(model)
+}
+
+fn apply_research(model: &mut Model, data: &Import, catalog: &Catalog) {
+    model.scores = roots_local::pgs::calculate(data, &catalog.scores);
+    model.provenance = catalog.provenance.clone();
 }
 
 #[tauri::command]
@@ -162,34 +169,44 @@ struct VariantPage {
     rows: Vec<import::Variant>,
 }
 #[tauri::command]
-fn variants(
+async fn variants(
     workspace: State<'_, Workspace>,
     query: String,
     offset: usize,
 ) -> Result<VariantPage, String> {
-    let state = workspace.session.lock().map_err(state_error)?;
-    let query = query.trim().to_ascii_lowercase();
-    let data = state
-        .imported
-        .as_ref()
-        .ok_or("Bitte zuerst eine DNA-Datei importieren.")?;
-    let mut total = 0usize;
-    let mut rows = Vec::new();
-    for row in &data.rows {
-        if query.is_empty()
-            || row.id.to_ascii_lowercase().contains(&query)
-            || query.split_once(':').is_some_and(|(chr, pos)| {
-                row.chromosome.eq_ignore_ascii_case(chr)
-                    && row.position.to_string().starts_with(pos)
-            })
-        {
-            if total >= offset && rows.len() < 50 {
-                rows.push(row.clone());
-            }
-            total += 1;
+    let workspace = workspace.inner().clone();
+    background(move || {
+        let state = workspace.session.lock().map_err(state_error)?;
+        let query = query.trim().to_ascii_lowercase();
+        let data = state
+            .imported
+            .as_ref()
+            .ok_or("Bitte zuerst eine DNA-Datei importieren.")?;
+        if query.is_empty() {
+            return Ok(VariantPage {
+                total: data.rows.len(),
+                rows: data.rows.iter().skip(offset).take(50).cloned().collect(),
+            });
         }
-    }
-    Ok(VariantPage { total, rows })
+        let mut total = 0usize;
+        let mut rows = Vec::new();
+        let coordinate = query.split_once(':');
+        for row in &data.rows {
+            if row.id.to_ascii_lowercase().contains(&query)
+                || coordinate.is_some_and(|(chr, pos)| {
+                    row.chromosome.eq_ignore_ascii_case(chr)
+                        && row.position.to_string().starts_with(pos)
+                })
+            {
+                if total >= offset && rows.len() < 50 {
+                    rows.push(row.clone());
+                }
+                total += 1;
+            }
+        }
+        Ok(VariantPage { total, rows })
+    })
+    .await
 }
 
 #[tauri::command]
@@ -328,6 +345,7 @@ async fn load_catalog(
             let mut fresh = model.clone();
             fresh.findings = analysis::evaluate(data, &new_catalog)?;
             fresh.catalog_version = new_catalog.version.clone();
+            apply_research(&mut fresh, data, &new_catalog);
             fresh.sequence = None;
             state.model = Some(fresh);
         }

@@ -39,7 +39,7 @@ fn full_taxonomy_and_four_reviewed_interpretations() {
             .iter()
             .filter(|x| x.status == Status::Research)
             .count(),
-        7
+        9
     );
 }
 
@@ -186,4 +186,62 @@ fn optional_pdf_full_and_short() {
     .unwrap();
     assert!(full.starts_with(b"%PDF") && short.starts_with(b"%PDF"));
     assert!(full.len() > short.len());
+}
+
+#[test]
+fn additive_score_requires_full_matching_build_and_alleles() {
+    use roots_local::pgs::{calculate, Score, Term};
+    let model = Score {
+        id: "synthetic".into(),
+        title: "Synthetic model".into(),
+        build: import::Build::Grch37,
+        population: "Synthetic".into(),
+        source: "https://example.org/test".into(),
+        terms: vec![
+            Term {
+                chromosome: "2".into(),
+                position: 136608646,
+                effect: 'A',
+                other: 'G',
+                weight: 0.25,
+            },
+            Term {
+                chromosome: "16".into(),
+                position: 48258198,
+                effect: 'T',
+                other: 'C',
+                weight: 0.5,
+            },
+        ],
+    };
+    let input = import::parse(SAMPLE, &AtomicBool::new(false)).unwrap();
+    let result = calculate(&input, std::slice::from_ref(&model));
+    assert_eq!(result[0].raw, Some(1.25));
+    let malformed = format!("{COLUMNS}rs4988235,2,136608646,AG\nrs17822931,16,48258198,AA\n");
+    let malformed = import::parse(malformed.as_bytes(), &AtomicBool::new(false)).unwrap();
+    let result = calculate(&malformed, std::slice::from_ref(&model));
+    assert_eq!((result[0].matched, result[0].raw), (1, None));
+
+    if let Some(typst) = std::env::var_os("ROOTS_TEST_TYPST") {
+        let catalog = Catalog::starter().unwrap();
+        let mut pdf = report::Model::new(
+            analysis::summary(&input),
+            catalog.version.clone(),
+            analysis::evaluate(&input, &catalog).unwrap(),
+            true,
+        );
+        pdf.scores = calculate(&input, &[model]);
+        for short in [false, true] {
+            let data = report::render(
+                &pdf,
+                report::Options {
+                    short,
+                    ..Default::default()
+                },
+                Path::new(&typst),
+            )
+            .unwrap();
+            assert!(data.starts_with(b"%PDF"));
+        }
+    }
 }

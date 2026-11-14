@@ -697,3 +697,10 @@ td small {
     padding-right: 10px;
   }
 }
+.score {
+  border: 1px solid var(--line);
+  padding: 10px;
+  border-radius: 8px;
+  margin-top: 10px;
+  overflow-wrap: anywhere;
+}

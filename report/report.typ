@@ -102,7 +102,7 @@ Der Bericht wertet die importierten Positionen anhand des dokumentierten Referen
 #for chapter in report.chapters {
   let chapter-findings = report.findings.filter(f => f.section.split(".").first() == chapter.id)
   let has-import = (chapter.id == "01" and report.external.origins.len() > 0) or (chapter.id == "02" and report.external.matches.len() + report.external.segments.len() > 0)
-  if not report.options.short or has-import or chapter-findings.any(f => f.status != "missing") {
+  if not report.options.short or has-import or (chapter.id == "14" and report.scores.len() > 0) or chapter-findings.any(f => f.status != "missing") {
     if not report.options.short { pagebreak(weak: true) }
     heading(level: 1, [#chapter.id · #chapter.title])
     if chapter.id == "01" and report.external.origins.len() > 0 {
@@ -126,11 +126,20 @@ Der Bericht wertet die importierten Positionen anhand des dokumentierten Referen
     for section in chapter.sections {
       let own = chapter-findings.filter(f => f.section == section.id and (not report.options.short or f.status != "missing"))
       let cross = report.findings.filter(f => section.id in f.cross and (not report.options.short or f.status != "missing"))
-      if not report.options.short or own.len() > 0 {
+      if not report.options.short or own.len() > 0 or (section.id == "14.4" and report.scores.len() > 0) {
         heading(level: 2, [#section.id · #section.title])
         if not report.options.short { caption(section.scope); parbreak() }
         if own.len() == 0 and cross.len() == 0 and not report.options.short {
-          if section.id == "03.1" {
+          if section.id == "14.4" and report.scores.len() > 0 {
+            for score in report.scores [
+              *#score.title* · #score.id \
+              #score.matched / #score.total Modellpositionen.
+              #if score.raw != none [Rohscore #str(calc.round(score.raw, digits: 5)).] else [Kein Rohscore bei unvollständiger Abdeckung.]
+              Studienpopulation · #score.population. #link(score.source, [Quelle]). \
+              Forschungswert ohne Perzentil oder persönliche Erkrankungswahrscheinlichkeit.
+              #parbreak()
+            ]
+          } else if section.id == "03.1" {
             [#report.summary.rows Zeilen aus #report.summary.format · Referenzgenom #(if report.summary.build == none { "unbekannt" } else { report.summary.build }).]
           } else if section.id == "03.4" {
             link(label("method"), [Siehe Methodik und Abdeckung.])
@@ -151,6 +160,7 @@ Der Bericht wertet die importierten Positionen anhand des dokumentierten Referen
 
 #pagebreak(weak: true)
 = Methodik & Abdeckung <method>
+#if report.provenance != none [Referenzkatalog · #report.provenance.origin · #report.provenance.license. #parbreak()]
 - Analysiert werden nur die im Referenzkatalog beschriebenen Positionen. Zuordnung anhand von Referenzbuild, Chromosom, Koordinate und unterstützten Allelen.
 - Fehlende und widersprüchliche Positionen bleiben offen. Die Messmethode einzelner Genotypen ist ohne entsprechende Daten im Export unbekannt.
 - Studienbezüge beschreiben veröffentlichte Zusammenhänge. Medizinisch relevante Consumer-Befunde benötigen klinische Bestätigung.

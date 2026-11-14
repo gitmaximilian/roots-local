@@ -99,8 +99,10 @@ pub struct Payload {
     pub version: String,
     pub markers: Vec<Marker>,
     pub traits: Vec<Trait>,
+    #[serde(default)]
+    pub scores: Vec<crate::pgs::Score>,
 }
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Clone, Debug, Deserialize, Serialize)]
 #[serde(deny_unknown_fields)]
 pub struct Manifest {
     pub schema: u8,
@@ -114,6 +116,8 @@ pub struct Manifest {
 pub struct Catalog {
     pub version: String,
     db: Connection,
+    pub scores: Vec<crate::pgs::Score>,
+    pub provenance: Option<Manifest>,
 }
 impl Catalog {
     pub fn starter() -> Result<Self, String> {
@@ -216,6 +220,17 @@ impl Catalog {
                 }
             }
         }
+        if !payload.scores.iter().all(crate::pgs::Score::valid)
+            || payload
+                .scores
+                .iter()
+                .map(|s| &s.id)
+                .collect::<HashSet<_>>()
+                .len()
+                != payload.scores.len()
+        {
+            return Err("Ein polygenetisches Forschungsmodell ist ungültig.".into());
+        }
         let mut db = Connection::open_in_memory().map_err(sql_error)?;
         db.execute_batch("CREATE TABLE marker (id TEXT PRIMARY KEY, gene TEXT NOT NULL, chr TEXT NOT NULL, b37 INTEGER NOT NULL, b38 INTEGER NOT NULL, alleles TEXT NOT NULL);
             CREATE INDEX marker_b37 ON marker(chr, b37);
@@ -247,6 +262,8 @@ impl Catalog {
         Ok(Self {
             version: payload.version,
             db,
+            scores: payload.scores,
+            provenance: None,
         })
     }
 
@@ -358,7 +375,9 @@ pub fn package(path: &Path, trusted_key: &str) -> Result<Catalog, String> {
     if payload.version != manifest.version {
         return Err("Die Katalogversionen stimmen nicht überein.".into());
     }
-    Catalog::from_payload(payload)
+    let mut catalog = Catalog::from_payload(payload)?;
+    catalog.provenance = Some(manifest);
+    Ok(catalog)
 }
 
 pub fn write_atomic(path: &Path, bytes: &[u8]) -> Result<(), String> {

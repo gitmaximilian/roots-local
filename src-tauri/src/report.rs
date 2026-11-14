@@ -29,6 +29,8 @@ pub struct Model {
     pub family: Option<Family>,
     pub sequence: Option<crate::cram::Coverage>,
     pub example: bool,
+    pub scores: Vec<crate::pgs::Result>,
+    pub provenance: Option<crate::catalog::Manifest>,
 }
 #[derive(Serialize)]
 struct Document {
@@ -58,6 +60,8 @@ impl Model {
             family: None,
             sequence: None,
             example,
+            scores: Vec::new(),
+            provenance: None,
         }
     }
 }
@@ -170,12 +174,6 @@ pub fn render(model: &Model, mut options: Options, typst: &Path) -> Result<Vec<u
         .output()
         .map_err(|_| "Das lokale PDF-Werkzeug konnte nicht gestartet werden.")?;
     if !result.status.success() {
-        #[cfg(debug_assertions)]
-        eprintln!(
-            "{}",
-            String::from_utf8_lossy(&result.stderr)
-                .replace(&directory.path().display().to_string(), "[temporär]")
-        );
         return Err("Der Report konnte nicht gerendert werden.".into());
     }
     fs::read(output).map_err(|_| "Das erzeugte PDF konnte nicht gelesen werden.".into())

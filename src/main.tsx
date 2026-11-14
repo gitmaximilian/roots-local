@@ -53,6 +53,15 @@ type Finding = {
   cross: string[];
 };
 type Report = {
+  scores: {
+    id: string;
+    title: string;
+    population: string;
+    source: string;
+    matched: number;
+    total: number;
+    raw: number | null;
+  }[];
   catalog_version: string;
   example: boolean;
   chapters: Chapter[];
@@ -724,6 +733,27 @@ function App() {
                                 {section.title}
                               </h3>
                               <p>{section.scope}</p>
+                              {section.id === "14.4" &&
+                                model?.scores.map((score) => (
+                                  <div className="score" key={score.id}>
+                                    <strong>{score.title}</strong>
+                                    <p>
+                                      {score.matched} / {score.total}{" "}
+                                      Modellpositionen ·{" "}
+                                      {score.raw === null
+                                        ? "Kein Rohscore"
+                                        : `Rohscore ${number.format(score.raw)}`}
+                                    </p>
+                                    <p>
+                                      Vergleichspopulation der Studie:{" "}
+                                      {score.population}. Forschungswert ohne
+                                      persönliches Risiko.
+                                    </p>
+                                    <small>
+                                      {score.id} · {score.source}
+                                    </small>
+                                  </div>
+                                ))}
                               {findings.map((f) => (
                                 <FindingDetail key={f.id} finding={f} />
                               ))}
