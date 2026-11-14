@@ -122,6 +122,14 @@ type Variant = {
   chromosome: string;
   position: number;
   alleles: string | null;
+  quality: VariantQuality;
+};
+type VariantQuality = "present" | "no_call" | "conflict";
+type VariantPage = {
+  total: number;
+  offset: number;
+  page_size: number;
+  rows: Variant[];
 };
 type Page = "home" | "chapters" | "variants" | "report" | "data";
 type Options = {
@@ -173,7 +181,16 @@ function Heading({
     </header>
   );
 }
-function FindingDetail({ finding }: { finding: Finding }) {
+type OpenVariant = (finding: Finding, marker: MarkerCheck) => void;
+type FindingLocation = Pick<Finding, "id" | "section">;
+
+function FindingDetail({
+  finding,
+  openVariant,
+}: {
+  finding: Finding;
+  openVariant: OpenVariant;
+}) {
   const [copied, setCopied] = useState<string>();
   return (
     <details className="finding" id={`finding-${finding.id}`}>
@@ -222,7 +239,13 @@ function FindingDetail({ finding }: { finding: Finding }) {
             {finding.checks.map((c) => (
               <tr key={c.id}>
                 <td>
-                  <span className="mono">{c.id}</span>
+                  <button
+                    className="text-button marker-link mono"
+                    aria-label={`${t("Rohdaten durchsuchen")}: ${c.id}`}
+                    onClick={() => openVariant(finding, c)}
+                  >
+                    {c.id} <ArrowRight size={13} />
+                  </button>
                   <small>{resultText(c.gene)}</small>
                 </td>
                 <td>{c.coordinate || "–"}</td>
@@ -259,9 +282,11 @@ function FindingDetail({ finding }: { finding: Finding }) {
 function FindingList({
   findings,
   anchor,
+  openVariant,
 }: {
   findings: Finding[];
   anchor: string;
+  openVariant: OpenVariant;
 }) {
   const [limit, setLimit] = useState(30);
   const anchorIndex = findings.findIndex((finding) => finding.id === anchor);
@@ -272,7 +297,11 @@ function FindingList({
   return (
     <>
       {findings.slice(0, shown).map((finding) => (
-        <FindingDetail key={finding.id} finding={finding} />
+        <FindingDetail
+          key={finding.id}
+          finding={finding}
+          openVariant={openVariant}
+        />
       ))}
       {shown < findings.length && (
         <button
@@ -287,96 +316,187 @@ function FindingList({
   );
 }
 
-function VariantRegister({ active }: { active: boolean }) {
-  const [query, setQuery] = useState("");
+function variantQualityLabel(quality: VariantQuality) {
+  return {
+    present: t("Genotyp vorhanden"),
+    no_call: t("Kein Genotyp"),
+    conflict: t("Widersprüchliche Werte"),
+  }[quality];
+}
+
+function VariantRegister({
+  initialQuery,
+  chromosomes,
+  onBack,
+}: {
+  initialQuery: string;
+  chromosomes: Report["summary"]["chromosomes"];
+  onBack?: () => void;
+}) {
+  const [query, setQuery] = useState(initialQuery);
+  const [chromosome, setChromosome] = useState("");
+  const [quality, setQuality] = useState<VariantQuality | "">("");
   const [offset, setOffset] = useState(0);
-  const [result, setResult] = useState<{ total: number; rows: Variant[] }>({
-    total: 0,
-    rows: [],
-  });
-  const [error, setError] = useState("");
+  const [result, setResult] = useState<VariantPage>();
+  const [error, setError] = useState<unknown>();
+  function resetPage() {
+    setResult(undefined);
+    setOffset(0);
+  }
   useEffect(() => {
-    if (!active) return;
     let mounted = true;
+    setError(undefined);
     const timer = setTimeout(() => {
-      invoke<typeof result>("variants", { query, offset })
+      invoke<VariantPage>("variants", {
+        query,
+        offset,
+        chromosome: chromosome || null,
+        quality: quality || null,
+      })
         .then((value) => {
-          if (mounted) {
-            setResult(value);
-            setError("");
-          }
+          if (mounted) setResult(value);
         })
-        .catch(() => {
-          if (mounted)
-            setError(t("Das Variantenregister konnte nicht geladen werden."));
+        .catch((reason: unknown) => {
+          if (mounted) {
+            setResult(undefined);
+            setError(typeof reason === "string" ? reason : new Error());
+          }
         });
     }, 120);
     return () => {
       mounted = false;
       clearTimeout(timer);
     };
-  }, [active, offset, query]);
+  }, [chromosome, offset, quality, query]);
+  const hasRows = result && result.rows.length > 0;
+  const loading = result?.offset !== offset && error === undefined;
   return (
     <>
+      {onBack && (
+        <button className="text-button variant-back" onClick={onBack}>
+          <ArrowLeft size={15} /> {t("Zurück zum Befund")}
+        </button>
+      )}
       <Heading
         title={t("Variantenregister")}
         description={t("Positionen und Genotypen aus der importierten Datei.")}
       />
-      <label className="search">
-        <Search size={17} />
-        <input
-          value={query}
+      <div className="filters variant-filters">
+        <label className="search">
+          <Search size={17} aria-hidden="true" />
+          <input
+            type="search"
+            value={query}
+            onChange={(e) => {
+              setQuery(e.target.value);
+              resetPage();
+            }}
+            aria-label={t("Varianten suchen")}
+            placeholder={t("rsID, Position oder Bereich")}
+          />
+        </label>
+        <select
+          aria-label={t("Chromosom")}
+          value={chromosome}
           onChange={(e) => {
-            setQuery(e.target.value);
-            setOffset(0);
+            setChromosome(e.target.value);
+            resetPage();
           }}
-          placeholder={t("Nach rsID oder Chromosom:Position suchen")}
-        />
-      </label>
-      {error && <p role="alert">{error}</p>}
-      <div className="panel">
-        <table>
-          <thead>
-            <tr>
-              <th>Marker</th>
-              <th>{t("Chromosom")}</th>
-              <th>Position</th>
-              <th>{t("Genotyp")}</th>
-            </tr>
-          </thead>
-          <tbody>
-            {result.rows.map((row, i) => (
-              <tr key={i}>
-                <td className="mono">{row.id || "–"}</td>
-                <td>{row.chromosome}</td>
-                <td>{number.format(row.position)}</td>
-                <td className="mono">{row.alleles || t("Fehlt")}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-        <div className="pagination">
-          <span>
-            {result.total ? offset + 1 : 0}–
-            {Math.min(offset + 50, result.total)}
-            {t("von")} {number.format(result.total)}
-          </span>
-          <button
-            onClick={() => setOffset(Math.max(offset - 50, 0))}
-            disabled={offset === 0}
-            aria-label={t("Vorige Seite")}
-          >
-            <ArrowLeft size={16} />
-          </button>
-          <button
-            onClick={() => setOffset(offset + 50)}
-            disabled={offset + 50 >= result.total}
-            aria-label={t("Nächste Seite")}
-          >
-            <ArrowRight size={16} />
-          </button>
-        </div>
+        >
+          <option value="">{t("Alle Chromosomen")}</option>
+          {chromosomes.map(([chr]) => (
+            <option key={chr} value={chr}>
+              {chr}
+            </option>
+          ))}
+        </select>
+        <select
+          aria-label={t("Datenqualität")}
+          value={quality}
+          onChange={(e) => {
+            setQuality(e.target.value as VariantQuality | "");
+            resetPage();
+          }}
+        >
+          <option value="">{t("Alle Genotypstatus")}</option>
+          {(["present", "no_call", "conflict"] as const).map((status) => (
+            <option key={status} value={status}>
+              {variantQualityLabel(status)}
+            </option>
+          ))}
+        </select>
       </div>
+      <p className="variant-hint">
+        {t("Beispiele: rs4988235, 2:136608646 oder chr2:136600000-136650000")}
+      </p>
+      {error !== undefined && (
+        <p role="alert">
+          {typeof error === "string"
+            ? resultText(error)
+            : t("Das Variantenregister konnte nicht geladen werden.")}
+        </p>
+      )}
+      {!result && error === undefined && (
+        <p role="status">{t("Varianten werden gesucht …")}</p>
+      )}
+      {result && !hasRows && (
+        <p role="status">{t("Keine passenden Rohzeilen gefunden.")}</p>
+      )}
+      {hasRows && (
+        <div className="panel variant-table" aria-busy={loading}>
+          <table>
+            <thead>
+              <tr>
+                <th>Marker</th>
+                <th>{t("Chromosom")}</th>
+                <th>Position</th>
+                <th>{t("Genotyp")}</th>
+                <th>{t("Datenqualität")}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {result.rows.map((row, i) => (
+                <tr key={i}>
+                  <td className="mono">{row.id || "–"}</td>
+                  <td>{row.chromosome}</td>
+                  <td>{number.format(row.position)}</td>
+                  <td className="mono">{row.alleles || t("Fehlt")}</td>
+                  <td>{variantQualityLabel(row.quality)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          <div className="pagination">
+            <span aria-live="polite">
+              {number.format(result.offset + 1)}–
+              {number.format(result.offset + result.rows.length)} {t("von")}{" "}
+              {number.format(result.total)}
+            </span>
+            <button
+              onClick={() =>
+                !loading && setOffset(result.offset - result.page_size)
+              }
+              aria-disabled={loading || result.offset === 0}
+              disabled={result.offset === 0}
+              aria-label={t("Vorige Seite")}
+            >
+              <ArrowLeft size={16} />
+            </button>
+            <button
+              onClick={() =>
+                !loading && setOffset(result.offset + result.page_size)
+              }
+              aria-disabled={
+                loading || result.offset + result.page_size >= result.total
+              }
+              disabled={result.offset + result.page_size >= result.total}
+              aria-label={t("Nächste Seite")}
+            >
+              <ArrowRight size={16} />
+            </button>
+          </div>
+        </div>
+      )}
     </>
   );
 }
@@ -411,12 +531,17 @@ function App() {
   });
   const [preview, setPreview] = useState<ArrayBuffer>();
   const [anchor, setAnchor] = useState("");
+  const [variantJump, setVariantJump] = useState<{
+    query: string;
+    finding: FindingLocation;
+  }>();
   useEffect(() => {
     if (!anchor || page !== "chapters") return;
     const element = document.getElementById(`finding-${anchor}`);
     if (element instanceof HTMLDetailsElement) {
       element.open = true;
       element.scrollIntoView({ block: "center" });
+      element.querySelector("summary")?.focus({ preventScroll: true });
       setAnchor("");
     }
   }, [anchor, page, activeChapter]);
@@ -464,9 +589,16 @@ function App() {
     setFilter("all");
     navigate("chapters");
   }
-  function openFinding(finding: Finding) {
+  function openFinding(finding: FindingLocation) {
     selectChapter(finding.section.split(".")[0]);
     setAnchor(finding.id);
+  }
+  function openVariant(finding: Finding, marker: MarkerCheck) {
+    setVariantJump({
+      query: marker.coordinate || marker.id,
+      finding: { id: finding.id, section: finding.section },
+    });
+    navigate("variants");
   }
 
   async function run<T>(
@@ -496,6 +628,7 @@ function App() {
       (result) => {
         if (result) {
           setReport(result);
+          setVariantJump(undefined);
           setOrigins("");
           setOptions({
             short: false,
@@ -558,7 +691,10 @@ function App() {
               key={id}
               className={page === id ? "selected" : ""}
               aria-current={page === id ? "page" : undefined}
-              onClick={() => navigate(id)}
+              onClick={() => {
+                if (id === "variants") setVariantJump(undefined);
+                navigate(id);
+              }}
               disabled={id === "variants" && !dataReady}
             >
               <Icon size={18} />
@@ -818,6 +954,7 @@ function App() {
                           key={search + filter}
                           findings={visible}
                           anchor={anchor}
+                          openVariant={openVariant}
                         />
                       ) : (
                         <p>{t("Keine passenden Merkmale gefunden.")}</p>
@@ -867,6 +1004,7 @@ function App() {
                               <FindingList
                                 findings={findings}
                                 anchor={anchor}
+                                openVariant={openVariant}
                               />
                               {cross.map((f) => (
                                 <button
@@ -895,7 +1033,20 @@ function App() {
               </div>
             </>
           )}
-          {page === "variants" && <VariantRegister active={dataReady} />}
+          {page === "variants" && model && (
+            <VariantRegister
+              key={variantJump?.query ?? ""}
+              initialQuery={variantJump?.query ?? ""}
+              chromosomes={model.summary.chromosomes}
+              onBack={
+                variantJump &&
+                (() => {
+                  setVariantJump(undefined);
+                  openFinding(variantJump.finding);
+                })
+              }
+            />
+          )}
           {page === "report" && (
             <>
               <Heading
@@ -1072,6 +1223,7 @@ function App() {
                             () => invoke("reset"),
                             () => {
                               setModel(undefined);
+                              setVariantJump(undefined);
                               setOrigins("");
                               setPreview(undefined);
                               navigate("home");

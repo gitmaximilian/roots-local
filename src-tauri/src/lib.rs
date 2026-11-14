@@ -6,3 +6,4 @@ pub mod import;
 pub mod locale;
 pub mod pgs;
 pub mod report;
+pub mod variants;

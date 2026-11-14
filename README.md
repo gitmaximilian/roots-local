@@ -28,6 +28,7 @@ Use `npm run tauri -- build --bundles app` for macOS. The script `scripts/packag
 ## What the app analyzes
 
 - **Raw exports.** CSV, TSV, TXT, and ZIP with declared GRCh37 or GRCh38 assemblies. Unknown assemblies, missing markers, and conflicting entries remain unresolved.
+- **Variant register.** Search by marker ID, exact coordinate, or inclusive range, such as `chr2:136600000-136650000`. Filter by chromosome or genotype status. Open a marker from a finding to inspect the matching rows and return to the finding.
 - **Starter catalog.** Rules for lactase activity, earwax type, bitter taste, and ACTN3 alongside selected studies. Data quality and scientific evidence are shown separately.
 - **Companion data.** Manually entered ancestry results, match and shared segment lists, and comparison of autosomal alleles against a family file.
 - **CRAM.** Measures catalog marker coverage using aligned reads and a matching, indexed local FASTA. Genotype and haplogroup inference are pending.

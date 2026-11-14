@@ -8,6 +8,7 @@ use roots_local::{
     import::{self, Import},
     locale::Language,
     report::{self, Model, Options},
+    variants::{self, Conflicts, Quality},
 };
 use serde::Serialize;
 use std::{
@@ -25,8 +26,12 @@ const SAMPLE: &[u8] = include_bytes!("../../fixtures/synthetic-myheritage.txt");
 #[derive(Default)]
 struct Session {
     catalog: Option<Catalog>,
-    imported: Option<Import>,
+    imported: Option<Arc<ImportedProfile>>,
     model: Option<Model>,
+}
+struct ImportedProfile {
+    data: Import,
+    conflicts: Conflicts,
 }
 #[derive(Clone, Default)]
 struct Workspace {
@@ -107,7 +112,12 @@ async fn background<T: Send + 'static>(
         .map_err(|_| "Die lokale Verarbeitung konnte nicht abgeschlossen werden.".into())
         .and_then(|result| result)
 }
-fn make_model(data: &Import, catalog: Option<&Catalog>, example: bool) -> Result<Model, String> {
+fn make_model(
+    data: &Import,
+    summary: analysis::Summary,
+    catalog: Option<&Catalog>,
+    example: bool,
+) -> Result<Model, String> {
     let starter;
     let active = if let Some(catalog) = catalog {
         catalog
@@ -115,12 +125,7 @@ fn make_model(data: &Import, catalog: Option<&Catalog>, example: bool) -> Result
         starter = Catalog::starter()?;
         &starter
     };
-    let mut model = Model::new(
-        analysis::summary(data),
-        active.version.clone(),
-        Vec::new(),
-        example,
-    );
+    let mut model = Model::new(summary, active.version.clone(), Vec::new(), example);
     model.apply_catalog(data, active)?;
     Ok(model)
 }
@@ -148,60 +153,44 @@ async fn import_dna(
             };
             import::file(&path, &job.cancel)?
         };
+        let (summary, conflicts) = analysis::summary_with_conflicts(&data);
         let mut state = workspace.session.lock().map_err(state_error)?;
-        let model = make_model(&data, state.catalog.as_ref(), example)?;
+        let model = make_model(&data, summary, state.catalog.as_ref(), example)?;
         if job.cancel.load(Relaxed) {
             return Err("Import abgebrochen.".into());
         }
-        state.imported = Some(data);
+        state.imported = Some(Arc::new(ImportedProfile { data, conflicts }));
         state.model = Some(model.clone());
         Ok(Some(model))
     })
     .await
 }
 
-#[derive(Serialize)]
-struct VariantPage {
-    total: usize,
-    rows: Vec<import::Variant>,
-}
 #[tauri::command]
 async fn variants(
     workspace: State<'_, Workspace>,
     query: String,
+    chromosome: Option<String>,
+    quality: Option<Quality>,
     offset: usize,
-) -> Result<VariantPage, String> {
-    let workspace = workspace.inner().clone();
+) -> Result<variants::Page, String> {
+    let profile = workspace
+        .session
+        .lock()
+        .map_err(state_error)?
+        .imported
+        .clone()
+        .ok_or("Bitte zuerst eine DNA-Datei importieren.")?;
     background(move || {
-        let state = workspace.session.lock().map_err(state_error)?;
-        let query = query.trim().to_ascii_lowercase();
-        let data = state
-            .imported
-            .as_ref()
-            .ok_or("Bitte zuerst eine DNA-Datei importieren.")?;
-        if query.is_empty() {
-            return Ok(VariantPage {
-                total: data.rows.len(),
-                rows: data.rows.iter().skip(offset).take(50).cloned().collect(),
-            });
-        }
-        let mut total = 0usize;
-        let mut rows = Vec::new();
-        let coordinate = query.split_once(':');
-        for row in &data.rows {
-            if row.id.to_ascii_lowercase().contains(&query)
-                || coordinate.is_some_and(|(chr, pos)| {
-                    row.chromosome.eq_ignore_ascii_case(chr)
-                        && row.position.to_string().starts_with(pos)
-                })
-            {
-                if total >= offset && rows.len() < 50 {
-                    rows.push(row.clone());
-                }
-                total += 1;
-            }
-        }
-        Ok(VariantPage { total, rows })
+        variants::page(
+            &profile.data.rows,
+            &profile.conflicts,
+            &query,
+            chromosome.as_deref(),
+            quality,
+            offset,
+        )
+        .map_err(String::from)
     })
     .await
 }
@@ -258,6 +247,7 @@ async fn import_extra(
                     state
                         .imported
                         .as_ref()
+                        .map(|profile| &profile.data)
                         .ok_or("Keine Genotypdatei importiert.")?,
                     &relative,
                 )?)
@@ -359,9 +349,9 @@ async fn load_catalog(
             return Err("Katalogimport abgebrochen.".into());
         }
         let mut state = workspace.session.lock().map_err(state_error)?;
-        if let (Some(data), Some(model)) = (&state.imported, &state.model) {
+        if let (Some(profile), Some(model)) = (&state.imported, &state.model) {
             let mut fresh = model.clone();
-            fresh.apply_catalog(data, &new_catalog)?;
+            fresh.apply_catalog(&profile.data, &new_catalog)?;
             fresh.sequence = None;
             state.model = Some(fresh);
         }

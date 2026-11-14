@@ -21,7 +21,6 @@
   "Das Variantenregister konnte nicht geladen werden.": "The variant index could not be loaded.",
   "Variantenregister": "Variant index",
   "Positionen und Genotypen aus der importierten Datei.": "Positions and genotypes from the imported file.",
-  "Nach rsID oder Chromosom:Position suchen": "Search by rsID or chromosome:position",
   "Chromosom": "Chromosome",
   "Fehlt": "Missing",
   "von": "of",
@@ -126,5 +125,17 @@
   "MyHeritage-Format": "MyHeritage format",
   "Rohscore": "Raw score",
   "PDF-Vorschau, Seite": "PDF preview, page",
-  "Entdecke deine DNA. Offline.": "Explore your DNA. Offline."
+  "Entdecke deine DNA. Offline.": "Explore your DNA. Offline.",
+  "Rohdaten durchsuchen": "Search raw data",
+  "Zurück zum Befund": "Back to finding",
+  "Varianten suchen": "Search variants",
+  "rsID, Position oder Bereich": "rsID, position, or range",
+  "Alle Chromosomen": "All chromosomes",
+  "Alle Genotypstatus": "All call statuses",
+  "Genotyp vorhanden": "Genotype present",
+  "Kein Genotyp": "No genotype",
+  "Widersprüchliche Werte": "Conflicting calls",
+  "Beispiele: rs4988235, 2:136608646 oder chr2:136600000-136650000": "Examples: rs4988235, 2:136608646, or chr2:136600000-136650000",
+  "Varianten werden gesucht …": "Searching variants…",
+  "Keine passenden Rohzeilen gefunden.": "No matching rows in the raw data."
 }

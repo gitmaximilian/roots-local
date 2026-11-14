@@ -252,5 +252,6 @@
   "Katalogimport abgebrochen.": "Catalog import canceled.",
   "Unbekannter Importtyp.": "Unknown import type.",
   "Keine Genotypdatei importiert.": "No genotype file was imported.",
-  "Keine Centimorgan-Spalte gefunden.": "No centimorgan column found."
+  "Keine Centimorgan-Spalte gefunden.": "No centimorgan column found.",
+  "Ungültiger Bereich. Verwende z. B. 2:136608646 oder chr2:136600000-136650000.": "Invalid region. Enter a position such as 2:136608646 or a range such as chr2:136600000-136650000."
 }

@@ -553,6 +553,26 @@ td small {
   padding: 5px;
   color: var(--green);
 }
+.marker-link {
+  white-space: nowrap;
+}
+.variant-back {
+  margin-bottom: 8px;
+}
+.variant-filters {
+  flex-wrap: wrap;
+}
+.variant-filters .search {
+  flex: 1 1 210px;
+}
+.variant-hint {
+  margin: 0 0 14px;
+  color: var(--muted);
+  font-size: 12px;
+}
+.variant-table {
+  overflow-x: auto;
+}
 .report-layout {
   display: grid;
   grid-template-columns: minmax(265px, 345px) minmax(0, 1fr);

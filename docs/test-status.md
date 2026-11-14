@@ -4,10 +4,12 @@
 |---|---|
 | **MacBook Air M4, macOS 15.6.1** | Native app built and installed. Imported a synthetic MyHeritage file with the native dialog, inspected results, previewed the full report, and exported a PDF. |
 | **M4 with network access denied** | Used the installed debug bundle with `--verify-offline` to evaluate synthetic data. Tested the native file import, preview, and export. The app process and spawned helpers were covered by the restriction. Independent macOS WebKit services were not separately instrumented. |
-| **Windows x64 and ARM64** | Native core and PDF tests passed on both [GitHub Actions runners](https://github.com/gitmaximilian/roots-local/actions/runs/43637748910), and both NSIS installers were built. Interactive offline Windows installation, update, and removal remain unverified. |
+| **Windows x64 and ARM64** | Native core and bilingual PDF tests passed on both [GitHub Actions runners](https://github.com/gitmaximilian/roots-local/actions/runs/43650151290), and both NSIS installers were built for that revision. Interactive offline Windows installation, update, and removal remain unverified. |
 | **Older macOS versions and Intel** | The configured macOS minimum is 15.6. Earlier releases and Intel Macs have not been tested. |
 
 English is the default for the app and its PDF report. The language switch was tested in the native M4 app with the same synthetic profile, and the German PDF preview rendered with network access denied. Verified exports in both languages contained 24 pages, 17 chapters, 76 sections, and 151 links. The starter reference report included embedded fonts. Representative pages were visually inspected. On the M4, the debug smoke test imported 700,015 synthetic rows and exported a PDF in 2.84 seconds, with approximately 165 MiB peak RSS. The benchmark used the command-line harness.
+
+The native M4 app imported 116 synthetic rows with the network restriction enabled. The variant register paginated the file, returned both conflicting calls for an inclusive region and an exact coordinate, and found the separate row with no genotype. The finding-to-marker link and its return action worked, and switching between English and German preserved the active search or filter.
 
 ## Milestones
 

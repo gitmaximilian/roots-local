@@ -1,6 +1,7 @@
 use crate::{
     catalog::{Catalog, Marker, Method, Trait},
     import::{Build, Import, Variant},
+    variants::Conflicts,
 };
 use serde::Serialize;
 use std::collections::{HashMap, HashSet};
@@ -41,9 +42,13 @@ pub struct Summary {
     pub chromosomes: Vec<(String, usize)>,
 }
 pub fn summary(data: &Import) -> Summary {
+    summary_with_conflicts(data).0
+}
+
+pub fn summary_with_conflicts(data: &Import) -> (Summary, Conflicts) {
     let mut counts = HashMap::new();
     let mut positions = HashMap::new();
-    let mut conflicts = HashSet::new();
+    let mut conflicts = HashMap::<&str, HashSet<u32>>::new();
     let mut duplicates = 0;
     for row in &data.rows {
         *counts.entry(&row.chromosome).or_insert(0) += 1;
@@ -51,7 +56,10 @@ pub fn summary(data: &Import) -> Summary {
         if let Some(previous) = positions.insert(key, row.alleles.as_ref()) {
             duplicates += 1;
             if previous != row.alleles.as_ref() {
-                conflicts.insert(key);
+                conflicts
+                    .entry(&row.chromosome)
+                    .or_default()
+                    .insert(row.position);
             }
         }
     }
@@ -67,7 +75,8 @@ pub fn summary(data: &Import) -> Summary {
             _ => 26,
         })
     });
-    Summary {
+    let total_conflicts = conflicts.values().map(HashSet::len).sum();
+    let summary = Summary {
         format: data.format,
         strand: data.strand,
         build: data.build,
@@ -76,8 +85,15 @@ pub fn summary(data: &Import) -> Summary {
         no_call: data.rows.iter().filter(|r| r.alleles.is_none()).count(),
         chromosomes,
         duplicates,
-        conflicts: conflicts.len(),
-    }
+        conflicts: total_conflicts,
+    };
+    (
+        summary,
+        conflicts
+            .into_iter()
+            .map(|(chr, positions)| (chr.to_owned(), positions))
+            .collect(),
+    )
 }
 
 fn check(
