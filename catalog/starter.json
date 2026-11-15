@@ -291,6 +291,10 @@
           "message": "Die hier untersuchte Variante für erhaltene Laktaseaktivität liegt an dieser Position nicht vor. Andere Varianten können ebenfalls eine Rolle spielen.",
           "confidence": "moderate"
         }
+      ],
+      "questions": [
+        "Vertrage ich Milch?",
+        "Bin ich laktoseintolerant?"
       ]
     },
     {
@@ -329,6 +333,9 @@
           "message": "Dieser Genotyp ist mit überwiegend feuchtem Ohrenschmalz verbunden.",
           "confidence": "high"
         }
+      ],
+      "questions": [
+        "Habe ich trockenes oder feuchtes Ohrenschmalz?"
       ]
     },
     {
@@ -371,6 +378,10 @@
           "message": "Am untersuchten Marker ist mindestens eine Kopie ohne diese Stoppvariante vorhanden.",
           "confidence": "high"
         }
+      ],
+      "questions": [
+        "Bin ich eher Sprinter oder Ausdauertyp?",
+        "Wie sind meine Muskelfasern?"
       ]
     },
     {
@@ -410,6 +421,10 @@
           "message": "Die drei Positionen sind mit zwei AVI-Kopien vereinbar. AVI ist in Studien mit schwächerer Wahrnehmung von PTC verbunden.",
           "confidence": "moderate"
         }
+      ],
+      "questions": [
+        "Schmecke ich Bitterstoffe stark?",
+        "Mag ich Brokkoli nicht wegen meiner Gene?"
       ]
     },
     {
@@ -429,6 +444,9 @@
           "Eriksson et al. · Flavour (2012)",
           "https://doi.org/10.1186/2044-7248-1-22"
         ]
+      ],
+      "questions": [
+        "Schmeckt Koriander für mich nach Seife?"
       ]
     },
     {
@@ -459,7 +477,11 @@
         ],
         "confidence": "high",
         "clinical": false
-      }
+      },
+      "questions": [
+        "Bekomme ich rote Haut nach Alkohol?",
+        "Wie vertrage ich Alkohol?"
+      ]
     },
     {
       "id": "caffeine",
@@ -478,6 +500,9 @@
           "Sachse et al. (1999)",
           "https://pubmed.ncbi.nlm.nih.gov/10233211/"
         ]
+      ],
+      "questions": [
+        "Wie vertrage ich Kaffee?"
       ]
     },
     {
@@ -497,6 +522,9 @@
           "HIrisPlex-S (2018)",
           "https://pubmed.ncbi.nlm.nih.gov/29753263/"
         ]
+      ],
+      "questions": [
+        "Welche Augenfarbe verraten meine Gene?"
       ]
     },
     {
@@ -527,7 +555,10 @@
         ],
         "confidence": "moderate",
         "clinical": true
-      }
+      },
+      "questions": [
+        "Habe ich ein erhöhtes Diabetesrisiko?"
+      ]
     },
     {
       "id": "iron",
@@ -562,7 +593,11 @@
         ],
         "confidence": "high",
         "clinical": true
-      }
+      },
+      "questions": [
+        "Speichere ich zu viel Eisen?",
+        "Habe ich ein Risiko für Hämochromatose?"
+      ]
     },
     {
       "id": "slco",
@@ -592,7 +627,10 @@
         ],
         "confidence": "moderate",
         "clinical": true
-      }
+      },
+      "questions": [
+        "Bekomme ich Muskelschmerzen von Statinen?"
+      ]
     },
     {
       "id": "clotting-study",
@@ -622,7 +660,11 @@
         ],
         "confidence": "high",
         "clinical": true
-      }
+      },
+      "questions": [
+        "Habe ich ein erhöhtes Thromboserisiko?",
+        "Trage ich Faktor-V-Leiden?"
+      ]
     },
     {
       "id": "lactase-evolution",
@@ -652,7 +694,10 @@
         ],
         "confidence": "high",
         "clinical": false
-      }
+      },
+      "questions": [
+        "Woher kommt meine Laktosetoleranz?"
+      ]
     },
     {
       "id": "cyp2c19-clopidogrel",
@@ -704,7 +749,10 @@
         ],
         "confidence": "high",
         "clinical": true
-      }
+      },
+      "questions": [
+        "Vertrage ich Fluorouracil?"
+      ]
     },
     {
       "id": "dpyd-ile560ser-fluoropyrimidines",
@@ -764,7 +812,10 @@
         ],
         "confidence": "moderate",
         "clinical": true
-      }
+      },
+      "questions": [
+        "Wie baue ich Tacrolimus ab?"
+      ]
     },
     {
       "id": "mc1r-red-hair",
@@ -799,7 +850,11 @@
         ],
         "confidence": "moderate",
         "clinical": false
-      }
+      },
+      "questions": [
+        "Trage ich Gene für rote Haare?",
+        "Bekomme ich leicht Sommersprossen?"
+      ]
     },
     {
       "id": "tchh-hair-shape",
@@ -823,6 +878,9 @@
           "dbSNP",
           "https://www.ncbi.nlm.nih.gov/snp/rs11803731"
         ]
+      ],
+      "questions": [
+        "Habe ich glatte oder lockige Haare von meinen Genen?"
       ]
     },
     {
@@ -901,6 +959,10 @@
           "message": "Beide Positionen sind gemischterbig. Meist entspricht das ε2/ε4, selten ε1/ε3.",
           "confidence": "moderate"
         }
+      ],
+      "questions": [
+        "Welchen APOE-Typ habe ich?",
+        "Habe ich ein erhöhtes Alzheimer-Risiko?"
       ]
     },
     {
@@ -980,6 +1042,9 @@
           "message": "Zwei Kopien *3. Die Enzymaktivität ist stark verringert.",
           "confidence": "moderate"
         }
+      ],
+      "questions": [
+        "Wie baue ich Warfarin oder Ibuprofen ab?"
       ]
     },
     {
@@ -1059,6 +1124,10 @@
           "message": "Je eine Kopie *2 und *17.",
           "confidence": "moderate"
         }
+      ],
+      "questions": [
+        "Wirkt Clopidogrel bei mir?",
+        "Wie baue ich Omeprazol ab?"
       ]
     },
     {
@@ -1130,6 +1199,9 @@
           "message": "Beide Kopien tragen beide Varianten. Die TPMT-Aktivität ist sehr gering.",
           "confidence": "moderate"
         }
+      ],
+      "questions": [
+        "Vertrage ich Azathioprin?"
       ]
     },
     {
@@ -1164,7 +1236,10 @@
         ],
         "confidence": "high",
         "clinical": true
-      }
+      },
+      "questions": [
+        "Vertrage ich Thiopurine?"
+      ]
     },
     {
       "id": "vkorc1",
@@ -1198,7 +1273,10 @@
         ],
         "confidence": "high",
         "clinical": true
-      }
+      },
+      "questions": [
+        "Brauche ich weniger Warfarin?"
+      ]
     },
     {
       "id": "prothrombin",
@@ -1228,7 +1306,10 @@
         ],
         "confidence": "high",
         "clinical": true
-      }
+      },
+      "questions": [
+        "Trage ich die Prothrombin-Mutation?"
+      ]
     },
     {
       "id": "adh1b",
@@ -1258,7 +1339,10 @@
         ],
         "confidence": "moderate",
         "clinical": false
-      }
+      },
+      "questions": [
+        "Wie schnell baue ich Alkohol ab?"
+      ]
     }
   ]
 }

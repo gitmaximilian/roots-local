@@ -609,7 +609,11 @@ async fn export_pdf(
         let Some(file) = handle
             .dialog()
             .file()
-            .set_file_name("Roots Local Report.pdf")
+            .set_file_name(if options.pass {
+                "Roots Local Medicine Pass.pdf"
+            } else {
+                "Roots Local Report.pdf"
+            })
             .add_filter("PDF", &["pdf"])
             .blocking_save_file()
         else {

@@ -32,6 +32,14 @@ import {
 } from "./finding-ui";
 import { Atlas } from "./atlas";
 import {
+  AskDna,
+  LifeAreas,
+  NucleusRadar,
+  areaOf,
+  areas,
+  type AreaId,
+} from "./life";
+import {
   ArrowDownToLine,
   ArrowLeft,
   ArrowRight,
@@ -49,6 +57,7 @@ import {
   List,
   LockKeyhole,
   Map as MapIcon,
+  Pill,
   ScanLine,
   Search,
   X,
@@ -88,6 +97,7 @@ const navigation = (): { id: Page; label: string; Icon: LucideIcon }[] => [
   { id: "atlas", label: t("Atlas"), Icon: MapIcon },
   { id: "variants", label: t("Varianten"), Icon: ScanLine },
   { id: "report", label: t("PDF-Report"), Icon: FileText },
+  { id: "pass", label: t("Medikamentenpass"), Icon: Pill },
   { id: "data", label: t("Datenquellen"), Icon: Database },
 ];
 
@@ -703,6 +713,8 @@ function App() {
     finding: FindingLocation;
   }>();
   const [inspected, setInspected] = useState<string>();
+  const [area, setArea] = useState<AreaId>();
+  const [passPreview, setPassPreview] = useState<ArrayBuffer>();
   const [paletteOpen, setPaletteOpen] = useState(false);
   const [dropping, setDropping] = useState(false);
   const showMedical = options.include_clinical;
@@ -864,6 +876,28 @@ function App() {
       },
     );
   }
+  function renderPass() {
+    void run(
+      t("PDF-Vorschau erstellen"),
+      () =>
+        invoke<ArrayBuffer>("preview_pdf", {
+          options: { ...options, language, pass: true },
+        }),
+      (bytes) => setPassPreview(bytes),
+    );
+  }
+  function savePass() {
+    void run(
+      t("PDF exportieren"),
+      () =>
+        invoke<boolean>("export_pdf", {
+          options: { ...options, language, pass: true },
+        }),
+      (saved) => {
+        if (saved) setNotice(t("Der Medikamentenpass wurde gespeichert."));
+      },
+    );
+  }
   function savePdf() {
     void run(
       t("PDF exportieren"),
@@ -945,6 +979,9 @@ function App() {
     (finding) => showMedical || !isMedical(finding),
   );
   const hiddenMedical = conclusions.length - shownConclusions.length;
+  const medicines = results.filter(
+    (finding) => finding.section.startsWith("15.") && finding.conclusion,
+  );
   const commands: Command[] = [
     ...navigation().map((item) => ({
       id: `page-${item.id}`,
@@ -988,6 +1025,17 @@ function App() {
       hint: t("Befehl"),
       run: () => switchLanguage(language === "de" ? "en" : "de"),
     },
+    ...results.flatMap((finding) =>
+      (finding.questions ?? []).map((question, index) => ({
+        id: `question-${finding.id}-${index}`,
+        label: resultText(question),
+        hint: t("Frage"),
+        run: () => {
+          if (page !== "home" && page !== "atlas") navigate("home");
+          setInspected(finding.id);
+        },
+      })),
+    ),
     ...chapters.map((chapter) => ({
       id: `chapter-${chapter.id}`,
       label: `${chapter.id} ${chapter.title}`,
@@ -1208,8 +1256,47 @@ function App() {
                       </button>
                     </div>
                   )}
+                  <div className="overview-hero">
+                    <AskDna
+                      findings={results}
+                      showMedical={showMedical}
+                      onShowMedical={() => setShowMedical(true)}
+                      onOpen={(finding) => setInspected(finding.id)}
+                    />
+                    <NucleusRadar
+                      findings={results}
+                      showMedical={showMedical}
+                      selected={inspected}
+                      onOpen={(finding) => setInspected(finding.id)}
+                      onSelectArea={(id) =>
+                        id === "medicines" ? navigate("pass") : setArea(id)
+                      }
+                    />
+                  </div>
                   <header className="section-heading">
-                    <h2>{t("Deine Schlussfolgerungen")}</h2>
+                    <h2>{t("Deine Lebensbereiche")}</h2>
+                  </header>
+                  <LifeAreas
+                    findings={results}
+                    showMedical={showMedical}
+                    selected={area}
+                    onSelect={(id) => setArea(area === id ? undefined : id)}
+                    onOpenPass={() => navigate("pass")}
+                  />
+                  <header className="section-heading">
+                    <h2>
+                      {area
+                        ? areas().find((a) => a.id === area)?.label
+                        : t("Alle Schlussfolgerungen")}
+                    </h2>
+                    {area && (
+                      <button
+                        className="text-button"
+                        onClick={() => setArea(undefined)}
+                      >
+                        {t("Alle anzeigen")}
+                      </button>
+                    )}
                     <button
                       className="text-button"
                       onClick={() => {
@@ -1224,40 +1311,44 @@ function App() {
                   </header>
                   {shownConclusions.length ? (
                     <div className="conclusions">
-                      {shownConclusions.map((finding) => (
-                        <button
-                          key={finding.id}
-                          className={`conclusion-tile${inspected === finding.id ? " active" : ""}`}
-                          onClick={() =>
-                            setInspected(
-                              inspected === finding.id ? undefined : finding.id,
-                            )
-                          }
-                        >
-                          <span className="top">
-                            <strong>{resultText(finding.title)}</strong>
-                            {isMedical(finding) && (
-                              <span className="medical">
-                                {t("Medizinisch")}
-                              </span>
-                            )}
-                          </span>
-                          <span className="answer">
-                            {visibleConclusion(finding, showMedical)}
-                          </span>
-                          {finding.confidence && (
-                            <ConfidenceMeter value={finding.confidence} />
-                          )}
-                          <span className="gene">
-                            {finding.checks
-                              .map(
-                                (check) =>
-                                  `${resultText(check.gene)} · ${check.id}`,
+                      {shownConclusions
+                        .filter((finding) => !area || areaOf(finding) === area)
+                        .map((finding) => (
+                          <button
+                            key={finding.id}
+                            className={`conclusion-tile${inspected === finding.id ? " active" : ""}`}
+                            onClick={() =>
+                              setInspected(
+                                inspected === finding.id
+                                  ? undefined
+                                  : finding.id,
                               )
-                              .join("  ")}
-                          </span>
-                        </button>
-                      ))}
+                            }
+                          >
+                            <span className="top">
+                              <strong>{resultText(finding.title)}</strong>
+                              {isMedical(finding) && (
+                                <span className="medical">
+                                  {t("Medizinisch")}
+                                </span>
+                              )}
+                            </span>
+                            <span className="answer">
+                              {visibleConclusion(finding, showMedical)}
+                            </span>
+                            {finding.confidence && (
+                              <ConfidenceMeter value={finding.confidence} />
+                            )}
+                            <span className="gene">
+                              {finding.checks
+                                .map(
+                                  (check) =>
+                                    `${resultText(check.gene)} · ${check.id}`,
+                                )
+                                .join("  ")}
+                            </span>
+                          </button>
+                        ))}
                     </div>
                   ) : (
                     <div className="empty">
@@ -1362,6 +1453,138 @@ function App() {
                   </div>
                 </section>
               ))}
+            {page === "pass" && (
+              <>
+                <Heading
+                  title={t("Medikamentenpass")}
+                  description={t(
+                    "Alle Hinweise zu Medikamenten auf einer Seite, für Ärztin, Arzt oder Apotheke.",
+                  )}
+                />
+                {!model ? (
+                  <div className="empty">
+                    {t("Öffne eine DNA-Datei, um einen Report zu erstellen.")}
+                  </div>
+                ) : !showMedical ? (
+                  <div className="notice-card">
+                    <p>
+                      <strong>
+                        {t("Der Pass zeigt medizinische Befunde.")}
+                      </strong>{" "}
+                      {t(
+                        "Sie stammen aus Verbraucherdaten und brauchen eine Laborbestätigung.",
+                      )}
+                    </p>
+                    <button
+                      className="button secondary compact"
+                      onClick={() => setShowMedical(true)}
+                    >
+                      {t("Anzeigen")}
+                    </button>
+                  </div>
+                ) : (
+                  <div className="pass-layout">
+                    <div className="pass-card">
+                      <div className="pass-head">
+                        <strong>{t("Medikamentenpass")}</strong>
+                        <span>Roots Local</span>
+                      </div>
+                      {medicines.length ? (
+                        <dl>
+                          {medicines.slice(0, 7).map((finding) => {
+                            const gene = finding.checks[0]?.gene ?? "";
+                            let line = resultText(finding.conclusion!).split(
+                              ". ",
+                            )[0];
+                            if (line.startsWith(`${gene} `))
+                              line = line.slice(gene.length + 1);
+                            return (
+                              <React.Fragment key={finding.id}>
+                                <dt>{gene}</dt>
+                                <dd>{line.replace(/\.$/, "")}</dd>
+                              </React.Fragment>
+                            );
+                          })}
+                        </dl>
+                      ) : (
+                        <p>
+                          {t("Keine pharmakogenetischen Schlussfolgerungen.")}
+                        </p>
+                      )}
+                      <small>
+                        {t(
+                          "Unbestätigte Verbraucherdaten · nicht für Dosisentscheidungen ohne Arzt",
+                        )}
+                      </small>
+                    </div>
+                    <div className="actions">
+                      <button
+                        className="button"
+                        disabled={!!busy}
+                        onClick={savePass}
+                      >
+                        {t("Pass als PDF exportieren")}
+                        <ArrowDownToLine size={16} />
+                      </button>
+                      <button
+                        className="button secondary"
+                        disabled={!!busy}
+                        onClick={renderPass}
+                      >
+                        {t("Vorschau")}
+                      </button>
+                    </div>
+                    <div className="variant-table">
+                      <table>
+                        <thead>
+                          <tr>
+                            <th>{t("Gen")}</th>
+                            <th>{t("Ergebnis und Bedeutung")}</th>
+                            <th>{t("Sicherheit")}</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {medicines.map((finding) => (
+                            <tr
+                              key={finding.id}
+                              className="clickable"
+                              onClick={() => setInspected(finding.id)}
+                            >
+                              <td>
+                                <strong>{finding.checks[0]?.gene}</strong>
+                                <small className="mono">
+                                  {finding.checks.map((c) => c.id).join(", ")}
+                                </small>
+                              </td>
+                              <td>
+                                {resultText(finding.conclusion!)}
+                                <small>{resultText(finding.summary)}</small>
+                              </td>
+                              <td>
+                                {finding.confidence && (
+                                  <ConfidenceMeter value={finding.confidence} />
+                                )}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                    {passPreview && (
+                      <div className="preview">
+                        <Suspense
+                          fallback={
+                            <p role="status">{t("PDF wird geöffnet …")}</p>
+                          }
+                        >
+                          <PdfPreview bytes={passPreview} />
+                        </Suspense>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </>
+            )}
             {page === "atlas" && model && (
               <>
                 <Heading

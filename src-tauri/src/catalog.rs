@@ -72,6 +72,9 @@ pub struct Trait {
     /// Medically relevant outcomes stay hidden until the user opts in.
     #[serde(default, skip_serializing_if = "std::ops::Not::not")]
     pub clinical: bool,
+    /// Everyday questions this rule answers, used by "Ask your DNA".
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub questions: Vec<String>,
 }
 impl Trait {
     pub fn is_clinical(&self) -> bool {
@@ -275,7 +278,10 @@ impl Catalog {
                         .is_some_and(|a| a.len() == 2 && a.contains(effect.allele))
                     && effect.conclusions.iter().all(|c| valid_text(c, 600))
             });
-            let signature_ok = outcomes_ok
+            let questions_ok =
+                item.questions.len() <= 8 && item.questions.iter().all(|q| valid_text(q, 160));
+            let signature_ok = questions_ok
+                && outcomes_ok
                 && effect_ok
                 && match item.method {
                     Method::Single => !item.outcomes.is_empty(),

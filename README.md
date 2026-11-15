@@ -6,7 +6,7 @@ Roots Local is an open-source desktop app for analyzing MyHeritage raw DNA expor
 
 ## Try it
 
-Open the app and select **View example**, choose **File › Open DNA File…** (⌘O), or drag the [synthetic MyHeritage file](fixtures/synthetic-myheritage.txt) into the window. The overview answers what your DNA says, with a confidence level for each conclusion. Press ⌘K to search findings, genes, markers, and commands. The **Atlas** shows every catalog marker on its chromosome. Open **PDF report** to preview or save the report locally. The app and PDF default to English. Select **Deutsch** from the language menu to switch both while keeping the current analysis.
+Open the app and select **View example**, choose **File › Open DNA File…** (⌘O), or drag the [synthetic MyHeritage file](fixtures/synthetic-myheritage.txt) into the window. The overview answers what your DNA says, with a confidence level for each conclusion. Ask questions such as *Can I drink milk?* in **Ask your DNA**; answers come from the catalog rules on your Mac. Your conclusions are grouped by area of life, from food to medicines, and the **Nucleus radar** shows how certain each one is. The **Medicine pass** collects drug-response findings on one page to show your physician. Press ⌘K to search findings, questions, genes, and commands. The **Atlas** shows every catalog marker on its chromosome. Open **PDF report** to preview or save the report locally. The app and PDF default to English. Select **Deutsch** from the language menu to switch both while keeping the current analysis.
 
 - [Platform verification and remaining milestones](docs/test-status.md)
 - [Report outline](docs/report-structure.md)

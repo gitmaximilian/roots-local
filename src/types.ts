@@ -26,6 +26,7 @@ export type Finding = {
   dosage: number | null;
   effect?: { marker: string; allele: string; clinical: boolean };
   clinical?: boolean;
+  questions?: string[];
   evidence: string;
   population: string;
   limits: string;
@@ -167,7 +168,7 @@ export type VariantPage = {
   rows: Variant[];
 };
 export type Page =
-  "home" | "chapters" | "atlas" | "variants" | "report" | "data";
+  "home" | "chapters" | "atlas" | "variants" | "report" | "pass" | "data";
 export type Options = {
   short: boolean;
   name: string | null;

@@ -790,3 +790,56 @@ fn sex_check_and_reverse_strand() {
     let bitter = findings.iter().find(|f| f.item.id == "bitter").unwrap();
     assert_eq!(bitter.checks[0].call, None);
 }
+
+#[test]
+fn medicine_pass_is_one_page_and_includes_medicines() {
+    let (Some(typst), Some(python)) = (
+        std::env::var_os("ROOTS_TEST_TYPST"),
+        std::env::var_os("ROOTS_TEST_PYTHON"),
+    ) else {
+        return;
+    };
+    let catalog = Catalog::starter().unwrap();
+    let raw = format!(
+        "{}rs1799853,10,96702047,CC\nrs1057910,10,96741053,AC\nrs9923231,16,31107689,CT\n",
+        std::str::from_utf8(SAMPLE).unwrap()
+    );
+    let data = import::parse(raw.as_bytes(), &AtomicBool::new(false)).unwrap();
+    let model = report::Model::new(
+        analysis::summary(&data),
+        catalog.version.clone(),
+        analysis::evaluate(&data, &catalog).unwrap(),
+        true,
+    );
+    let directory = tempfile::tempdir().unwrap();
+    let path = directory.path().join("pass.pdf");
+    // No clinical opt-in in the options: exporting the pass is the opt-in.
+    report::export(
+        &model,
+        report::Options {
+            pass: true,
+            ..Default::default()
+        },
+        Path::new(&typst),
+        &path,
+    )
+    .unwrap();
+    let result = std::process::Command::new(python)
+        .env("PYTHONIOENCODING", "utf-8")
+        .arg("-c")
+        .arg("from pypdf import PdfReader; import sys; r = PdfReader(sys.argv[1]); print(len(r.pages)); print(' '.join(r.pages[0].extract_text().split()))")
+        .arg(&path)
+        .output()
+        .unwrap();
+    let text = String::from_utf8(result.stdout).unwrap();
+    assert!(text.starts_with("1\n"), "{text}");
+    for expected in [
+        "Medicine pass",
+        "*1/*3: intermediate metabolizer",
+        "VKORC1",
+        "SLCO1B1",
+    ] {
+        assert!(text.contains(expected), "Missing {expected:?}");
+    }
+    assert!(!text.contains("Lactase"));
+}

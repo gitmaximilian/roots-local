@@ -21,6 +21,9 @@ pub struct Options {
     pub include_clinical: bool,
     pub include_lineage: bool,
     pub language: Language,
+    /// Render the one-page medicine pass instead of the report. Exporting the
+    /// pass is the explicit opt-in for its medication findings.
+    pub pass: bool,
 }
 
 #[derive(Clone, Serialize)]
@@ -114,6 +117,9 @@ pub fn typst_binary() -> Result<PathBuf, String> {
 }
 
 fn document(model: &Model, mut options: Options) -> Document {
+    if options.pass {
+        options.include_clinical = true;
+    }
     options.name = options
         .name
         .take()
@@ -245,9 +251,14 @@ pub fn render(model: &Model, options: Options, typst: &Path) -> Result<Vec<u8>, 
         .map_err(|_| "Der temporäre Exportordner konnte nicht geöffnet werden.")?;
     let view = directory.path().join("report.typ");
     let data = directory.path().join("report.json");
+    let pass = options.pass;
     let document = document(model, options);
-    fs::write(&view, include_str!("../../report/report.typ"))
-        .map_err(|_| "Die PDF-Vorlage konnte nicht geöffnet werden.")?;
+    let template = if pass {
+        include_str!("../../report/pass.typ")
+    } else {
+        include_str!("../../report/report.typ")
+    };
+    fs::write(&view, template).map_err(|_| "Die PDF-Vorlage konnte nicht geöffnet werden.")?;
     fs::write(
         &data,
         serde_json::to_vec(&document).map_err(|_| "Das Reportmodell ist ungültig.")?,

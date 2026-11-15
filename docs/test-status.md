@@ -37,6 +37,8 @@ The PDF content checks cover 16 combinations of language, report format, clinica
 
 **2026-11-15, catalog 1.4.0 and version 0.2.0, MacBook Air M4, macOS 15.6.1.** 5 Python tests and 20 Rust tests passed. New tests cover APOE, CYP2C9, CYP2C19, and TPMT combinations including unresolved patterns, the X heterozygosity check, and reverse-strand complementing. New effect alleles were checked against the NCBI dbSNP record of each marker. The release app bundle was built, ad-hoc signed, and passed `codesign --verify --deep --strict`. Its DMG was installed through a local Homebrew 7.0.13 tap with the release cask. The installed app had no quarantine flag, kept a valid signature, and launched. `spctl` rejects the app as expected without notarization.
 
+**2026-11-15, life areas, Ask your DNA, Nucleus radar, and Medicine pass.** 5 Python tests and 21 Rust tests passed. A new test renders the medicine pass without a separate clinical opt-in and checks that it has one page, lists the drug-response conclusions, and leaves out non-medical findings. In the browser QA page, 12 typed questions were matched: 11 reached the expected finding and an unrelated question returned the no-rule message. Overview, area filter, radar, pass, and the German locale were checked visually in light and dark. The debug bundle was rebuilt, ad-hoc signed, installed, and started under `--verify-offline`.
+
 **Blocked on external input:**
 
 | Step | Waiting for |

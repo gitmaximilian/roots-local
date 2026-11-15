@@ -12,6 +12,7 @@ fn run() -> Result<(), String> {
     let mut include_clinical = false;
     let mut include_lineage = false;
     let mut short = false;
+    let mut pass = false;
     let mut model_json: Option<std::ffi::OsString> = None;
     let mut catalog = None;
     let mut clinvar = None;
@@ -27,6 +28,7 @@ fn run() -> Result<(), String> {
             Some("--include-clinical") => include_clinical = true,
             Some("--include-lineage") => include_lineage = true,
             Some("--short") => short = true,
+            Some("--pass") => pass = true,
             Some("--model-json") if model_json.is_none() => {
                 model_json = Some(args.next().ok_or("Missing model JSON path.")?);
             }
@@ -121,6 +123,7 @@ fn run() -> Result<(), String> {
             include_clinical,
             include_lineage,
             short,
+            pass,
             ..Default::default()
         },
         Path::new(&typst),
