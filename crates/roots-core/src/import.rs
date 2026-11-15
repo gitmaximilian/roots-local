@@ -1,8 +1,7 @@
 use csv::{ReaderBuilder, StringRecord};
 use serde::{Deserialize, Serialize};
 use std::{
-    fs::File,
-    io::{BufRead, BufReader, Read},
+    io::{BufRead, BufReader, Read, Seek, SeekFrom},
     path::Path,
     sync::atomic::{AtomicBool, Ordering::Relaxed},
 };
@@ -12,7 +11,7 @@ pub const MAX_INPUT: u64 = 128 * 1024 * 1024;
 const MAX_ROWS: usize = 2_000_000;
 const MAX_LINE: u64 = 32 * 1024;
 
-#[derive(Debug, Copy, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum Build {
     #[serde(rename = "GRCh37")]
     Grch37,
@@ -241,17 +240,16 @@ pub fn parse(input: impl Read, cancel: &AtomicBool) -> Result<Import, String> {
     })
 }
 
-pub fn file(path: &Path, cancel: &AtomicBool) -> Result<Import, String> {
-    let file = File::open(path).map_err(|_| "Datei konnte nicht geöffnet werden.")?;
-    if file
-        .metadata()
-        .map_err(|_| "Dateigröße konnte nicht gelesen werden.")?
-        .len()
-        > MAX_INPUT
-    {
+/// Imports a raw data file (CSV, TSV, TXT, or a ZIP with one such table).
+pub fn file(mut file: impl Read + Seek, cancel: &AtomicBool) -> Result<Import, String> {
+    let length = file
+        .seek(SeekFrom::End(0))
+        .and_then(|length| file.seek(SeekFrom::Start(0)).map(|_| length))
+        .map_err(|_| "Dateigröße konnte nicht gelesen werden.")?;
+    if length > MAX_INPUT {
         return Err("Die Datei überschreitet 128 MiB.".into());
     }
-    let mut reader = BufReader::new(file);
+    let mut reader = BufReader::with_capacity(1 << 20, file);
     if reader
         .fill_buf()
         .map_err(|_| "Die Datei konnte nicht gelesen werden.")?

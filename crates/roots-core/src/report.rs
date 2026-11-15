@@ -1,15 +1,10 @@
 use crate::{
     analysis::{Finding, Status, Summary},
-    catalog::{structure, write_atomic, Chapter},
+    catalog::{structure, Chapter},
     external::{External, Family},
     locale::{self, Language},
 };
 use serde::{Deserialize, Serialize};
-use std::{
-    fs,
-    path::{Path, PathBuf},
-    process::Command,
-};
 
 #[derive(Clone, Default, Deserialize, Serialize)]
 #[serde(default, deny_unknown_fields)]
@@ -100,20 +95,6 @@ impl Model {
         crate::analysis::resolve_bitter_phase(&mut self.findings, &trio);
         self.trio = Some(trio);
     }
-}
-
-pub fn typst_binary() -> Result<PathBuf, String> {
-    let native = std::env::current_exe()
-        .ok()
-        .and_then(|p| p.parent().map(|p| p.join("typst")));
-    let dev = Path::new(env!("CARGO_MANIFEST_DIR"))
-        .join("binaries")
-        .join(format!("typst-{}", env!("ROOTS_TARGET")));
-    native
-        .into_iter()
-        .chain(cfg!(debug_assertions).then_some(dev))
-        .find(|path| path.is_file())
-        .ok_or_else(|| "Das gebündelte PDF-Werkzeug wurde nicht gefunden.".into())
 }
 
 fn document(model: &Model, mut options: Options) -> Document {
@@ -246,48 +227,14 @@ fn document(model: &Model, mut options: Options) -> Document {
     }
 }
 
-pub fn render(model: &Model, options: Options, typst: &Path) -> Result<Vec<u8>, String> {
-    let directory = tempfile::tempdir()
-        .map_err(|_| "Der temporäre Exportordner konnte nicht geöffnet werden.")?;
-    let view = directory.path().join("report.typ");
-    let data = directory.path().join("report.json");
-    let pass = options.pass;
-    let document = document(model, options);
-    let template = if pass {
-        include_str!("../../report/pass.typ")
+/// Renders the report or the medicine pass as PDF bytes.
+pub fn render(model: &Model, options: Options) -> Result<Vec<u8>, String> {
+    let template = if options.pass {
+        include_str!("../../../report/pass.typ")
     } else {
-        include_str!("../../report/report.typ")
+        include_str!("../../../report/report.typ")
     };
-    fs::write(&view, template).map_err(|_| "Die PDF-Vorlage konnte nicht geöffnet werden.")?;
-    fs::write(
-        &data,
-        serde_json::to_vec(&document).map_err(|_| "Das Reportmodell ist ungültig.")?,
-    )
-    .map_err(|_| "Die Daten konnten nicht für den PDF-Export vorbereitet werden.")?;
-    let output = directory.path().join("report.pdf");
-    let mut renderer = Command::new(typst);
-    renderer
-        .current_dir(directory.path())
-        .arg("compile")
-        .arg("--root")
-        .arg(directory.path())
-        .arg("--ignore-system-fonts")
-        .arg(&view)
-        .arg(&output);
-    let result = renderer
-        .output()
-        .map_err(|_| "Das lokale PDF-Werkzeug konnte nicht gestartet werden.")?;
-    if !result.status.success() {
-        return Err("Der Report konnte nicht gerendert werden.".into());
-    }
-    fs::read(output).map_err(|_| "Das erzeugte PDF konnte nicht gelesen werden.".into())
-}
-
-pub fn export(
-    model: &Model,
-    options: Options,
-    typst: &Path,
-    destination: &Path,
-) -> Result<(), String> {
-    write_atomic(destination, &render(model, options, typst)?)
+    let document = document(model, options);
+    let data = serde_json::to_vec(&document).map_err(|_| "Das Reportmodell ist ungültig.")?;
+    crate::pdf::compile(template, data)
 }

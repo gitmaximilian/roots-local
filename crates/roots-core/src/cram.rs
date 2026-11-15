@@ -9,7 +9,6 @@ use serde::Serialize;
 use std::{
     collections::HashMap,
     io,
-    path::Path,
     sync::{
         atomic::{AtomicBool, Ordering::Relaxed},
         Arc, OnceLock,
@@ -75,24 +74,35 @@ impl<A: fasta::repository::Adapter> fasta::repository::Adapter for CheckedRefere
     }
 }
 
-pub fn coverage(
-    path: &Path,
-    reference: &Path,
+/// Measures catalog marker coverage in a CRAM file.
+///
+/// `reference` is an uncompressed FASTA and `index` its `.fai` index. Both are
+/// read with random access, so only the requested regions are loaded.
+pub fn coverage<R, F>(
+    cram: R,
+    reference: F,
+    index: impl io::Read,
     markers: &[Marker],
     cancel: &AtomicBool,
-) -> Result<Coverage, String> {
+) -> Result<Coverage, String>
+where
+    R: io::Read,
+    F: io::BufRead + io::Seek + Send + Sync + 'static,
+{
     use fasta::repository::adapters::IndexedReader;
-    let reference = fasta::io::indexed_reader::Builder::default()
-        .build_from_path(reference)
-        .map_err(|_| "Eine lokale FASTA-Datei mit zugehörigem .fai-Index ist erforderlich.")?;
+    const REFERENCE_ERROR: &str =
+        "Eine lokale FASTA-Datei mit zugehörigem .fai-Index ist erforderlich.";
+    let index = fasta::fai::io::Reader::new(io::BufReader::new(index))
+        .read_index()
+        .map_err(|_| REFERENCE_ERROR)?;
+    let reference = fasta::io::IndexedReader::new(reference, index);
     let dictionary = Arc::new(OnceLock::new());
     let mut reader = cram::io::reader::Builder::default()
         .set_reference_sequence_repository(fasta::Repository::new(CheckedReference {
             source: IndexedReader::new(reference),
             dictionary: dictionary.clone(),
         }))
-        .build_from_path(path)
-        .map_err(|_| READ_ERROR)?;
+        .build_from_reader(cram);
     let header = reader.read_header().map_err(|_| READ_ERROR)?;
     use sam::header::record::value::map::reference_sequence::tag::MD5_CHECKSUM;
     dictionary
@@ -368,11 +378,21 @@ mod tests {
             "CG".into(),
         )];
         let cancel = AtomicBool::new(false);
-        let result = coverage(&cram, &fasta, &markers, &cancel).unwrap();
+        let run = || {
+            let open = |path: &std::path::Path| fs::File::open(path).unwrap();
+            coverage(
+                open(&cram),
+                io::BufReader::new(open(&fasta)),
+                open(&directory.path().join("reference.fa.fai")),
+                &markers,
+                &cancel,
+            )
+        };
+        let result = run().unwrap();
         assert_eq!(result.reads, 4);
         assert_eq!(result.targets[0].depth, 2);
         assert_eq!(result.targets[0].bases, [0, 1, 1, 0]);
         fs::write(&fasta, ">chr22\nTCCTAGGA\n").unwrap();
-        assert!(coverage(&cram, &fasta, &markers, &cancel).is_err());
+        assert!(run().is_err());
     }
 }

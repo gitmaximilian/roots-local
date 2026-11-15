@@ -1,5 +1,5 @@
 use serde::{Deserialize, Serialize};
-use std::{fs::File, io::Read, path::Path};
+use std::io::Read;
 
 const MAX_BYTES: u64 = 16 * 1024;
 const INVALID: &str = "Die Datei enthält kein unterstütztes Haplogrep-Ergebnis.";
@@ -23,8 +23,7 @@ struct Candidate {
     quality: f64,
 }
 
-pub fn maternal_file(path: &Path) -> Result<Maternal, String> {
-    let file = File::open(path).map_err(|_| "Datei konnte nicht geöffnet werden.")?;
+pub fn maternal_file(file: impl Read) -> Result<Maternal, String> {
     let mut contents = Vec::new();
     file.take(MAX_BYTES + 1)
         .read_to_end(&mut contents)

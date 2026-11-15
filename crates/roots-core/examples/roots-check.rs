@@ -1,13 +1,17 @@
-use roots_local::{analysis, catalog::Catalog, clinical, cram, external, import, lineage, report};
-use std::{env, path::Path, sync::atomic::AtomicBool};
+use roots_core::{analysis, catalog::Catalog, clinical, cram, external, import, lineage, report};
+use std::{env, fs::File, io::BufReader, path::Path, sync::atomic::AtomicBool};
+
+fn open(path: impl AsRef<Path>) -> Result<File, String> {
+    File::open(path).map_err(|_| "File could not be opened.".into())
+}
 
 fn run() -> Result<(), String> {
     let mut args = env::args_os().skip(1);
-    let [Some(input), Some(output), Some(typst)] = [args.next(), args.next(), args.next()] else {
-        return Err("Usage: roots-check <raw-data> <report.pdf> <typst> [--synthetic] [--german] [--short] [--include-calls] [--include-clinical] [--catalog <package> <public-key>] [--clinvar <vcf> [--clingen <csv>]] [--parents <first> <second>] [--cram <cram> <indexed-fasta>] [--lineage <summary-json> [--include-lineage]]".into());
+    let [Some(input), Some(output)] = [args.next(), args.next()] else {
+        return Err("Usage: roots-check <raw-data> <report.pdf> [--synthetic] [--german] [--short] [--include-calls] [--include-clinical] [--catalog <package> <public-key>] [--clinvar <vcf> [--clingen <csv>]] [--parents <first> <second>] [--cram <cram> <indexed-fasta>] [--lineage <summary-json> [--include-lineage]]".into());
     };
     let mut example = false;
-    let mut language = roots_local::locale::Language::En;
+    let mut language = roots_core::locale::Language::En;
     let mut include_calls = false;
     let mut include_clinical = false;
     let mut include_lineage = false;
@@ -23,7 +27,7 @@ fn run() -> Result<(), String> {
     while let Some(option) = args.next() {
         match option.to_str() {
             Some("--synthetic") if !example => example = true,
-            Some("--german") => language = roots_local::locale::Language::De,
+            Some("--german") => language = roots_core::locale::Language::De,
             Some("--include-calls") => include_calls = true,
             Some("--include-clinical") => include_clinical = true,
             Some("--include-lineage") => include_lineage = true,
@@ -57,13 +61,13 @@ fn run() -> Result<(), String> {
                     .next()
                     .and_then(|v| v.into_string().ok())
                     .ok_or("Missing catalog public key.")?;
-                catalog = Some(roots_local::catalog::package(Path::new(&path), &key)?);
+                catalog = Some(roots_core::catalog::package(open(&path)?, &key)?);
             }
             _ => return Err("Unknown or repeated option.".into()),
         }
     }
     let cancel = AtomicBool::new(false);
-    let data = import::file(Path::new(&input), &cancel)?;
+    let data = import::file(open(&input)?, &cancel)?;
     let catalog = match catalog {
         Some(catalog) => catalog,
         None => Catalog::starter()?,
@@ -76,10 +80,10 @@ fn run() -> Result<(), String> {
     );
     model.apply_catalog(&data, &catalog)?;
     if let Some(path) = clinvar {
-        let mut matches = clinical::file(Path::new(&path), &data, &cancel)?;
+        let mut matches = clinical::file(open(&path)?, &data, &cancel)?;
         println!("{} matching ClinVar records", matches.variants.len());
         if let Some(path) = clingen {
-            let validity = clinical::gene_validity(Path::new(&path), &matches, &cancel)?;
+            let validity = clinical::gene_validity(open(&path)?, &matches, &cancel)?;
             println!("{} matching ClinGen curations", validity.records.len());
             matches.gene_validity = Some(validity);
         }
@@ -88,16 +92,19 @@ fn run() -> Result<(), String> {
         return Err("ClinGen import requires a ClinVar file.".into());
     }
     if let Some((first, second)) = parents {
-        let first = import::file(Path::new(&first), &cancel)?;
-        let second = import::file(Path::new(&second), &cancel)?;
+        let first = import::file(open(&first)?, &cancel)?;
+        let second = import::file(open(&second)?, &cancel)?;
         let result = external::trio(&data, &first, &second, &catalog.markers()?, &cancel)?;
         println!("{} shared trio markers", result.compared);
         model.apply_trio(result);
     }
     if let Some((path, reference)) = sequencing {
+        let mut index = reference.clone();
+        index.push(".fai");
         let coverage = cram::coverage(
-            Path::new(&path),
-            Path::new(&reference),
+            open(&path)?,
+            BufReader::new(open(&reference)?),
+            open(&index)?,
             &catalog.markers()?,
             &cancel,
         )?;
@@ -113,9 +120,9 @@ fn run() -> Result<(), String> {
         model.sequence = Some(coverage);
     }
     if let Some(path) = maternal {
-        model.maternal_lineage = Some(lineage::maternal_file(Path::new(&path))?);
+        model.maternal_lineage = Some(lineage::maternal_file(open(&path)?)?);
     }
-    report::export(
+    let pdf = report::render(
         &model,
         report::Options {
             language,
@@ -126,9 +133,8 @@ fn run() -> Result<(), String> {
             pass,
             ..Default::default()
         },
-        Path::new(&typst),
-        Path::new(&output),
     )?;
+    std::fs::write(&output, pdf).map_err(|_| "PDF could not be written.")?;
     if let Some(path) = &model_json {
         let json = serde_json::to_vec(&model).map_err(|_| "Model could not be serialized.")?;
         std::fs::write(path, json).map_err(|_| "Model JSON could not be written.")?;

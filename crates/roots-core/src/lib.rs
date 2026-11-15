@@ -6,6 +6,7 @@ pub mod external;
 pub mod import;
 pub mod lineage;
 pub mod locale;
+pub mod pdf;
 pub mod pgs;
 pub mod report;
 pub mod variants;

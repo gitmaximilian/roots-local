@@ -1,5 +1,5 @@
 use ed25519_dalek::{Signer, SigningKey};
-use roots_local::{
+use roots_core::{
     analysis::{self, Status},
     catalog::{self, Catalog, Confidence},
     clinical, external, import, lineage, report,
@@ -7,15 +7,15 @@ use roots_local::{
 use sha2::{Digest, Sha256};
 use std::{fs, io::Write, path::Path, sync::atomic::AtomicBool};
 
-const SAMPLE: &[u8] = include_bytes!("../../fixtures/synthetic-myheritage.txt");
-const MATERNAL: &str = include_str!("../../fixtures/synthetic-maternal.json");
+const SAMPLE: &[u8] = include_bytes!("../../../fixtures/synthetic-myheritage.txt");
+const MATERNAL: &str = include_str!("../../../fixtures/synthetic-maternal.json");
 const COLUMNS: &str = "##reference=build37\nRSID,CHROMOSOME,POSITION,RESULT\n";
 
 #[test]
 fn maternal_summary_rejects_other_references_and_invalid_coverage() {
     let file = tempfile::NamedTempFile::new().unwrap();
     fs::write(file.path(), MATERNAL).unwrap();
-    assert!(lineage::maternal_file(file.path()).is_ok());
+    assert!(lineage::maternal_file(fs::File::open(file.path()).unwrap()).is_ok());
     for invalid in [
         MATERNAL.replace("phylotree-rcrs@17.3", "phylotree-rsrs@17.2"),
         MATERNAL.replace("1200", "16570"),
@@ -23,7 +23,7 @@ fn maternal_summary_rejects_other_references_and_invalid_coverage() {
         MATERNAL.replace("H100", "unsupported markup"),
     ] {
         fs::write(file.path(), invalid).unwrap();
-        assert!(lineage::maternal_file(file.path()).is_err());
+        assert!(lineage::maternal_file(fs::File::open(file.path()).unwrap()).is_err());
     }
 }
 
@@ -105,7 +105,7 @@ fn clinvar_vcf_requires_consistent_assembly_identifier_and_alleles() {
     let mut compressed = flate2::write::GzEncoder::new(Vec::new(), flate2::Compression::fast());
     compressed.write_all(source.as_bytes()).unwrap();
     fs::write(file.path(), compressed.finish().unwrap()).unwrap();
-    let matched = clinical::file(file.path(), &data, &cancel).unwrap();
+    let matched = clinical::file(fs::File::open(file.path()).unwrap(), &data, &cancel).unwrap();
     assert_eq!(matched.variants.len(), 1);
     assert_eq!(matched.variants[0].copies, 1);
     assert_eq!(
@@ -119,11 +119,12 @@ fn clinvar_vcf_requires_consistent_assembly_identifier_and_alleles() {
         "TESTGENE,HGNC:123,Other condition,MONDO:9999998,AR,SOP12,Strong,https://search.clinicalgenome.org/kb/gene-validity/test-2\n",
     );
     fs::write(file.path(), validity).unwrap();
-    let evidence = clinical::gene_validity(file.path(), &matched, &cancel).unwrap();
+    let evidence =
+        clinical::gene_validity(fs::File::open(file.path()).unwrap(), &matched, &cancel).unwrap();
     assert_eq!(evidence.records.len(), 1);
     assert_eq!(evidence.records[0].mondo, "MONDO:9999999");
     fs::write(file.path(), source.replace("GRCh37", "GRCh38")).unwrap();
-    assert!(clinical::file(file.path(), &data, &cancel).is_err());
+    assert!(clinical::file(fs::File::open(file.path()).unwrap(), &data, &cancel).is_err());
 }
 
 #[test]
@@ -332,14 +333,15 @@ fn zip_and_cancellation_are_safe_and_repeatable() {
         .unwrap();
     zip.write_all(SAMPLE).unwrap();
     zip.finish().unwrap();
-    assert!(import::file(&path, &AtomicBool::new(true)).is_err());
+    assert!(import::file(fs::File::open(&path).unwrap(), &AtomicBool::new(true)).is_err());
     for _ in 0..2 {
-        let imported = import::file(&path, &AtomicBool::new(false)).unwrap();
+        let imported =
+            import::file(fs::File::open(&path).unwrap(), &AtomicBool::new(false)).unwrap();
         assert_eq!(imported.rows.len(), 15);
         assert_eq!(imported.format, "ZIP / CSV");
     }
     fs::write(&path, b"PK\x03\x04not a zip").unwrap();
-    assert!(import::file(&path, &AtomicBool::new(false)).is_err());
+    assert!(import::file(fs::File::open(&path).unwrap(), &AtomicBool::new(false)).is_err());
 }
 
 #[test]
@@ -353,9 +355,21 @@ fn local_origins_matches_segments_and_family() {
         "Name,Shared DNA (cM),Relationship\nSynthetisch,400,Cousin\n",
     )
     .unwrap();
-    assert_eq!(external::supporting_file(&path).unwrap().matches.len(), 1);
+    assert_eq!(
+        external::supporting_file(fs::File::open(&path).unwrap())
+            .unwrap()
+            .matches
+            .len(),
+        1
+    );
     fs::write(&path, "Name,Chromosome,Start Location,End Location,Segment Size (cM)\nSynthetisch,2,125,440,4.6\n").unwrap();
-    assert_eq!(external::supporting_file(&path).unwrap().segments.len(), 1);
+    assert_eq!(
+        external::supporting_file(fs::File::open(&path).unwrap())
+            .unwrap()
+            .segments
+            .len(),
+        1
+    );
     let child = import::parse(SAMPLE, &AtomicBool::new(false)).unwrap();
     let parent = format!("{COLUMNS}rs4988235,2,136608646,AA\nrs17822931,16,48258198,CC\n");
     let parent = import::parse(parent.as_bytes(), &AtomicBool::new(false)).unwrap();
@@ -420,7 +434,7 @@ fn signed_catalog_rejects_tampering() {
     let mut package =
         serde_json::json!({"manifest":manifest,"payload":payload,"signature":signature});
     fs::write(&path, package.to_string()).unwrap();
-    let verified = catalog::package(&path, &pubkey).unwrap();
+    let verified = catalog::package(fs::File::open(&path).unwrap(), &pubkey).unwrap();
     assert_eq!(verified.version, version);
     for (row, matched) in [
         ("rs90000001,1,12000,AG", true),
@@ -440,15 +454,11 @@ fn signed_catalog_rejects_tampering() {
     }
     package["payload"] = serde_json::Value::String(format!("{payload} "));
     fs::write(&path, package.to_string()).unwrap();
-    assert!(catalog::package(&path, &pubkey).is_err());
+    assert!(catalog::package(fs::File::open(&path).unwrap(), &pubkey).is_err());
 }
 
 #[test]
-fn optional_pdf_full_and_short() {
-    let Some(typst) = std::env::var_os("ROOTS_TEST_TYPST") else {
-        return;
-    };
-    let typst = Path::new(&typst);
+fn pdf_full_and_short() {
     let catalog = Catalog::starter().unwrap();
     let data = import::parse(SAMPLE, &AtomicBool::new(false)).unwrap();
     let mut model = report::Model::new(
@@ -457,17 +467,17 @@ fn optional_pdf_full_and_short() {
         analysis::evaluate(&data, &catalog).unwrap(),
         true,
     );
-    model.sequence = Some(roots_local::cram::Coverage {
+    model.sequence = Some(roots_core::cram::Coverage {
         build: import::Build::Grch37,
         reads: 4,
-        targets: vec![roots_local::cram::Target {
+        targets: vec![roots_core::cram::Target {
             id: "synthetic".into(),
             coordinate: "22:2".into(),
             depth: 2,
             bases: [0, 1, 1, 0],
         }],
     });
-    let full = report::render(&model, report::Options::default(), typst).unwrap();
+    let full = report::render(&model, report::Options::default()).unwrap();
     let short = report::render(
         &model,
         report::Options {
@@ -475,7 +485,6 @@ fn optional_pdf_full_and_short() {
             include_calls: true,
             ..Default::default()
         },
-        typst,
     )
     .unwrap();
     assert!(full.starts_with(b"%PDF") && short.starts_with(b"%PDF"));
@@ -484,7 +493,7 @@ fn optional_pdf_full_and_short() {
 
 #[test]
 fn additive_score_requires_full_matching_build_and_alleles() {
-    use roots_local::pgs::{calculate, Score, Term};
+    use roots_core::pgs::{calculate, Score, Term};
     let model = Score {
         id: "synthetic".into(),
         title: "Synthetic model".into(),
@@ -516,7 +525,7 @@ fn additive_score_requires_full_matching_build_and_alleles() {
     let result = calculate(&malformed, std::slice::from_ref(&model));
     assert_eq!((result[0].matched, result[0].raw), (1, None));
 
-    if let Some(typst) = std::env::var_os("ROOTS_TEST_TYPST") {
+    {
         let catalog = Catalog::starter().unwrap();
         let mut pdf = report::Model::new(
             analysis::summary(&input),
@@ -542,24 +551,18 @@ fn additive_score_requires_full_matching_build_and_alleles() {
                     short,
                     ..Default::default()
                 },
-                Path::new(&typst),
             )
             .unwrap();
             assert!(data.starts_with(b"%PDF"));
         }
         if let Some(python) = std::env::var_os("ROOTS_TEST_PYTHON") {
-            verify_pdf_contents(&mut pdf, &input, Path::new(&typst), Path::new(&python));
+            verify_pdf_contents(&mut pdf, &input, Path::new(&python));
         }
     }
 }
 
-fn verify_pdf_contents(
-    pdf: &mut report::Model,
-    input: &import::Import,
-    typst: &Path,
-    python: &Path,
-) {
-    use roots_local::locale::Language;
+fn verify_pdf_contents(pdf: &mut report::Model, input: &import::Import, python: &Path) {
+    use roots_core::locale::Language;
     let directory = tempfile::tempdir().unwrap();
     let vcf = directory.path().join("reference.vcf");
     fs::write(&vcf, concat!(
@@ -567,7 +570,12 @@ fn verify_pdf_contents(
         "#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\n",
         "2\t136608646\t999999991\tA\tG\t.\t.\tRS=4988235;CLNSIG=Pathogenic;CLNREVSTAT=criteria_provided;CLNDN=Synthetic_condition\n",
     )).unwrap();
-    let mut clinical = clinical::file(&vcf, input, &AtomicBool::new(false)).unwrap();
+    let mut clinical = clinical::file(
+        fs::File::open(&vcf).unwrap(),
+        input,
+        &AtomicBool::new(false),
+    )
+    .unwrap();
     clinical.gene_validity = Some(clinical::GeneValidity {
         date: "2026-01-01".into(),
         records: vec![clinical::GeneDisease {
@@ -584,7 +592,8 @@ fn verify_pdf_contents(
     pdf.clinical = Some(clinical);
     let maternal = directory.path().join("maternal.json");
     fs::write(&maternal, MATERNAL).unwrap();
-    pdf.maternal_lineage = Some(lineage::maternal_file(&maternal).unwrap());
+    pdf.maternal_lineage =
+        Some(lineage::maternal_file(fs::File::open(&maternal).unwrap()).unwrap());
     for (language, score, coverage, marker, unavailable) in [
         (
             Language::En,
@@ -606,7 +615,7 @@ fn verify_pdf_contents(
                 [(false, false), (false, true), (true, false), (true, true)]
             {
                 let path = directory.path().join("report.pdf");
-                report::export(
+                let bytes = report::render(
                     pdf,
                     report::Options {
                         language,
@@ -616,10 +625,9 @@ fn verify_pdf_contents(
                         include_lineage: !include_clinical,
                         ..Default::default()
                     },
-                    typst,
-                    &path,
                 )
                 .unwrap();
+                fs::write(&path, bytes).unwrap();
                 let result = std::process::Command::new(python)
                     .env("PYTHONIOENCODING", "utf-8")
                     .arg("-c")
@@ -793,10 +801,7 @@ fn sex_check_and_reverse_strand() {
 
 #[test]
 fn medicine_pass_is_one_page_and_includes_medicines() {
-    let (Some(typst), Some(python)) = (
-        std::env::var_os("ROOTS_TEST_TYPST"),
-        std::env::var_os("ROOTS_TEST_PYTHON"),
-    ) else {
+    let Some(python) = std::env::var_os("ROOTS_TEST_PYTHON") else {
         return;
     };
     let catalog = Catalog::starter().unwrap();
@@ -814,16 +819,15 @@ fn medicine_pass_is_one_page_and_includes_medicines() {
     let directory = tempfile::tempdir().unwrap();
     let path = directory.path().join("pass.pdf");
     // No clinical opt-in in the options: exporting the pass is the opt-in.
-    report::export(
+    let bytes = report::render(
         &model,
         report::Options {
             pass: true,
             ..Default::default()
         },
-        Path::new(&typst),
-        &path,
     )
     .unwrap();
+    fs::write(&path, bytes).unwrap();
     let result = std::process::Command::new(python)
         .env("PYTHONIOENCODING", "utf-8")
         .arg("-c")

@@ -1,12 +1,13 @@
 use ed25519_dalek::{Signature, VerifyingKey};
-use rusqlite::{params, Connection};
 use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
-use std::{collections::HashSet, fs, io::Read, path::Path};
-use tempfile::NamedTempFile;
+use std::{
+    collections::{HashMap, HashSet},
+    io::Read,
+};
 
 use crate::locale::Language;
-pub const STARTER: &str = include_str!("../../catalog/starter.json");
+pub const STARTER: &str = include_str!("../../../catalog/starter.json");
 const MAX_PAYLOAD: u64 = 32 * 1024 * 1024;
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -28,8 +29,8 @@ pub fn structure() -> Vec<Chapter> {
 
 pub fn localized_structure(language: Language) -> Vec<Chapter> {
     let data = match language {
-        Language::En => include_str!("../../catalog/report-structure.en.json"),
-        Language::De => include_str!("../../catalog/report-structure.de.json"),
+        Language::En => include_str!("../../../catalog/report-structure.en.json"),
+        Language::De => include_str!("../../../catalog/report-structure.de.json"),
     };
     serde_json::from_str(data).expect("valid built-in chapter structure")
 }
@@ -177,9 +178,15 @@ fn valid_text(value: &str, limit: usize) -> bool {
         && !value.chars().any(char::is_control)
 }
 
+/// A validated catalog, indexed by marker ID and by coordinate on both builds.
 pub struct Catalog {
     pub version: String,
-    db: Connection,
+    /// Markers sorted by ID.
+    markers: Vec<Marker>,
+    /// Traits sorted by section, then ID.
+    traits: Vec<Trait>,
+    by_id: HashMap<String, usize>,
+    by_position: HashMap<(crate::import::Build, u32), Vec<usize>>,
     pub scores: Vec<crate::pgs::Score>,
     pub provenance: Option<Manifest>,
 }
@@ -348,93 +355,70 @@ impl Catalog {
         {
             return Err("Ein polygenetisches Forschungsmodell ist ungültig.".into());
         }
-        let mut db = Connection::open_in_memory().map_err(sql_error)?;
-        db.execute_batch("CREATE TABLE marker (id TEXT PRIMARY KEY, gene TEXT NOT NULL, chr TEXT NOT NULL, b37 INTEGER NOT NULL, b38 INTEGER NOT NULL, alleles TEXT NOT NULL);
-            CREATE INDEX marker_b37 ON marker(chr, b37);
-            CREATE INDEX marker_b38 ON marker(chr, b38);
-            CREATE TABLE trait (id TEXT PRIMARY KEY, section TEXT NOT NULL, content TEXT NOT NULL);
-            CREATE INDEX trait_section ON trait(section);").map_err(sql_error)?;
-        let transaction = db.transaction().map_err(sql_error)?;
-        {
-            let mut marker_sql = transaction
-                .prepare("INSERT INTO marker VALUES (?1, ?2, ?3, ?4, ?5, ?6)")
-                .map_err(sql_error)?;
-            for Marker(id, gene, chr, old, new, alleles) in payload.markers {
-                marker_sql
-                    .execute(params![id, gene, chr, old, new, alleles])
-                    .map_err(sql_error)?;
-            }
-            let mut trait_sql = transaction
-                .prepare("INSERT INTO trait VALUES (?1, ?2, ?3)")
-                .map_err(sql_error)?;
-            for item in payload.traits {
-                let encoded = serde_json::to_string(&item)
-                    .map_err(|_| "Merkmalsregel kann nicht gelesen werden.")?;
-                trait_sql
-                    .execute(params![item.id, item.section, encoded])
-                    .map_err(sql_error)?;
+        let mut markers = payload.markers;
+        markers.sort_by(|a, b| a.0.cmp(&b.0));
+        let mut traits = payload.traits;
+        traits.sort_by(|a, b| (&a.section, &a.id).cmp(&(&b.section, &b.id)));
+        let by_id = markers
+            .iter()
+            .enumerate()
+            .map(|(index, marker)| (marker.0.clone(), index))
+            .collect();
+        let mut by_position: HashMap<_, Vec<usize>> = HashMap::new();
+        for (index, marker) in markers.iter().enumerate() {
+            use crate::import::Build;
+            for (build, position) in [(Build::Grch37, marker.3), (Build::Grch38, marker.4)] {
+                if position > 0 {
+                    by_position
+                        .entry((build, position))
+                        .or_default()
+                        .push(index);
+                }
             }
         }
-        transaction.commit().map_err(sql_error)?;
         Ok(Self {
             version: payload.version,
-            db,
+            markers,
+            traits,
+            by_id,
+            by_position,
             scores: payload.scores,
             provenance: None,
         })
     }
 
     pub fn markers(&self) -> Result<Vec<Marker>, String> {
-        let mut query = self
-            .db
-            .prepare("SELECT id, gene, chr, b37, b38, alleles FROM marker ORDER BY id")
-            .map_err(sql_error)?;
-        let values = query
-            .query_map([], |r| {
-                Ok(Marker(
-                    r.get(0)?,
-                    r.get(1)?,
-                    r.get(2)?,
-                    r.get(3)?,
-                    r.get(4)?,
-                    r.get(5)?,
-                ))
-            })
-            .map_err(sql_error)?;
-        values.collect::<Result<Vec<_>, _>>().map_err(sql_error)
+        Ok(self.markers.clone())
     }
 
     pub fn traits(&self) -> Result<Vec<Trait>, String> {
-        let mut query = self
-            .db
-            .prepare("SELECT content FROM trait ORDER BY section, id")
-            .map_err(sql_error)?;
-        let values = query
-            .query_map([], |r| r.get::<_, String>(0))
-            .map_err(sql_error)?;
-        values
-            .map(|value| {
-                serde_json::from_str(&value.map_err(sql_error)?)
-                    .map_err(|_| "Die Merkmalsregel ist beschädigt.".into())
+        Ok(self.traits.clone())
+    }
+
+    /// Looks up a marker by its rsID.
+    pub fn marker(&self, id: &str) -> Option<&Marker> {
+        self.by_id.get(id).map(|&index| &self.markers[index])
+    }
+
+    /// Whether a catalog marker sits at this coordinate of the given build.
+    pub fn has_position(
+        &self,
+        build: crate::import::Build,
+        chromosome: &str,
+        position: u32,
+    ) -> bool {
+        self.by_position
+            .get(&(build, position))
+            .is_some_and(|found| {
+                found
+                    .iter()
+                    .any(|&index| self.markers[index].2 == chromosome)
             })
-            .collect()
     }
 }
 
-fn sql_error(_: rusqlite::Error) -> String {
-    "Der Referenzkatalog konnte nicht gelesen oder aufgebaut werden.".into()
-}
-
-pub fn bounded_read(path: &Path, max: u64) -> Result<Vec<u8>, String> {
-    let input = fs::File::open(path).map_err(|_| "Die Datei konnte nicht geöffnet werden.")?;
-    if input
-        .metadata()
-        .map_err(|_| "Die Dateigröße konnte nicht geprüft werden.")?
-        .len()
-        > max
-    {
-        return Err("Die Datei überschreitet das Größenlimit.".into());
-    }
+/// Reads at most `max` bytes and fails if the input is longer.
+pub fn bounded_read(input: impl Read, max: u64) -> Result<Vec<u8>, String> {
     let mut data = Vec::new();
     input
         .take(max + 1)
@@ -463,8 +447,8 @@ fn hex<const N: usize>(value: &str) -> Option<[u8; N]> {
     }
     Some(bytes)
 }
-pub fn package(path: &Path, trusted_key: &str) -> Result<Catalog, String> {
-    let bytes = bounded_read(path, MAX_PAYLOAD)?;
+pub fn package(input: impl Read, trusted_key: &str) -> Result<Catalog, String> {
+    let bytes = bounded_read(input, MAX_PAYLOAD)?;
     let package: Package =
         serde_json::from_slice(&bytes).map_err(|_| "Ungültiges Katalogpaket.")?;
     let key = hex::<32>(trusted_key.trim())
@@ -495,22 +479,4 @@ pub fn package(path: &Path, trusted_key: &str) -> Result<Catalog, String> {
     let mut catalog = Catalog::from_payload(payload)?;
     catalog.provenance = Some(manifest);
     Ok(catalog)
-}
-
-pub fn write_atomic(path: &Path, bytes: &[u8]) -> Result<(), String> {
-    use std::io::Write;
-    let parent = path
-        .parent()
-        .filter(|p| !p.as_os_str().is_empty())
-        .unwrap_or_else(|| Path::new("."));
-    let mut temporary =
-        NamedTempFile::new_in(parent).map_err(|_| "Der Exportordner ist nicht beschreibbar.")?;
-    temporary
-        .write_all(bytes)
-        .and_then(|_| temporary.as_file().sync_all())
-        .map_err(|_| "Der Export konnte nicht geschrieben werden.")?;
-    temporary
-        .persist(path)
-        .map_err(|_| "Der Export konnte nicht gespeichert werden.")?;
-    Ok(())
 }

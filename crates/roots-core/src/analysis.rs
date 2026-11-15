@@ -306,27 +306,17 @@ pub fn evaluate_with_coverage(
     data: &Import,
     catalog: &Catalog,
 ) -> Result<(usize, Vec<Finding>), String> {
-    let markers = catalog.markers()?;
-    let by_id: HashMap<_, _> = markers
-        .iter()
-        .map(|marker| (marker.0.as_str(), marker))
-        .collect();
-    let wanted: HashSet<_> = markers
-        .iter()
-        .filter_map(|m| {
-            data.build
-                .map(|b| (m.2.as_str(), if b == Build::Grch37 { m.3 } else { m.4 }))
-        })
-        .filter(|(_, position)| *position > 0)
-        .collect();
     let mut at_pos = HashMap::<_, Vec<_>>::new();
     let mut ids = HashSet::new();
     for row in &data.rows {
         let pos = (row.chromosome.as_str(), row.position);
-        if wanted.contains(&pos) {
+        if data
+            .build
+            .is_some_and(|build| catalog.has_position(build, pos.0, pos.1))
+        {
             at_pos.entry(pos).or_default().push(row);
         }
-        if by_id.contains_key(row.id.as_str()) {
+        if catalog.marker(&row.id).is_some() {
             ids.insert(row.id.as_str());
         }
     }
@@ -337,17 +327,20 @@ pub fn evaluate_with_coverage(
             .markers
             .iter()
             .map(|id| {
-                check(
-                    by_id[id.as_str()],
+                let marker = catalog
+                    .marker(id)
+                    .ok_or("Der Referenzkatalog ist unvollständig.")?;
+                Ok(check(
+                    marker,
                     data,
                     &at_pos,
                     &ids,
                     item.require_identifier
                         || item.method == Method::Gwas
                         || item.section.starts_with("15."),
-                )
+                ))
             })
-            .collect();
+            .collect::<Result<_, String>>()?;
         let complete = checks.iter().all(|c| c.call.is_some());
         gwas_total += usize::from(item.method == Method::Gwas);
         // Large catalogs contribute observed loci to the report. Existing curated

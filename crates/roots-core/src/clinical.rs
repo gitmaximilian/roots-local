@@ -3,9 +3,7 @@ use flate2::bufread::MultiGzDecoder;
 use serde::Serialize;
 use std::{
     collections::{BTreeMap, HashMap},
-    fs::File,
     io::{BufRead, BufReader, Read},
-    path::Path,
     sync::atomic::{AtomicBool, Ordering::Relaxed},
 };
 
@@ -56,9 +54,9 @@ pub struct GeneDisease {
     pub evidence_url: String,
 }
 
-pub fn file(path: &Path, data: &Import, cancel: &AtomicBool) -> Result<Matches, String> {
-    let file = File::open(path).map_err(|_| "Datei konnte nicht geöffnet werden.")?;
-    let mut reader = BufReader::new(file);
+/// Matches a ClinVar VCF (plain or bgzip/gzip compressed) against the import.
+pub fn file(file: impl Read, data: &Import, cancel: &AtomicBool) -> Result<Matches, String> {
+    let mut reader = BufReader::with_capacity(1 << 20, file);
     let compressed = reader
         .fill_buf()
         .map_err(|_| INVALID)?
@@ -261,20 +259,17 @@ fn match_row(
 }
 
 pub fn gene_validity(
-    path: &Path,
+    file: impl Read,
     matches: &Matches,
     cancel: &AtomicBool,
 ) -> Result<GeneValidity, String> {
     const INVALID: &str = "Die Datei ist keine unterstützte ClinGen-CSV.";
     const MAX_BYTES: u64 = 16 * 1024 * 1024;
-    let file = File::open(path).map_err(|_| "Datei konnte nicht geöffnet werden.")?;
-    if file.metadata().map_err(|_| INVALID)?.len() > MAX_BYTES {
-        return Err(INVALID.into());
-    }
+    let bytes = crate::catalog::bounded_read(file, MAX_BYTES).map_err(|_| INVALID)?;
     let mut csv = csv::ReaderBuilder::new()
         .has_headers(false)
         .flexible(true)
-        .from_reader(file.take(MAX_BYTES + 1));
+        .from_reader(bytes.as_slice());
     let mut rows = csv.records();
     let first = rows.next().ok_or(INVALID)?.map_err(|_| INVALID)?;
     let second = rows.next().ok_or(INVALID)?.map_err(|_| INVALID)?;

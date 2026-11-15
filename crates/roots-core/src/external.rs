@@ -5,7 +5,7 @@ use crate::{
 use serde::{Deserialize, Serialize};
 use std::{
     collections::{HashMap, HashSet},
-    path::Path,
+    io::Read,
     sync::atomic::{AtomicBool, Ordering::Relaxed},
 };
 
@@ -85,8 +85,8 @@ pub fn origins(value: &str) -> Result<External, String> {
     })
 }
 
-pub fn supporting_file(path: &Path) -> Result<External, String> {
-    let bytes = bounded_read(path, 8 * 1024 * 1024)?;
+pub fn supporting_file(input: impl Read) -> Result<External, String> {
+    let bytes = bounded_read(input, 8 * 1024 * 1024)?;
     let first_line = bytes
         .split(|byte| *byte == b'\n')
         .next()

@@ -22,7 +22,7 @@ pub fn english(message: &str) -> &str {
     static STRINGS: OnceLock<HashMap<&'static str, &'static str>> = OnceLock::new();
     STRINGS
         .get_or_init(|| {
-            serde_json::from_str(include_str!("../../catalog/result-strings.json"))
+            serde_json::from_str(include_str!("../../../catalog/result-strings.json"))
                 .expect("valid built-in result translations")
         })
         .get(message)
