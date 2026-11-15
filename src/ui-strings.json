@@ -261,5 +261,10 @@
   "Schlussfolgerung": "Conclusion",
   "Bitte eine CSV-, TSV-, TXT- oder ZIP-Datei verwenden.": "Please use a CSV, TSV, TXT, or ZIP file.",
   "Bitte genau zwei Elterndateien auswählen.": "Please select exactly two parent files.",
-  "Bitte CRAM, FASTA und den .fai-Index gemeinsam auswählen.": "Please select the CRAM, the FASTA, and its .fai index together."
+  "Bitte CRAM, FASTA und den .fai-Index gemeinsam auswählen.": "Please select the CRAM, the FASTA, and its .fai index together.",
+  "Impressum & Datenschutz": "Legal notice & privacy",
+  "Datenschutz": "Privacy",
+  "Eine neue Version von Roots Local ist bereit.": "A new version of Roots Local is ready.",
+  "Neu laden": "Reload",
+  "Menü": "Menu"
 }

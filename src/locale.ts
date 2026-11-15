@@ -3,8 +3,19 @@ import strings from "./ui-strings.json";
 
 export type Language = "en" | "de";
 
+// The language is the only thing Roots Local remembers in the browser.
+function stored(): string | null {
+  try {
+    return localStorage.getItem("roots-local-language");
+  } catch {
+    return null;
+  }
+}
 let language: Language =
-  localStorage.getItem("roots-local-language") === "de" ? "de" : "en";
+  stored() === "de" ||
+  (stored() === null && navigator.language.toLowerCase().startsWith("de"))
+    ? "de"
+    : "en";
 
 export function getLanguage() {
   return language;
@@ -13,7 +24,11 @@ export function getLanguage() {
 export function setLanguage(value: Language) {
   language = value;
   document.documentElement.lang = value;
-  localStorage.setItem("roots-local-language", value);
+  try {
+    localStorage.setItem("roots-local-language", value);
+  } catch {
+    // Private browsing may refuse storage; the choice then lasts for this tab.
+  }
 }
 
 export function t(message: keyof typeof strings): string {

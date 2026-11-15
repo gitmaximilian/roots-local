@@ -168,7 +168,14 @@ export type VariantPage = {
   rows: Variant[];
 };
 export type Page =
-  "home" | "chapters" | "atlas" | "variants" | "report" | "pass" | "data";
+  | "home"
+  | "chapters"
+  | "atlas"
+  | "variants"
+  | "report"
+  | "pass"
+  | "data"
+  | "privacy";
 export type Options = {
   short: boolean;
   name: string | null;

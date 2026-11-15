@@ -27,6 +27,10 @@ if (cancelFlag) worker.postMessage({ type: "cancel-flag", flag: cancelFlag.buffe
 
 worker.onmessage = (event: MessageEvent<Response>) => {
   const message = event.data;
+  if (message.type === "ready") {
+    document.documentElement.dataset[message.part] = "ready";
+    return;
+  }
   if (message.type === "progress") {
     const fraction = message.total > 0 ? message.read / message.total : 0;
     for (const listener of progressListeners) listener(fraction);
@@ -69,21 +73,29 @@ export function onProgress(listener: (fraction: number) => void) {
 /** Opens the system file picker. Resolves with no files when it is dismissed. */
 export function pickFiles(accept: string, multiple = false): Promise<File[]> {
   return new Promise((resolve) => {
+    // Remove inputs of earlier, dismissed pickers.
+    for (const old of document.querySelectorAll("input.file-input")) old.remove();
     const input = document.createElement("input");
     input.type = "file";
     // iOS greys out files whose type it does not know, so the filter is only a
     // hint on desktop browsers. The worker validates every file anyway.
     if (!/iPad|iPhone|iPod/.test(navigator.userAgent)) input.accept = accept;
     input.multiple = multiple;
-    input.style.display = "none";
+    // Visually hidden rather than display:none: iOS Safari ignores clicks on
+    // file inputs that are not rendered.
+    input.className = "file-input";
     let settled = false;
     const finish = (files: File[]) => {
       if (settled) return;
       settled = true;
-      input.remove();
       resolve(files);
     };
-    input.addEventListener("change", () => finish([...(input.files ?? [])]));
+    input.addEventListener("change", () => {
+      finish([...(input.files ?? [])]);
+      input.remove();
+    });
+    // The element stays until the next picker opens: some browsers report a
+    // cancel before a late selection arrives.
     input.addEventListener("cancel", () => finish([]));
     document.body.append(input);
     input.click();
@@ -104,3 +116,44 @@ export function download(bytes: Uint8Array, name: string, type = "application/pd
 }
 
 export const isApple = /Mac|iPhone|iPad|iPod/.test(navigator.platform || navigator.userAgent);
+
+/**
+ * Registers the service worker that keeps this build's static files for
+ * offline use. A new version waits until the user agrees to reload.
+ */
+export function registerOffline(onUpdate: (apply: () => void) => void) {
+  if (!("serviceWorker" in navigator) || import.meta.env.DEV) return;
+  // Reload only after the user accepted an update. On the first visit the new
+  // service worker also takes control, and that must not interrupt the user.
+  let accepted = false;
+  navigator.serviceWorker.addEventListener("controllerchange", () => {
+    if (!accepted) return;
+    accepted = false;
+    location.reload();
+  });
+  void navigator.serviceWorker
+    .register("/sw.js", { scope: "/", updateViaCache: "none" })
+    .then((registration) => {
+      const offer = (waiting: ServiceWorker) =>
+        onUpdate(() => {
+          accepted = true;
+          waiting.postMessage("activate-update");
+        });
+      if (registration.waiting && navigator.serviceWorker.controller) {
+        offer(registration.waiting);
+      }
+      registration.addEventListener("updatefound", () => {
+        const installing = registration.installing;
+        installing?.addEventListener("statechange", () => {
+          if (installing.state === "installed" && navigator.serviceWorker.controller) {
+            offer(installing);
+          }
+        });
+      });
+      // Check for a new version when the app returns to the foreground.
+      document.addEventListener("visibilitychange", () => {
+        if (document.visibilityState === "visible") void registration.update().catch(() => undefined);
+      });
+    })
+    .catch(() => undefined);
+}

@@ -33,14 +33,14 @@ type Call =
   | { method: "saveOrigins"; entries: string }
   | { method: "loadCatalog"; file: File; key: string }
   | { method: "reset" }
-  | { method: "renderPdf"; options: PdfOptions }
-  | { method: "preloadPdf" };
+  | { method: "renderPdf"; options: PdfOptions };
 
 export type Request = Call & { id: number };
 export type Method = Call["method"];
 export type Args<M extends Method> = Omit<Extract<Call, { method: M }>, "method">;
 
 export type Response =
+  | { type: "ready"; part: "analysis" | "pdf" }
   | { type: "progress"; read: number; total: number }
   | { type: "result"; id: number; ok: true; value: unknown }
   | { type: "result"; id: number; ok: false; error: string };

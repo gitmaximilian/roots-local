@@ -168,15 +168,9 @@ td small {
   min-height: 0;
   background: var(--sidebar);
   border-right: 1px solid var(--line);
-  padding: 46px 10px 12px;
+  padding: 18px 10px 12px;
   backdrop-filter: saturate(160%) blur(24px);
   -webkit-backdrop-filter: saturate(160%) blur(24px);
-}
-.sidebar .drag {
-  position: absolute;
-  inset: 0 auto auto 0;
-  width: var(--sidebar-width);
-  height: 40px;
 }
 .brand {
   display: flex;
@@ -1421,4 +1415,218 @@ tr.clickable:hover td {
   .overview-hero {
     grid-template-columns: minmax(0, 1fr);
   }
+}
+
+/* Privacy page and sidebar footer */
+.sidebar-bottom {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 2px;
+}
+.sidebar-bottom button {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  padding: 6px 4px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+.sidebar-bottom button:hover,
+.sidebar-bottom button.selected {
+  color: var(--ink);
+}
+.sidebar-bottom a {
+  color: inherit;
+  padding: 2px 4px 4px 25px;
+  text-decoration: none;
+}
+.sidebar-bottom a:hover {
+  text-decoration: underline;
+}
+.privacy {
+  max-width: 760px;
+  display: grid;
+  gap: 16px;
+}
+.privacy .panel {
+  padding: 20px 22px;
+}
+.privacy h2 {
+  margin: 0 0 8px;
+  font-size: 16px;
+}
+.privacy p,
+.privacy li {
+  line-height: 1.55;
+}
+.privacy ol {
+  margin: 0;
+  padding-left: 20px;
+  display: grid;
+  gap: 6px;
+}
+.privacy-links a {
+  color: var(--accent);
+}
+
+/* ---------- browser shell ---------- */
+.menu-button {
+  display: none;
+  border: 0;
+  background: none;
+  color: var(--ink);
+  align-items: center;
+  justify-content: center;
+}
+.nav-scrim {
+  display: none;
+}
+
+/* ---------- touch ---------- */
+@media (pointer: coarse) {
+  .sidebar nav button,
+  .sidebar-bottom button,
+  .button,
+  .text-button,
+  .language-control select,
+  .palette-trigger,
+  .choice,
+  .menu-button {
+    min-height: 44px;
+  }
+  .menu-button {
+    min-width: 44px;
+  }
+  input,
+  select,
+  textarea {
+    font-size: 16px; /* prevents iOS from zooming into focused fields */
+  }
+}
+
+/* ---------- phone ---------- */
+@media (max-width: 760px) {
+  body {
+    overflow: auto;
+  }
+  .app,
+  .app.with-inspector {
+    grid-template-columns: minmax(0, 1fr);
+    height: 100dvh;
+  }
+  .sidebar {
+    position: fixed;
+    z-index: 40;
+    inset: 0 auto 0 0;
+    width: min(320px, 86vw);
+    padding: calc(14px + env(safe-area-inset-top)) 10px
+      calc(12px + env(safe-area-inset-bottom))
+      calc(10px + env(safe-area-inset-left));
+    background: var(--bg);
+    box-shadow: var(--shadow);
+    transform: translateX(-105%);
+    transition: transform 0.22s ease;
+    visibility: hidden;
+  }
+  .app.nav-open .sidebar {
+    transform: none;
+    visibility: visible;
+  }
+  .nav-scrim {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 30;
+    background: var(--overlay);
+  }
+  .menu-button {
+    display: inline-flex;
+    margin-left: -8px;
+  }
+  .topbar {
+    height: auto;
+    min-height: 52px;
+    gap: 6px;
+    padding: env(safe-area-inset-top) calc(10px + env(safe-area-inset-right)) 0
+      calc(10px + env(safe-area-inset-left));
+  }
+  .topbar .title {
+    min-width: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+  .topbar .title .example {
+    display: none;
+  }
+  .toolbar-actions {
+    gap: 4px;
+  }
+  .palette-trigger {
+    min-width: 0;
+    width: 44px;
+    justify-content: center;
+    padding: 0;
+  }
+  .palette-trigger span,
+  .palette-trigger kbd {
+    display: none;
+  }
+  .switch {
+    font-size: 12px;
+  }
+  .content {
+    padding: 16px calc(16px + env(safe-area-inset-right))
+      calc(40px + env(safe-area-inset-bottom))
+      calc(16px + env(safe-area-inset-left));
+    gap: 14px;
+  }
+  h1 {
+    font-size: 23px;
+  }
+  .inspector {
+    position: fixed;
+    z-index: 50;
+    inset: 0;
+    border-left: 0;
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  .inspector header {
+    height: auto;
+    min-height: 52px;
+    padding: env(safe-area-inset-top) 14px 0;
+  }
+  .inspector header button {
+    min-width: 44px;
+    min-height: 44px;
+    justify-content: center;
+  }
+  .stats,
+  .welcome,
+  .atlas,
+  .report-layout,
+  .browse,
+  .overview-hero {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .actions {
+    flex-wrap: wrap;
+  }
+  .variant-table {
+    overflow-x: auto;
+  }
+}
+.file-input {
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
 }

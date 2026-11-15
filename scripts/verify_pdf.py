@@ -1,4 +1,10 @@
-"""Check the synthetic full report with pypdf."""
+"""Check a full report with pypdf.
+
+Usage: verify_pdf.py <report.pdf> [en|de] [--imported]
+
+--imported checks a report of the synthetic file opened as a regular import,
+which does not carry the example-profile label.
+"""
 from pathlib import Path
 import re
 import sys
@@ -12,11 +18,14 @@ bookmarks = [entry.title for entry in pdf.outline if isinstance(entry, dict)]
 assert [match[1] for title in bookmarks if (match := re.match(r"^(\d{2}) · ", title))] == chapters
 text = "\n".join(page.extract_text() for page in pdf.pages)
 assert all(f"{section} ·" in text for section in sections)
-language = sys.argv[2] if len(sys.argv) > 2 else "en"
+arguments = [value for value in sys.argv[2:] if not value.startswith("--")]
+language = arguments[0] if arguments else "en"
 expected = {
     "en": ["Explore your DNA. Offline.", "Synthetic profile", "Lactase activity in adulthood", "Variant index"],
     "de": ["Entdecke deine DNA. Offline.", "Synthetisches Profil", "Laktaseaktivität im Erwachsenenalter", "Variantenregister"],
 }[language]
+if "--imported" in sys.argv:
+    expected = [value for value in expected if value not in ("Synthetic profile", "Synthetisches Profil")]
 assert all(value in text for value in expected), expected
 links = 0
 for page in pdf.pages:

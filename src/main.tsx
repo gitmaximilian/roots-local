@@ -25,7 +25,10 @@ import {
   download,
   onProgress,
   pickFiles,
+  isApple,
+  registerOffline,
 } from "./platform";
+import { LEGAL_URL, Privacy } from "./privacy";
 import type { ExtraKind } from "./protocol";
 import { Logo, Mark } from "./brand";
 import { CommandPalette, type Command } from "./command-palette";
@@ -700,6 +703,8 @@ function App() {
   const [query, setQuery] = useState("");
   const [busy, setBusy] = useState("");
   const [progress, setProgress] = useState<number>();
+  const [update, setUpdate] = useState<() => void>();
+  const [navOpen, setNavOpen] = useState(false);
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
   const [origins, setOrigins] = useState("");
@@ -775,6 +780,7 @@ function App() {
   };
   function navigate(page: Page) {
     setPage(page);
+    setNavOpen(false);
     document.querySelector(".content")?.scrollTo(0, 0);
   }
   function selectChapter(id: string) {
@@ -975,6 +981,7 @@ function App() {
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, []);
+  useEffect(() => registerOffline((apply) => setUpdate(() => apply)), []);
   useEffect(() => {
     const stop = onProgress(setProgress);
     return () => void stop();
@@ -1047,7 +1054,7 @@ function App() {
     {
       id: "open",
       label: t("DNA-Datei öffnen"),
-      hint: "⌘O",
+      hint: isApple ? "⌘O" : "Ctrl O",
       run: () => importData(false),
     },
     {
@@ -1061,7 +1068,7 @@ function App() {
           {
             id: "export",
             label: t("PDF exportieren"),
-            hint: "⌘E",
+            hint: isApple ? "⌘E" : "Ctrl E",
             run: savePdf,
           },
           {
@@ -1114,10 +1121,16 @@ function App() {
   return (
     <MedicalContext.Provider value={showMedical}>
       <div
-        className={`app${inspectedFinding ? " with-inspector" : ""}${dropping ? " dropping" : ""}`}
+        className={`app${inspectedFinding ? " with-inspector" : ""}${dropping ? " dropping" : ""}${navOpen ? " nav-open" : ""}`}
       >
+        {navOpen && (
+          <div
+            className="nav-scrim"
+            aria-hidden="true"
+            onClick={() => setNavOpen(false)}
+          />
+        )}
         <aside className="sidebar">
-          <div className="drag" data-tauri-drag-region />
           <button className="brand" onClick={() => navigate("home")}>
             <Logo size={24} />
             <span>Roots Local</span>
@@ -1186,14 +1199,33 @@ function App() {
               ))}
           </nav>
           <div className="sidebar-bottom">
-            <LockKeyhole size={14} />
-            <span>{t("Lokal auf diesem Gerät")}</span>
+            <button
+              className={page === "privacy" ? "selected" : ""}
+              aria-current={page === "privacy" ? "page" : undefined}
+              onClick={() => navigate("privacy")}
+            >
+              <LockKeyhole size={14} />
+              <span>{t("Lokal auf diesem Gerät")}</span>
+            </button>
+            <a href={LEGAL_URL} target="_blank" rel="noopener noreferrer">
+              {t("Impressum & Datenschutz")}
+            </a>
           </div>
         </aside>
         <main>
-          <div className="topbar" data-tauri-drag-region>
+          <div className="topbar">
+            <button
+              className="menu-button"
+              aria-label={t("Menü")}
+              aria-expanded={navOpen}
+              onClick={() => setNavOpen(true)}
+            >
+              <List size={20} />
+            </button>
             <span className="title">
-              {navigation().find((n) => n.id === page)?.label}
+              {page === "privacy"
+                ? t("Datenschutz")
+                : navigation().find((n) => n.id === page)?.label}
               {model?.example && (
                 <span className="example">{t("Beispielprofil")}</span>
               )}
@@ -1212,11 +1244,12 @@ function App() {
               )}
               <button
                 className="palette-trigger"
+                aria-label={t("Suchen")}
                 onClick={() => setPaletteOpen(true)}
               >
                 <Search size={14} />
-                {t("Suchen")}
-                <kbd>⌘K</kbd>
+                <span>{t("Suchen")}</span>
+                <kbd>{isApple ? "⌘K" : "Ctrl K"}</kbd>
               </button>
               <label className="language-control">
                 <select
@@ -1238,6 +1271,14 @@ function App() {
             </div>
           </div>
           <div className="content">
+            {update && (
+              <div className="feedback" role="status">
+                <span>{t("Eine neue Version von Roots Local ist bereit.")}</span>
+                <button className="text-button" onClick={update}>
+                  {t("Neu laden")}
+                </button>
+              </div>
+            )}
             {(busy || error || notice) && (
               <div
                 className={`feedback ${error ? "error" : ""}`}
@@ -2014,6 +2055,7 @@ function App() {
                 )}
               </>
             )}
+            {page === "privacy" && <Privacy />}
             {page === "data" && (
               <>
                 <Heading

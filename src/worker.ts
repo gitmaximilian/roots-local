@@ -52,6 +52,16 @@ function loadPdf(): Promise<PdfModule> {
   return pdf;
 }
 
+// Load both engines up front, so that after start-up the app makes no
+// further requests at all, and PDF export works offline.
+void ready
+  .then(() => {
+    post({ type: "ready", part: "analysis" });
+    return loadPdf();
+  })
+  .then(() => post({ type: "ready", part: "pdf" }))
+  .catch(() => undefined);
+
 async function handle(request: Request): Promise<unknown> {
   const session = await ready;
   session.begin();
@@ -81,9 +91,6 @@ async function handle(request: Request): Promise<unknown> {
       const module = await loadPdf();
       return module.render(!!request.options.pass, data);
     }
-    case "preloadPdf":
-      await loadPdf();
-      return null;
   }
 }
 
