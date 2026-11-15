@@ -33,11 +33,14 @@ The PDF content checks cover 16 combinations of language, report format, clinica
 
 **2026-11-15, commit `883d0ed`, MacBook Air M4, macOS 15.6.1.** Local checks: 5 Python tests and 18 Rust tests (4 unit, 14 integration) passed. Baseline PDFs from CI run 43673110939 passed `scripts/verify_pdf.py` with 26 pages, 17 chapters, 76 sections, and 165 links each. Windows acceptance was dropped when the project moved to Apple Silicon only.
 
+**2026-11-15, branch `redesign/native-mac`, MacBook Air M4, macOS 15.6.1.** 5 Python tests and 18 Rust tests passed, including the PDF content check across 16 language, length, and privacy combinations. It now also asserts that conclusions appear and that medical conclusions follow the clinical opt-in. Full reports in both languages passed `scripts/verify_pdf.py` with 27 pages, 17 chapters, 76 sections, and 167 links. The debug app bundle was built with an ad-hoc signature, passed `codesign --verify --deep --strict`, was installed, and started under `--verify-offline` with its main window open. The new interface was exercised in a browser against a model exported by `roots-check --model-json`: overview conclusions, the medical toggle, the inspector, the command palette, the Atlas, light and dark appearance, and the German locale with the active profile preserved. The native menu and Finder drag and drop were not exercised interactively.
+
 **Blocked on external input:**
 
 | Step | Waiting for |
 |---|---|
 | Provider data validation | An authorized MyHeritage tabular export and a WGS CRAM with its matching indexed FASTA |
+| Native menu and drag-and-drop check | A person using the installed app on the Mac |
 | Further inference validation | Assay benchmarks, known pedigrees, validated clinical diplotype and copy-number references, and suitable risk calibration data |
 | Signed releases | A Developer ID Application identity with notarization credentials |
 

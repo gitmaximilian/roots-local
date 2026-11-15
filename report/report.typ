@@ -1,10 +1,10 @@
 #let report = json("report.json")
 #let lang = report.options.language
 #let tr(de, en) = if lang == "de" { de } else { en }
-#let theme = rgb("#15443c")
+#let theme = rgb("#1b6b59")
 #let ink = rgb("#202f2c")
 #let secondary = rgb("#526861")
-#let paper = rgb("#ecf4ef")
+#let paper = rgb("#e9f2ee")
 #set document(title: "Roots Local · " + tr("DNA-Report", "DNA report"))
 #set text(font: "Libertinus Serif", lang: lang, size: 11pt, fill: ink)
 #set par(leading: 0.67em, justify: false)
@@ -61,17 +61,52 @@
   ]
 }
 
-#v(22mm)
-#text(size: 11pt, weight: "bold", fill: theme, tracking: 0.1em)[ROOTS LOCAL]
+#let mark(size) = box(width: size, height: size, {
+  place(rect(width: size, height: size, radius: size * 0.23, fill: theme))
+  place(dx: size * 0.26, dy: size * 0.26, circle(radius: size * 0.24, stroke: size * 0.08 + white))
+  place(dx: size * 0.48, dy: size * 0.48, circle(radius: size * 0.08, fill: white))
+})
+// GRCh37 chromosome lengths in Mb; the cover motif marks personal findings.
+#let chromosome-sizes = (("1", 249.25), ("2", 243.2), ("3", 198.02), ("4", 191.15), ("5", 180.92), ("6", 171.12), ("7", 159.14), ("8", 146.36), ("9", 141.21), ("10", 135.53), ("11", 135.01), ("12", 133.85), ("13", 115.17), ("14", 107.35), ("15", 102.53), ("16", 90.35), ("17", 81.2), ("18", 78.08), ("19", 59.13), ("20", 63.03), ("21", 48.13), ("22", 51.3), ("X", 155.27), ("Y", 59.37))
+#let karyogram(height) = {
+  let longest = 249.25
+  let marks = ()
+  for finding in report.findings.filter(f => f.status == "personal") {
+    for check in finding.checks {
+      if check.coordinate != none {
+        let parts = check.coordinate.split(":")
+        marks.push((parts.at(0), float(parts.at(1)) / 1000000))
+      }
+    }
+  }
+  grid(columns: chromosome-sizes.len(), column-gutter: 2.6mm, ..chromosome-sizes.map(entry => {
+    let (name, length) = entry
+    stack(spacing: 1.6mm,
+      box(width: 3.2mm, height: height, {
+        place(top, rect(width: 3.2mm, height: height * length / longest, radius: 1.6mm, fill: rgb("#e3ebe7")))
+        for m in marks.filter(m => m.at(0) == name) {
+          place(top + left, dx: -0.7mm, dy: height * m.at(1) / longest - 0.3mm, rect(width: 4.6mm, height: 0.7mm, fill: theme))
+        }
+      }),
+      align(center, text(size: 6pt, fill: secondary, name)))
+  }))
+}
+
+#v(14mm)
+#grid(columns: (auto, 1fr), column-gutter: 4mm, align: horizon,
+  mark(11mm),
+  text(size: 11pt, weight: "bold", fill: theme, tracking: 0.1em)[ROOTS LOCAL])
 #v(11mm)
 #text(size: 41pt, fill: theme, weight: "bold")[#tr("Dein DNA-Report", "Your DNA report")]
 #v(4mm)
 #text(size: 16pt, fill: secondary)[#tr("Entdecke deine DNA. Offline.", "Explore your DNA. Offline.")]
-#v(16mm)
+#v(10mm)
+#karyogram(34mm)
+#v(9mm)
 #if report.options.name != none { text(size: 17pt, report.options.name); v(4mm) }
 #if report.example { block(fill: paper, inset: 8pt, radius: 4pt)[#tr("Synthetisches Profil", "Synthetic profile")] }
 #grid(columns: (1fr, 1fr, 1fr), gutter: 7pt,
-  box-stat(report.personal, tr("Auswertbare Merkmale", "Interpretable traits")),
+  box-stat(report.personal, tr("Schlussfolgerungen", "Conclusions")),
   box-stat(report.research, tr("Studienbezüge", "Research associations")),
   box-stat(report.summary.rows, tr("Genotypzeilen", "Genotype rows"))
 )
@@ -79,6 +114,28 @@
 #caption([#tr("MyHeritage-Format", "MyHeritage format") · #report.summary.format · #tr("Referenzgenom", "Reference genome") #(if report.summary.build == none { tr("unbekannt", "unknown") } else { report.summary.build }) \
   Roots Local #report.version · #tr("Referenzkatalog", "Reference catalog") #report.catalog_version])
 #pagebreak()
+
+#heading(level: 1, [#tr("Auf einen Blick", "At a glance")])
+#let concluded = report.findings.filter(f => f.conclusion != none)
+#if concluded.len() == 0 [
+  #tr("Für diese Datei liegen noch keine Schlussfolgerungen vor.", "There are no conclusions for this file yet.")
+] else [
+  #tr("Jede Zeile beantwortet, was ein Befund für dich bedeutet. Details und Quellen stehen im jeweiligen Kapitel.", "Each row answers what a finding means for you. Details and sources are in the chapter for each finding.")
+  #v(3mm)
+  #table(columns: (34%, 1fr, 22%), stroke: (x, y) => if y > 0 { (top: 0.5pt + rgb("#dbe4df")) }, inset: (x: 0pt, y: 6pt), column-gutter: 4mm,
+    text(size: 9pt, fill: secondary)[#tr("Befund", "Finding")],
+    text(size: 9pt, fill: secondary)[#tr("Schlussfolgerung", "Conclusion")],
+    text(size: 9pt, fill: secondary)[#tr("Sicherheit", "Confidence")],
+    ..concluded.map(f => (
+      text(weight: "bold", fill: theme, f.title),
+      f.conclusion,
+      text(size: 9.5pt, fill: secondary, confidence(f.confidence)),
+    )).flatten())
+  #if not report.options.include_clinical [
+    #caption(tr("Medizinische Befunde zu Medikamenten und Erkrankungsrisiken sind ausgeblendet. Sie lassen sich beim Export einschließen.", "Medical findings about medicines and disease risk are hidden. You can include them when exporting."))
+  ]
+]
+#pagebreak(weak: true)
 
 #outline(title: [#tr("Inhalt", "Contents")], depth: 1, indent: auto)
 #if not report.options.short [

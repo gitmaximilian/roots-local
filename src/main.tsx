@@ -8,9 +8,29 @@ import {
 import starterCatalog from "../catalog/starter.json";
 import englishChapters from "../catalog/report-structure.en.json";
 import germanChapters from "../catalog/report-structure.de.json";
-import React, { lazy, Suspense, useEffect, useMemo, useState } from "react";
+import React, {
+  createContext,
+  lazy,
+  Suspense,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import { createRoot } from "react-dom/client";
 import { invoke } from "@tauri-apps/api/core";
+import { listen } from "@tauri-apps/api/event";
+import { getCurrentWebview } from "@tauri-apps/api/webview";
+import { Logo, Mark } from "./brand";
+import { CommandPalette, type Command } from "./command-palette";
+import {
+  ConfidenceMeter,
+  Inspector,
+  StatusLabel,
+  isMedical,
+  visibleConclusion,
+} from "./finding-ui";
+import { Atlas } from "./atlas";
 import {
   ArrowDownToLine,
   ArrowLeft,
@@ -28,6 +48,7 @@ import {
   Layers,
   List,
   LockKeyhole,
+  Map as MapIcon,
   ScanLine,
   Search,
   X,
@@ -38,166 +59,20 @@ const PdfPreview = lazy(() =>
 );
 import "./style.css";
 
-type Status = "personal" | "research" | "missing";
-type Section = { id: string; title: string; scope: string };
-type Chapter = { id: string; title: string; part: string; sections: Section[] };
-type MarkerCheck = {
-  id: string;
-  gene: string;
-  coordinate: string | null;
-  call: string | null;
-  status: string;
-};
-type Finding = {
-  id: string;
-  section: string;
-  title: string;
-  summary: string;
-  status: Status;
-  message: string;
-  evidence: string;
-  population: string;
-  limits: string;
-  checks: MarkerCheck[];
-  sources: [string, string][];
-  cross: string[];
-  study?: {
-    reported_trait: string;
-    accession: string;
-    p_value: string;
-    effect: string;
-    effect_context: string;
-  };
-};
-type Report = {
-  scores: {
-    id: string;
-    title: string;
-    population: string;
-    source: string;
-    matched: number;
-    total: number;
-    raw: number | null;
-  }[];
-  catalog_version: string;
-  gwas_total: number;
-  example: boolean;
-  chapters: Chapter[];
-  findings: Finding[];
-  summary: {
-    format: string;
-    build: string | null;
-    rows: number;
-    skipped: number;
-    no_call: number;
-    conflicts: number;
-    duplicates: number;
-    strand: string;
-    chromosomes: [string, number][];
-  };
-  external: {
-    origins: { label: string; percent: number | null }[];
-    matches: { name: string; cm: number; relationship: string | null }[];
-    segments: {
-      name: string;
-      chromosome: string;
-      start: number;
-      end: number;
-      cm: number;
-    }[];
-  };
-  maternal_lineage: {
-    tool_version: string;
-    tree: string;
-    covered_positions: number;
-    candidates: { haplogroup: string; quality: number }[];
-    warnings: number;
-    errors: number;
-  } | null;
-  family: {
-    compared: number;
-    compatible: number;
-    discordant: number;
-    identical: number;
-    kinship: number | null;
-    kinship_markers: number;
-  } | null;
-  trio: {
-    compared: number;
-    phased_heterozygous: number;
-    ambiguous: number;
-    homozygous: number;
-    inconsistent: number;
-    assignments: {
-      marker: string;
-      chromosome: number;
-      position: number;
-      first: string;
-      second: string;
-    }[];
-  } | null;
-  clinical: {
-    build: string;
-    release: string;
-    gene_validity: {
-      date: string;
-      records: {
-        gene: string;
-        hgnc: string;
-        disease: string;
-        mondo: string;
-        inheritance: string;
-        classification: string;
-        evidence_url: string;
-      }[];
-    } | null;
-    variants: {
-      id: number;
-      marker: string;
-      chromosome: string;
-      position: number;
-      copies: number;
-      alternate: string;
-      classifications: string;
-      conflicting_classifications: string;
-      review_status: string;
-      conditions: string;
-    }[];
-  } | null;
-  sequence: {
-    reads: number;
-    build: string;
-    targets: {
-      id: string;
-      coordinate: string;
-      depth: number;
-      bases: number[];
-    }[];
-  } | null;
-};
-type Variant = {
-  id: string;
-  chromosome: string;
-  position: number;
-  alleles: string | null;
-  quality: VariantQuality;
-};
-type VariantQuality = "present" | "no_call" | "conflict";
-type VariantPage = {
-  total: number;
-  offset: number;
-  page_size: number;
-  rows: Variant[];
-};
-type Page = "home" | "chapters" | "variants" | "report" | "data";
-type Options = {
-  short: boolean;
-  name: string | null;
-  include_calls: boolean;
-  include_relatives: boolean;
-  include_clinical: boolean;
-  include_lineage: boolean;
-};
+import type {
+  Confidence,
+  Status,
+  Section,
+  Chapter,
+  MarkerCheck,
+  Finding,
+  Report,
+  Variant,
+  VariantQuality,
+  VariantPage,
+  Page,
+  Options,
+} from "./types";
 
 const number = {
   format(value: number) {
@@ -206,27 +81,16 @@ const number = {
     ).format(value);
   },
 };
-const statusLabels = () => ({
-  personal: t("Auswertbar"),
-  research: t("Studienbezug"),
-  missing: t("Offen"),
-});
+const MedicalContext = createContext(false);
 const navigation = (): { id: Page; label: string; Icon: LucideIcon }[] => [
   { id: "home", label: t("Übersicht"), Icon: Layers },
   { id: "chapters", label: t("Kapitel"), Icon: BookOpen },
+  { id: "atlas", label: t("Atlas"), Icon: MapIcon },
   { id: "variants", label: t("Varianten"), Icon: ScanLine },
   { id: "report", label: t("PDF-Report"), Icon: FileText },
   { id: "data", label: t("Datenquellen"), Icon: Database },
 ];
 
-function StatusLabel({ status }: { status: Status }) {
-  return (
-    <span className={`status ${status}`}>
-      <i />
-      {statusLabels()[status]}
-    </span>
-  );
-}
 function Heading({
   title,
   description,
@@ -252,16 +116,35 @@ function FindingDetail({
   openVariant: OpenVariant;
 }) {
   const [copied, setCopied] = useState<string>();
+  const showMedical = useContext(MedicalContext);
+  const conclusion = visibleConclusion(finding, showMedical);
+  const hidden = isMedical(finding) && !showMedical;
   return (
     <details className="finding" id={`finding-${finding.id}`}>
       <summary>
-        <span>{resultText(finding.title)}</span>
-        <StatusLabel status={finding.status} />
+        <span>
+          {resultText(finding.title)}
+          {conclusion && <span className="answer">{conclusion}</span>}
+          {hidden && (
+            <span className="answer">
+              {t("Medizinischer Befund ausgeblendet")}
+            </span>
+          )}
+        </span>
+        {isMedical(finding) && (
+          <span className="medical">{t("Medizinisch")}</span>
+        )}
+        <StatusLabel status={hidden ? "research" : finding.status} />
         <ChevronDown size={16} />
       </summary>
       <div className="finding-content">
+        {finding.confidence && !hidden && (
+          <ConfidenceMeter value={finding.confidence} />
+        )}
         <p>{resultText(finding.summary)}</p>
-        <p className="interpretation">{resultText(finding.message)}</p>
+        {!hidden && (
+          <p className="interpretation">{resultText(finding.message)}</p>
+        )}
         <dl className="definition">
           <dt>{t("Evidenz")}</dt>
           <dd>{resultText(finding.evidence)}</dd>
@@ -309,7 +192,7 @@ function FindingDetail({
                   <small>{resultText(c.gene)}</small>
                 </td>
                 <td>{c.coordinate || "–"}</td>
-                <td className="mono">{c.call || "–"}</td>
+                <td className="mono">{hidden ? "•••" : c.call || "–"}</td>
                 <td>{resultText(c.status)}</td>
               </tr>
             ))}
@@ -819,6 +702,14 @@ function App() {
     query: string;
     finding: FindingLocation;
   }>();
+  const [inspected, setInspected] = useState<string>();
+  const [paletteOpen, setPaletteOpen] = useState(false);
+  const [dropping, setDropping] = useState(false);
+  const showMedical = options.include_clinical;
+  function setShowMedical(value: boolean) {
+    setOptions((current) => ({ ...current, include_clinical: value }));
+    setPreview(undefined);
+  }
   useEffect(() => {
     if (!anchor || page !== "chapters") return;
     const element = document.getElementById(`finding-${anchor}`);
@@ -865,7 +756,7 @@ function App() {
   };
   function navigate(page: Page) {
     setPage(page);
-    window.scrollTo(0, 0);
+    document.querySelector(".content")?.scrollTo(0, 0);
   }
   function selectChapter(id: string) {
     setActiveChapter(id);
@@ -913,6 +804,7 @@ function App() {
         if (result) {
           setReport(result);
           setVariantJump(undefined);
+          setInspected(undefined);
           setOrigins("");
           setOptions({
             short: false,
@@ -924,6 +816,27 @@ function App() {
           });
           navigate("home");
         }
+      },
+    );
+  }
+  function importPath(path: string) {
+    void run(
+      t("DNA-Datei einlesen"),
+      () => invoke<Report>("import_path", { path, language }),
+      (result) => {
+        setReport(result);
+        setVariantJump(undefined);
+        setInspected(undefined);
+        setOrigins("");
+        setOptions({
+          short: false,
+          name: "",
+          include_calls: false,
+          include_relatives: false,
+          include_clinical: false,
+          include_lineage: false,
+        });
+        navigate("home");
       },
     );
   }
@@ -962,863 +875,1153 @@ function App() {
     );
   }
 
+  const latest = React.useRef({ importData, savePdf, navigate, busy, model });
+  latest.current = { importData, savePdf, navigate, busy, model };
+  useEffect(() => {
+    function onKey(event: KeyboardEvent) {
+      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") {
+        event.preventDefault();
+        setPaletteOpen((open) => !open);
+      }
+    }
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
+  useEffect(() => {
+    const stop = listen<string>("menu", ({ payload }) => {
+      const app = latest.current;
+      if (app.busy) return;
+      if (payload === "open") app.importData(false);
+      else if (payload === "example") app.importData(true);
+      else if (payload === "export" && app.model) app.savePdf();
+      else if (payload === "palette") setPaletteOpen(true);
+      else if (payload === "language-en") switchLanguage("en");
+      else if (payload === "language-de") switchLanguage("de");
+    });
+    stop.catch(() => undefined);
+    return () =>
+      void stop.then((unlisten) => unlisten()).catch(() => undefined);
+  }, []);
+  useEffect(() => {
+    let unlisten: (() => void) | undefined;
+    let webview: ReturnType<typeof getCurrentWebview>;
+    try {
+      webview = getCurrentWebview();
+    } catch {
+      return;
+    }
+    webview
+      .onDragDropEvent((event) => {
+        if (event.payload.type === "over" || event.payload.type === "enter") {
+          setDropping(true);
+        } else if (event.payload.type === "drop") {
+          setDropping(false);
+          const [path] = event.payload.paths;
+          if (path && !latest.current.busy) importPath(path);
+        } else {
+          setDropping(false);
+        }
+      })
+      .then((stop) => (unlisten = stop))
+      .catch(() => undefined);
+    return () => unlisten?.();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const inspectedFinding = results.find((finding) => finding.id === inspected);
+  const counts = useMemo(() => {
+    const map = new Map<string, number>();
+    for (const finding of results) {
+      if (finding.status === "missing") continue;
+      const id = finding.section.split(".")[0];
+      map.set(id, (map.get(id) ?? 0) + 1);
+    }
+    return map;
+  }, [results]);
+  const conclusions = results.filter(
+    (finding) => finding.status === "personal" && finding.conclusion,
+  );
+  const shownConclusions = conclusions.filter(
+    (finding) => showMedical || !isMedical(finding),
+  );
+  const hiddenMedical = conclusions.length - shownConclusions.length;
+  const commands: Command[] = [
+    ...navigation().map((item) => ({
+      id: `page-${item.id}`,
+      label: item.label,
+      hint: t("Ansicht"),
+      run: () => navigate(item.id),
+    })),
+    {
+      id: "open",
+      label: t("DNA-Datei öffnen"),
+      hint: "⌘O",
+      run: () => importData(false),
+    },
+    {
+      id: "example",
+      label: t("Beispiel ansehen"),
+      hint: t("Befehl"),
+      run: () => importData(true),
+    },
+    ...(model
+      ? [
+          {
+            id: "export",
+            label: t("PDF exportieren"),
+            hint: "⌘E",
+            run: savePdf,
+          },
+          {
+            id: "medical",
+            label: showMedical
+              ? t("Medizinische Befunde ausblenden")
+              : t("Medizinische Befunde anzeigen"),
+            hint: t("Befehl"),
+            run: () => setShowMedical(!showMedical),
+          },
+        ]
+      : []),
+    {
+      id: "language",
+      label: language === "de" ? "Switch to English" : "Auf Deutsch wechseln",
+      hint: t("Befehl"),
+      run: () => switchLanguage(language === "de" ? "en" : "de"),
+    },
+    ...chapters.map((chapter) => ({
+      id: `chapter-${chapter.id}`,
+      label: `${chapter.id} ${chapter.title}`,
+      hint: t("Kapitel"),
+      run: () => selectChapter(chapter.id),
+    })),
+    ...results
+      .filter((finding) => finding.status !== "missing" || !finding.study)
+      .map((finding) => ({
+        id: `finding-${finding.id}`,
+        label: resultText(finding.title),
+        hint: finding.checks.map((check) => check.id).join(", "),
+        keywords: `${finding.checks.map((check) => check.gene).join(" ")} ${finding.section}`,
+        run: () => {
+          if (page !== "home" && page !== "atlas") navigate("home");
+          setInspected(finding.id);
+        },
+      })),
+  ];
+
   return (
-    <div className="app">
-      <aside className="sidebar">
-        <button className="brand" onClick={() => navigate("home")}>
-          <span>
-            <Dna size={24} />
-          </span>
-          <strong>Roots Local</strong>
-        </button>
-        <nav aria-label={t("Hauptnavigation")}>
-          {navigation().map(({ id, label, Icon }) => (
-            <button
-              key={id}
-              className={page === id ? "selected" : ""}
-              aria-current={page === id ? "page" : undefined}
-              onClick={() => {
-                if (id === "variants") setVariantJump(undefined);
-                navigate(id);
-              }}
-              disabled={id === "variants" && !dataReady}
-            >
-              <Icon size={18} />
-              {label}
-            </button>
-          ))}
-        </nav>
-        <div className="sidebar-bottom">
-          <LockKeyhole size={16} />
-          <span>{t("Lokal auf diesem Gerät")}</span>
-        </div>
-      </aside>
-      <main>
-        <div className="topbar">
-          <span>
-            {navigation().find((n) => n.id === page)?.label}
-            {model?.example && (
-              <span className="example">{t("Beispielprofil")}</span>
-            )}
-          </span>
-          <div className="toolbar-actions">
-            <label className="language-control">
-              <span>{language === "de" ? "Sprache" : "Language"}</span>
-              <select
-                aria-label={language === "de" ? "Sprache" : "Language"}
-                value={language}
-                disabled={!!busy}
-                onChange={(event) =>
-                  switchLanguage(event.target.value as Language)
-                }
-              >
-                <option value="en" lang="en">
-                  English
-                </option>
-                <option value="de" lang="de">
-                  Deutsch
-                </option>
-              </select>
-            </label>
-            <button
-              className="button secondary compact"
-              onClick={() => importData(false)}
-              disabled={!!busy}
-            >
-              {t("Datei öffnen")}
-              <ArrowRight size={15} />
-            </button>
-          </div>
-        </div>
-        <div className="content">
-          {(busy || error || notice) && (
-            <div
-              className={`feedback ${error ? "error" : ""}`}
-              role={error ? "alert" : "status"}
-            >
-              <span>{busy ? `${busy} …` : error || notice}</span>
-              {busy ? (
-                !busy.includes("PDF") && (
-                  <button
-                    className="text-button"
-                    onClick={() => void invoke("cancel_job")}
-                  >
-                    {t("Abbrechen")}
-                  </button>
-                )
-              ) : (
+    <MedicalContext.Provider value={showMedical}>
+      <div
+        className={`app${inspectedFinding ? " with-inspector" : ""}${dropping ? " dropping" : ""}`}
+      >
+        <aside className="sidebar">
+          <div className="drag" data-tauri-drag-region />
+          <button className="brand" onClick={() => navigate("home")}>
+            <Logo size={24} />
+            <span>Roots Local</span>
+          </button>
+          <nav aria-label={t("Hauptnavigation")}>
+            <div className="group">{t("Bibliothek")}</div>
+            {navigation()
+              .filter(({ id }) => id !== "data")
+              .map(({ id, label, Icon }) => (
                 <button
-                  className="text-button"
-                  aria-label={t("Meldung schließen")}
+                  key={id}
+                  className={page === id ? "selected" : ""}
+                  aria-current={page === id ? "page" : undefined}
                   onClick={() => {
-                    setError("");
-                    setNotice("");
+                    if (id === "variants") setVariantJump(undefined);
+                    navigate(id);
                   }}
+                  disabled={(id === "variants" || id === "atlas") && !dataReady}
                 >
-                  <X size={16} />
+                  <Icon size={16} />
+                  <span>{label}</span>
+                  {id === "chapters" && model && (
+                    <span className="count">
+                      {totals.personal + totals.research}
+                    </span>
+                  )}
                 </button>
-              )}
-            </div>
-          )}
-          {page === "home" &&
-            (model ? (
+              ))}
+            {model && (
               <>
-                <Heading
-                  title={t("Dein DNA-Profil")}
-                  description={`${t("MyHeritage-Format")} · ${model.summary.format} · ${model.summary.build || t("Referenzgenom unbekannt")}`}
-                />
-                <div className="stats">
-                  <div>
-                    <Check size={20} />
-                    <strong>{totals.personal}</strong>
-                    <span>{t("Auswertbare Merkmale")}</span>
-                  </div>
-                  <div>
-                    <FlaskConical size={20} />
-                    <strong>{totals.research}</strong>
-                    <span>{t("Studienbezüge")}</span>
-                  </div>
-                  <div>
-                    <List size={20} />
-                    <strong>{number.format(model.summary.rows)}</strong>
-                    <span>{t("Genotypzeilen")}</span>
-                  </div>
-                </div>
-                <header className="section-heading">
-                  <h2>{t("Ergebnisse")}</h2>
+                <div className="group">{t("Kapitel")}</div>
+                {chapters
+                  .filter((chapter) => counts.has(chapter.id))
+                  .map((chapter) => (
+                    <button
+                      key={chapter.id}
+                      className={
+                        page === "chapters" && activeChapter === chapter.id
+                          ? "selected"
+                          : ""
+                      }
+                      onClick={() => selectChapter(chapter.id)}
+                    >
+                      <span>
+                        <span className="mono">{chapter.id}</span>{" "}
+                        {chapter.title}
+                      </span>
+                      <span className="count">{counts.get(chapter.id)}</span>
+                    </button>
+                  ))}
+              </>
+            )}
+            <div className="group">{t("Quellen")}</div>
+            {navigation()
+              .filter(({ id }) => id === "data")
+              .map(({ id, label, Icon }) => (
+                <button
+                  key={id}
+                  className={page === id ? "selected" : ""}
+                  aria-current={page === id ? "page" : undefined}
+                  onClick={() => navigate(id)}
+                >
+                  <Icon size={16} />
+                  <span>{label}</span>
+                </button>
+              ))}
+          </nav>
+          <div className="sidebar-bottom">
+            <LockKeyhole size={14} />
+            <span>{t("Lokal auf diesem Gerät")}</span>
+          </div>
+        </aside>
+        <main>
+          <div className="topbar" data-tauri-drag-region>
+            <span className="title">
+              {navigation().find((n) => n.id === page)?.label}
+              {model?.example && (
+                <span className="example">{t("Beispielprofil")}</span>
+              )}
+            </span>
+            <div className="toolbar-actions">
+              {model && (
+                <label className="switch">
+                  <input
+                    type="checkbox"
+                    checked={showMedical}
+                    onChange={(event) => setShowMedical(event.target.checked)}
+                  />
+                  <span className="track" aria-hidden="true" />
+                  {t("Medizinisch")}
+                </label>
+              )}
+              <button
+                className="palette-trigger"
+                onClick={() => setPaletteOpen(true)}
+              >
+                <Search size={14} />
+                {t("Suchen")}
+                <kbd>⌘K</kbd>
+              </button>
+              <label className="language-control">
+                <select
+                  aria-label={language === "de" ? "Sprache" : "Language"}
+                  value={language}
+                  disabled={!!busy}
+                  onChange={(event) =>
+                    switchLanguage(event.target.value as Language)
+                  }
+                >
+                  <option value="en" lang="en">
+                    English
+                  </option>
+                  <option value="de" lang="de">
+                    Deutsch
+                  </option>
+                </select>
+              </label>
+            </div>
+          </div>
+          <div className="content">
+            {(busy || error || notice) && (
+              <div
+                className={`feedback ${error ? "error" : ""}`}
+                role={error ? "alert" : "status"}
+              >
+                <span>{busy ? `${busy} …` : error || notice}</span>
+                {busy ? (
+                  !busy.includes("PDF") && (
+                    <button
+                      className="text-button"
+                      onClick={() => void invoke("cancel_job")}
+                    >
+                      {t("Abbrechen")}
+                    </button>
+                  )
+                ) : (
                   <button
                     className="text-button"
+                    aria-label={t("Meldung schließen")}
                     onClick={() => {
-                      setQuery("");
-                      setFilter("all");
-                      navigate("chapters");
+                      setError("");
+                      setNotice("");
                     }}
                   >
-                    {t("Alle Kapitel")}
-                    <ArrowRight size={15} />
+                    <X size={16} />
                   </button>
-                </header>
-                <div className="result-grid">
-                  {results
-                    .filter((f) => f.status !== "missing")
-                    .slice(0, 8)
-                    .map((f) => (
-                      <button
-                        key={f.id}
-                        className="result-tile"
-                        onClick={() => openFinding(f)}
-                      >
-                        <StatusLabel status={f.status} />
-                        <strong>{resultText(f.title)}</strong>
-                        <span>{resultText(f.message)}</span>
-                        <ChevronRight size={17} />
-                      </button>
-                    ))}
-                </div>
-                {!totals.personal && !totals.research && (
-                  <div className="empty">
-                    <CircleHelp size={20} />
-                    {model.summary.build
-                      ? t(
-                          "Die Datenbasis für die vorhandenen Merkmalsregeln ist nicht ausreichend.",
-                        )
-                      : t(
-                          "Der Dateikopf nennt kein unterstütztes Referenzgenom. Die Rohdaten bleiben im Variantenregister sichtbar.",
-                        )}
-                  </div>
                 )}
-                <header className="section-heading">
-                  <h2>{t("Datenqualität")}</h2>
-                </header>
-                <div className="panel quality">
-                  <span>
-                    <strong>{number.format(model.summary.no_call)}</strong>
-                    {t("ohne Genotyp")}
-                  </span>
-                  <span>
-                    <strong>{number.format(model.summary.conflicts)}</strong>{" "}
-                    {t("widersprüchlich")}
-                  </span>
-                  <span>
-                    <strong>{number.format(model.summary.skipped)}</strong>{" "}
-                    {t("übersprungen")}
-                  </span>
-                </div>
-              </>
-            ) : (
-              <section className="welcome">
-                <div className="welcome-copy">
-                  <div className="logo-glyph">
-                    <Dna size={30} />
-                  </div>
-                  <Heading
-                    title={t("Deine DNA. Dein Gerät.")}
-                    description={t(
-                      "Öffne deinen MyHeritage-Rohdatenexport und erkunde Herkunft, Merkmale und Forschungsbefunde.",
-                    )}
-                  />
-                  <div className="actions">
-                    <button
-                      className="button"
-                      disabled={!!busy}
-                      onClick={() => importData(false)}
-                    >
-                      {t("DNA-Datei öffnen")}
-                      <ArrowRight size={16} />
-                    </button>
-                    <button
-                      className="button secondary"
-                      disabled={!!busy}
-                      onClick={() => importData(true)}
-                    >
-                      {t("Beispiel ansehen")}
-                    </button>
-                  </div>
-                  <p className="formats">{t("CSV, TSV, TXT oder ZIP")}</p>
-                </div>
-                <div className="helix" aria-hidden="true">
-                  <Dna size={210} strokeWidth={0.72} />
-                </div>
-              </section>
-            ))}
-          {page === "chapters" && (
-            <>
-              <Heading
-                title={t("Kapitel")}
-                description={t("17 Hauptkapitel für deinen DNA-Vollreport.")}
-              />
-              <div className="browse">
-                <nav className="chapter-list" aria-label={t("Reportkapitel")}>
-                  {groups.map((group) => (
-                    <div key={group}>
-                      <h3>{group}</h3>
-                      {chapters
-                        .filter((c) => c.part === group)
-                        .map((c) => (
-                          <button
-                            key={c.id}
-                            className={
-                              c.id === activeChapter && !search
-                                ? "selected"
-                                : ""
-                            }
-                            onClick={() => selectChapter(c.id)}
-                          >
-                            <span className="mono">{c.id}</span>
-                            {c.title}
-                          </button>
-                        ))}
-                    </div>
-                  ))}
-                </nav>
-                <section className="chapter-detail">
-                  {model && (
-                    <div className="filters">
-                      <label className="search">
-                        <Search size={16} />
-                        <input
-                          placeholder={t("Merkmal, Gen oder rsID")}
-                          value={query}
-                          onChange={(e) => setQuery(e.target.value)}
-                        />
-                      </label>
-                      <select
-                        aria-label={t("Auswertungsstatus")}
-                        value={filter}
-                        onChange={(e) =>
-                          setFilter(e.target.value as typeof filter)
-                        }
-                      >
-                        <option value="all">{t("Alle Status")}</option>
-                        <option value="personal">{t("Auswertbar")}</option>
-                        <option value="research">{t("Studienbezug")}</option>
-                        <option value="missing">{t("Offen")}</option>
-                      </select>
-                    </div>
-                  )}
-                  {search ? (
-                    <>
-                      <h2>{t("Suchergebnisse")}</h2>
-                      {visible.length ? (
-                        <FindingList
-                          key={search + filter}
-                          findings={visible}
-                          anchor={anchor}
-                          openVariant={openVariant}
-                        />
-                      ) : (
-                        <p>{t("Keine passenden Merkmale gefunden.")}</p>
-                      )}
-                    </>
-                  ) : (
-                    chapter && (
-                      <>
-                        <h2>{chapter.title}</h2>
-                        {chapter.sections.map((section) => {
-                          const maternal =
-                            section.id === "01.3"
-                              ? model?.maternal_lineage
-                              : null;
-                          const findings = visible.filter(
-                            (item) => item.section === section.id,
-                          );
-                          const cross = visible.filter((item) =>
-                            item.cross.includes(section.id),
-                          );
-                          return (
-                            <section className="subchapter" key={section.id}>
-                              <h3>
-                                <span className="mono">{section.id}</span>{" "}
-                                {section.title}
-                              </h3>
-                              <p>{section.scope}</p>
-                              {maternal && <MaternalResult data={maternal} />}
-                              {section.id === "14.4" &&
-                                model?.scores.map((score) => (
-                                  <div className="score" key={score.id}>
-                                    <strong>{resultText(score.title)}</strong>
-                                    <p>
-                                      {score.matched} / {score.total}{" "}
-                                      {t("Modellpositionen ·")}{" "}
-                                      {score.raw === null
-                                        ? t("Kein Rohscore")
-                                        : `${t("Rohscore")} ${number.format(score.raw)}`}
-                                    </p>
-                                    <p>
-                                      {t("Vergleichspopulation der Studie:")}{" "}
-                                      {resultText(score.population)}
-                                      {t(
-                                        ". Forschungswert ohne persönliches Risiko.",
-                                      )}
-                                    </p>
-                                    <small>
-                                      {score.id} · {score.source}
-                                    </small>
-                                  </div>
-                                ))}
-                              <FindingList
-                                findings={findings}
-                                anchor={anchor}
-                                openVariant={openVariant}
-                              />
-                              {cross.map((f) => (
-                                <button
-                                  className="text-button"
-                                  key={f.id}
-                                  onClick={() => openFinding(f)}
-                                >
-                                  {t("Siehe")}
-                                  {resultText(f.title)} <ArrowRight size={14} />
-                                </button>
-                              ))}
-                              {model &&
-                                !findings.length &&
-                                !cross.length &&
-                                !maternal && (
-                                  <small>
-                                    {t(
-                                      "Für diesen Abschnitt liegt aktuell keine passende Merkmalsregel vor.",
-                                    )}
-                                  </small>
-                                )}
-                            </section>
-                          );
-                        })}
-                      </>
-                    )
-                  )}
-                </section>
               </div>
-            </>
-          )}
-          {page === "variants" && model && (
-            <VariantRegister
-              key={variantJump?.query ?? ""}
-              initialQuery={variantJump?.query ?? ""}
-              chromosomes={model.summary.chromosomes}
-              onBack={
-                variantJump &&
-                (() => {
-                  setVariantJump(undefined);
-                  openFinding(variantJump.finding);
-                })
-              }
-            />
-          )}
-          {page === "report" && (
-            <>
-              <Heading
-                title={t("PDF-Report")}
-                description={t(
-                  "Gestalteter Export mit Inhaltsverzeichnis, Quellen und Abdeckung.",
-                )}
-              />
-              {model ? (
-                <div className="report-layout">
-                  <div className="panel report-settings">
-                    <h2>{t("Umfang")}</h2>
-                    <label className="choice">
-                      <input
-                        type="radio"
-                        name="scope"
-                        checked={!options.short}
-                        disabled={!!busy}
-                        onChange={() => {
-                          setOptions({ ...options, short: false });
-                          setPreview(undefined);
-                        }}
-                      />
-                      <span>
-                        <strong>{t("Vollreport")}</strong>
-                        <small>
-                          {t("17 Hauptkapitel und Variantenanhang")}
-                        </small>
-                      </span>
-                    </label>
-                    <label className="choice">
-                      <input
-                        type="radio"
-                        name="scope"
-                        checked={options.short}
-                        disabled={!!busy}
-                        onChange={() => {
-                          setOptions({ ...options, short: true });
-                          setPreview(undefined);
-                        }}
-                      />
-                      <span>
-                        <strong>{t("Kurzreport")}</strong>
-                        <small>
-                          {t(
-                            "Ausgewählte Ergebnisse und importierte Zusatzdaten",
-                          )}
-                        </small>
-                      </span>
-                    </label>
-                    <h2>{t("Persönliche Angaben")}</h2>
-                    <label className="field">
-                      {t("Name im Report")}{" "}
-                      <input
-                        value={options.name || ""}
-                        disabled={!!busy}
-                        placeholder="Optional"
-                        maxLength={120}
-                        onChange={(e) => {
-                          setOptions({ ...options, name: e.target.value });
-                          setPreview(undefined);
-                        }}
-                      />
-                    </label>
-                    <label className="choice">
-                      <input
-                        type="checkbox"
-                        checked={options.include_calls}
-                        disabled={!!busy}
-                        onChange={(e) => {
-                          setOptions({
-                            ...options,
-                            include_calls: e.target.checked,
-                          });
-                          setPreview(undefined);
-                        }}
-                      />
-                      {t("Konkrete Genotypen anzeigen")}
-                    </label>
-                    <label className="choice">
-                      <input
-                        type="checkbox"
-                        checked={options.include_relatives}
-                        disabled={!!busy}
-                        onChange={(e) => {
-                          setOptions({
-                            ...options,
-                            include_relatives: e.target.checked,
-                          });
-                          setPreview(undefined);
-                        }}
-                      />
-                      {t("Namen von DNA-Matches anzeigen")}
-                    </label>
-                    {model.clinical && (
-                      <label className="choice">
-                        <input
-                          type="checkbox"
-                          checked={options.include_clinical}
-                          disabled={!!busy}
-                          onChange={(e) => {
-                            setOptions({
-                              ...options,
-                              include_clinical: e.target.checked,
-                            });
-                            setPreview(undefined);
-                          }}
-                        />
-                        <span>
-                          <strong>
-                            {t("ClinVar- und ClinGen-Einträge aufnehmen")}
-                          </strong>
-                          <small>
-                            {t(
-                              "Quellenlinks können beobachtete Varianten offenlegen.",
+            )}
+            {page === "home" &&
+              (model ? (
+                <>
+                  <Heading
+                    title={t("Was deine DNA sagt")}
+                    description={`${t("MyHeritage-Format")} · ${model.summary.format} · ${model.summary.build || t("Referenzgenom unbekannt")} · ${t("Katalog")} ${model.catalog_version}`}
+                  />
+                  <div className="stats">
+                    <div>
+                      <small>{t("Schlussfolgerungen")}</small>
+                      <strong>{shownConclusions.length}</strong>
+                    </div>
+                    <div>
+                      <small>{t("Studienbezüge")}</small>
+                      <strong>{totals.research}</strong>
+                    </div>
+                    <div>
+                      <small>{t("Offen")}</small>
+                      <strong>{totals.missing}</strong>
+                    </div>
+                    <div>
+                      <small>{t("Genotypzeilen")}</small>
+                      <strong>{number.format(model.summary.rows)}</strong>
+                    </div>
+                  </div>
+                  {hiddenMedical > 0 && (
+                    <div className="notice-card">
+                      <p>
+                        <strong>
+                          {hiddenMedical}{" "}
+                          {t("medizinische Befunde ausgeblendet.")}
+                        </strong>{" "}
+                        {t(
+                          "Sie betreffen Medikamente oder Erkrankungsrisiken und brauchen eine Laborbestätigung.",
+                        )}
+                      </p>
+                      <button
+                        className="button secondary compact"
+                        onClick={() => setShowMedical(true)}
+                      >
+                        {t("Anzeigen")}
+                      </button>
+                    </div>
+                  )}
+                  <header className="section-heading">
+                    <h2>{t("Deine Schlussfolgerungen")}</h2>
+                    <button
+                      className="text-button"
+                      onClick={() => {
+                        setQuery("");
+                        setFilter("all");
+                        navigate("chapters");
+                      }}
+                    >
+                      {t("Alle Kapitel")}
+                      <ArrowRight size={15} />
+                    </button>
+                  </header>
+                  {shownConclusions.length ? (
+                    <div className="conclusions">
+                      {shownConclusions.map((finding) => (
+                        <button
+                          key={finding.id}
+                          className={`conclusion-tile${inspected === finding.id ? " active" : ""}`}
+                          onClick={() =>
+                            setInspected(
+                              inspected === finding.id ? undefined : finding.id,
+                            )
+                          }
+                        >
+                          <span className="top">
+                            <strong>{resultText(finding.title)}</strong>
+                            {isMedical(finding) && (
+                              <span className="medical">
+                                {t("Medizinisch")}
+                              </span>
                             )}
-                          </small>
-                        </span>
-                      </label>
-                    )}
-                    {model.maternal_lineage && (
-                      <label className="choice">
-                        <input
-                          type="checkbox"
-                          checked={options.include_lineage}
-                          disabled={!!busy}
-                          onChange={(event) => {
-                            setOptions({
-                              ...options,
-                              include_lineage: event.target.checked,
-                            });
-                            setPreview(undefined);
-                          }}
-                        />
-                        {t("Importiertes mtDNA-Ergebnis aufnehmen")}
-                      </label>
-                    )}
+                          </span>
+                          <span className="answer">
+                            {visibleConclusion(finding, showMedical)}
+                          </span>
+                          {finding.confidence && (
+                            <ConfidenceMeter value={finding.confidence} />
+                          )}
+                          <span className="gene">
+                            {finding.checks
+                              .map(
+                                (check) =>
+                                  `${resultText(check.gene)} · ${check.id}`,
+                              )
+                              .join("  ")}
+                          </span>
+                        </button>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="empty">
+                      <CircleHelp size={20} />
+                      {model.summary.build
+                        ? t(
+                            "Die Datenbasis für die vorhandenen Merkmalsregeln ist nicht ausreichend.",
+                          )
+                        : t(
+                            "Der Dateikopf nennt kein unterstütztes Referenzgenom. Die Rohdaten bleiben im Variantenregister sichtbar.",
+                          )}
+                    </div>
+                  )}
+                  {totals.research > 0 && (
+                    <>
+                      <header className="section-heading">
+                        <h2>{t("Studienbezüge")}</h2>
+                      </header>
+                      <div className="result-grid">
+                        {results
+                          .filter((f) => f.status === "research")
+                          .slice(0, 9)
+                          .map((f) => (
+                            <button
+                              key={f.id}
+                              className={`conclusion-tile${inspected === f.id ? " active" : ""}`}
+                              onClick={() => setInspected(f.id)}
+                            >
+                              <StatusLabel status={f.status} />
+                              <strong>{resultText(f.title)}</strong>
+                              <span className="gene">
+                                {f.checks.map((check) => check.id).join(", ")}
+                              </span>
+                            </button>
+                          ))}
+                      </div>
+                    </>
+                  )}
+                  <header className="section-heading">
+                    <h2>{t("Datenqualität")}</h2>
+                  </header>
+                  <div className="panel quality">
+                    <span>
+                      <strong>{number.format(model.summary.no_call)}</strong>
+                      {t("ohne Genotyp")}
+                    </span>
+                    <span>
+                      <strong>{number.format(model.summary.conflicts)}</strong>{" "}
+                      {t("widersprüchlich")}
+                    </span>
+                    <span>
+                      <strong>{number.format(model.summary.skipped)}</strong>{" "}
+                      {t("übersprungen")}
+                    </span>
+                  </div>
+                </>
+              ) : (
+                <section className="welcome">
+                  <div className="welcome-copy">
+                    <Heading
+                      title={t("Deine DNA. Dein Gerät.")}
+                      description={t(
+                        "Öffne deinen MyHeritage-Rohdatenexport. Roots Local zieht Schlüsse aus deinen Genotypen und zeigt, wie sicher sie sind.",
+                      )}
+                    />
                     <div className="actions">
                       <button
                         className="button"
                         disabled={!!busy}
-                        onClick={savePdf}
+                        onClick={() => importData(false)}
                       >
-                        {t("PDF exportieren")}
-                        <ArrowDownToLine size={16} />
+                        {t("DNA-Datei öffnen")}
+                        <ArrowRight size={16} />
                       </button>
                       <button
                         className="button secondary"
                         disabled={!!busy}
-                        onClick={renderPdf}
+                        onClick={() => importData(true)}
                       >
-                        {t("Vorschau")}
+                        {t("Beispiel ansehen")}
                       </button>
                     </div>
+                    <p className="formats">
+                      {t("CSV, TSV, TXT oder ZIP")} ·{" "}
+                      {t("Oder die Datei einfach ins Fenster ziehen.")}
+                    </p>
                   </div>
-                  <div className="preview">
-                    {preview ? (
-                      <Suspense
-                        fallback={
-                          <p role="status">{t("PDF wird geöffnet …")}</p>
-                        }
-                      >
-                        <PdfPreview bytes={preview} />
-                      </Suspense>
-                    ) : (
-                      <div className="mock-report">
-                        <span>ROOTS LOCAL</span>
-                        <strong>
-                          {t("Dein")}
-                          <br />
-                          {t("DNA-Report")}
-                        </strong>
-                        <i />
-                        <p>{t("Entdecke deine DNA. Offline.")}</p>
-                        <small>
-                          {options.short
-                            ? t("Kurzreport")
-                            : t("Vollreport · 17 Kapitel")}
-                        </small>
+                  <div className="helix" aria-hidden="true">
+                    <Mark size={200} />
+                  </div>
+                </section>
+              ))}
+            {page === "atlas" && model && (
+              <>
+                <Heading
+                  title={t("Atlas")}
+                  description={t(
+                    "Jeder Katalogmarker an seiner Position im Genom. Wähle einen Marker, um den Befund zu öffnen.",
+                  )}
+                />
+                <Atlas
+                  findings={results}
+                  build={model.summary.build}
+                  showMedical={showMedical}
+                  selected={inspected}
+                  onOpen={(finding) => setInspected(finding.id)}
+                />
+              </>
+            )}
+            {page === "chapters" && (
+              <>
+                <Heading
+                  title={t("Kapitel")}
+                  description={t("17 Hauptkapitel für deinen DNA-Vollreport.")}
+                />
+                <div className="browse">
+                  <nav className="chapter-list" aria-label={t("Reportkapitel")}>
+                    {groups.map((group) => (
+                      <div key={group}>
+                        <h3>{group}</h3>
+                        {chapters
+                          .filter((c) => c.part === group)
+                          .map((c) => (
+                            <button
+                              key={c.id}
+                              className={
+                                c.id === activeChapter && !search
+                                  ? "selected"
+                                  : ""
+                              }
+                              onClick={() => selectChapter(c.id)}
+                            >
+                              <span className="mono">{c.id}</span>
+                              {c.title}
+                            </button>
+                          ))}
+                      </div>
+                    ))}
+                  </nav>
+                  <section className="chapter-detail">
+                    {model && (
+                      <div className="filters">
+                        <label className="search">
+                          <Search size={16} />
+                          <input
+                            placeholder={t("Merkmal, Gen oder rsID")}
+                            value={query}
+                            onChange={(e) => setQuery(e.target.value)}
+                          />
+                        </label>
+                        <select
+                          aria-label={t("Auswertungsstatus")}
+                          value={filter}
+                          onChange={(e) =>
+                            setFilter(e.target.value as typeof filter)
+                          }
+                        >
+                          <option value="all">{t("Alle Status")}</option>
+                          <option value="personal">{t("Auswertbar")}</option>
+                          <option value="research">{t("Studienbezug")}</option>
+                          <option value="missing">{t("Offen")}</option>
+                        </select>
                       </div>
                     )}
-                  </div>
-                </div>
-              ) : (
-                <div className="empty">
-                  <FileText size={22} />
-                  {t("Öffne eine DNA-Datei, um einen Report zu erstellen.")}
-                </div>
-              )}
-            </>
-          )}
-          {page === "data" && (
-            <>
-              <Heading
-                title={t("Datenquellen")}
-                description={t(
-                  "Lokale Begleitdateien und Referenzkataloge für deine Auswertung.",
-                )}
-              />
-              <div className="data-grid">
-                <section className="panel data-card">
-                  <Dna size={22} />
-                  <h2>{t("Genotypdatei")}</h2>
-                  <p>
-                    {model
-                      ? `${model.summary.format} · ${model.summary.build || t("Build unbekannt")} · ${resultText(model.summary.strand)}`
-                      : t("Keine Datei geöffnet.")}
-                  </p>
-                  <div className="actions">
-                    <button
-                      className="button secondary"
-                      disabled={!!busy}
-                      onClick={() => importData(false)}
-                    >
-                      {t("Öffnen")}
-                    </button>
-                    {model && (
-                      <button
-                        className="text-button"
-                        disabled={!!busy}
-                        onClick={() =>
-                          void run(
-                            t("Sitzung schließen"),
-                            () => invoke("reset"),
-                            () => {
-                              setModel(undefined);
-                              setVariantJump(undefined);
-                              setOrigins("");
-                              setPreview(undefined);
-                              navigate("home");
-                            },
-                          )
-                        }
-                      >
-                        {t("Sitzung schließen")}
-                      </button>
-                    )}
-                  </div>
-                </section>
-                <section className="panel data-card">
-                  <Database size={22} />
-                  <h2>{t("Referenzkatalog")}</h2>
-                  <p>
-                    {t("Aktiver Katalog")}
-                    {version}
-                    {t(". Signierte Pakete können lokal geladen werden.")}
-                  </p>
-                  <label className="field">
-                    {t("Öffentlicher Ed25519-Schlüssel")}
-                    <input
-                      value={key}
-                      maxLength={64}
-                      placeholder={t("64 Hex-Zeichen")}
-                      onChange={(e) => setKey(e.target.value)}
-                    />
-                  </label>
-                  <button
-                    className="button secondary"
-                    disabled={!!busy || !/^[0-9a-f]{64}$/i.test(key)}
-                    onClick={() =>
-                      void run(
-                        t("Katalog überprüfen"),
-                        () =>
-                          invoke<{
-                            version: string;
-                            model: Report | null;
-                          } | null>("load_catalog", {
-                            trustedKey: key,
-                            language,
-                          }),
-                        (value) => {
-                          if (value) {
-                            setVersion(value.version);
-                            if (value.model) setReport(value.model);
-                            setNotice(t("Der Katalog wurde übernommen."));
-                          }
-                        },
+                    {search ? (
+                      <>
+                        <h2>{t("Suchergebnisse")}</h2>
+                        {visible.length ? (
+                          <FindingList
+                            key={search + filter}
+                            findings={visible}
+                            anchor={anchor}
+                            openVariant={openVariant}
+                          />
+                        ) : (
+                          <p>{t("Keine passenden Merkmale gefunden.")}</p>
+                        )}
+                      </>
+                    ) : (
+                      chapter && (
+                        <>
+                          <h2>{chapter.title}</h2>
+                          {chapter.sections.map((section) => {
+                            const maternal =
+                              section.id === "01.3"
+                                ? model?.maternal_lineage
+                                : null;
+                            const findings = visible.filter(
+                              (item) => item.section === section.id,
+                            );
+                            const cross = visible.filter((item) =>
+                              item.cross.includes(section.id),
+                            );
+                            return (
+                              <section className="subchapter" key={section.id}>
+                                <h3>
+                                  <span className="mono">{section.id}</span>{" "}
+                                  {section.title}
+                                </h3>
+                                <p>{section.scope}</p>
+                                {maternal && <MaternalResult data={maternal} />}
+                                {section.id === "14.4" &&
+                                  model?.scores.map((score) => (
+                                    <div className="score" key={score.id}>
+                                      <strong>{resultText(score.title)}</strong>
+                                      <p>
+                                        {score.matched} / {score.total}{" "}
+                                        {t("Modellpositionen ·")}{" "}
+                                        {score.raw === null
+                                          ? t("Kein Rohscore")
+                                          : `${t("Rohscore")} ${number.format(score.raw)}`}
+                                      </p>
+                                      <p>
+                                        {t("Vergleichspopulation der Studie:")}{" "}
+                                        {resultText(score.population)}
+                                        {t(
+                                          ". Forschungswert ohne persönliches Risiko.",
+                                        )}
+                                      </p>
+                                      <small>
+                                        {score.id} · {score.source}
+                                      </small>
+                                    </div>
+                                  ))}
+                                <FindingList
+                                  findings={findings}
+                                  anchor={anchor}
+                                  openVariant={openVariant}
+                                />
+                                {cross.map((f) => (
+                                  <button
+                                    className="text-button"
+                                    key={f.id}
+                                    onClick={() => openFinding(f)}
+                                  >
+                                    {t("Siehe")} {resultText(f.title)}{" "}
+                                    <ArrowRight size={14} />
+                                  </button>
+                                ))}
+                                {model &&
+                                  !findings.length &&
+                                  !cross.length &&
+                                  !maternal && (
+                                    <small>
+                                      {t(
+                                        "Für diesen Abschnitt liegt aktuell keine passende Merkmalsregel vor.",
+                                      )}
+                                    </small>
+                                  )}
+                              </section>
+                            );
+                          })}
+                        </>
                       )
-                    }
-                  >
-                    {t("Paket öffnen")}
-                  </button>
-                  {model && model.gwas_total > 0 && (
-                    <p>
-                      {number.format(
-                        model.findings.filter((finding) => finding.study)
-                          .length,
-                      )}{" "}
-                      {t("passende Studienassoziationen von")}{" "}
-                      {number.format(model.gwas_total)}
-                      {t("GWAS-Katalogeinträgen.")}
-                    </p>
+                    )}
+                  </section>
+                </div>
+              </>
+            )}
+            {page === "variants" && model && (
+              <VariantRegister
+                key={variantJump?.query ?? ""}
+                initialQuery={variantJump?.query ?? ""}
+                chromosomes={model.summary.chromosomes}
+                onBack={
+                  variantJump &&
+                  (() => {
+                    setVariantJump(undefined);
+                    openFinding(variantJump.finding);
+                  })
+                }
+              />
+            )}
+            {page === "report" && (
+              <>
+                <Heading
+                  title={t("PDF-Report")}
+                  description={t(
+                    "Gestalteter Export mit Inhaltsverzeichnis, Quellen und Abdeckung.",
                   )}
-                </section>
-                {model && (
-                  <>
-                    <section className="panel data-card">
-                      <GitBranch size={22} />
-                      <h2>{t("Herkunft & Familie")}</h2>
+                />
+                {model ? (
+                  <div className="report-layout">
+                    <div className="panel report-settings">
+                      <h2>{t("Umfang")}</h2>
+                      <label className="choice">
+                        <input
+                          type="radio"
+                          name="scope"
+                          checked={!options.short}
+                          disabled={!!busy}
+                          onChange={() => {
+                            setOptions({ ...options, short: false });
+                            setPreview(undefined);
+                          }}
+                        />
+                        <span>
+                          <strong>{t("Vollreport")}</strong>
+                          <small>
+                            {t("17 Hauptkapitel und Variantenanhang")}
+                          </small>
+                        </span>
+                      </label>
+                      <label className="choice">
+                        <input
+                          type="radio"
+                          name="scope"
+                          checked={options.short}
+                          disabled={!!busy}
+                          onChange={() => {
+                            setOptions({ ...options, short: true });
+                            setPreview(undefined);
+                          }}
+                        />
+                        <span>
+                          <strong>{t("Kurzreport")}</strong>
+                          <small>
+                            {t(
+                              "Ausgewählte Ergebnisse und importierte Zusatzdaten",
+                            )}
+                          </small>
+                        </span>
+                      </label>
+                      <h2>{t("Persönliche Angaben")}</h2>
                       <label className="field">
-                        {t("Vorhandene Herkunftsergebnisse")}
-                        <textarea
-                          value={origins}
-                          onChange={(e) => setOrigins(e.target.value)}
-                          placeholder={t("Region; 42.5\nGenetische Gruppe")}
-                          rows={3}
-                          maxLength={18000}
+                        {t("Name im Report")}{" "}
+                        <input
+                          value={options.name || ""}
+                          disabled={!!busy}
+                          placeholder="Optional"
+                          maxLength={120}
+                          onChange={(e) => {
+                            setOptions({ ...options, name: e.target.value });
+                            setPreview(undefined);
+                          }}
                         />
                       </label>
+                      <label className="choice">
+                        <input
+                          type="checkbox"
+                          checked={options.include_calls}
+                          disabled={!!busy}
+                          onChange={(e) => {
+                            setOptions({
+                              ...options,
+                              include_calls: e.target.checked,
+                            });
+                            setPreview(undefined);
+                          }}
+                        />
+                        {t("Konkrete Genotypen anzeigen")}
+                      </label>
+                      <label className="choice">
+                        <input
+                          type="checkbox"
+                          checked={options.include_relatives}
+                          disabled={!!busy}
+                          onChange={(e) => {
+                            setOptions({
+                              ...options,
+                              include_relatives: e.target.checked,
+                            });
+                            setPreview(undefined);
+                          }}
+                        />
+                        {t("Namen von DNA-Matches anzeigen")}
+                      </label>
+                      {
+                        <label className="choice">
+                          <input
+                            type="checkbox"
+                            checked={options.include_clinical}
+                            disabled={!!busy}
+                            onChange={(e) => {
+                              setOptions({
+                                ...options,
+                                include_clinical: e.target.checked,
+                              });
+                              setPreview(undefined);
+                            }}
+                          />
+                          <span>
+                            <strong>
+                              {t("Medizinische Befunde aufnehmen")}
+                            </strong>
+                            <small>
+                              {t(
+                                "Medikamente, Erkrankungsrisiken sowie ClinVar und ClinGen. Quellenlinks können beobachtete Varianten offenlegen.",
+                              )}
+                            </small>
+                          </span>
+                        </label>
+                      }
+                      {model.maternal_lineage && (
+                        <label className="choice">
+                          <input
+                            type="checkbox"
+                            checked={options.include_lineage}
+                            disabled={!!busy}
+                            onChange={(event) => {
+                              setOptions({
+                                ...options,
+                                include_lineage: event.target.checked,
+                              });
+                              setPreview(undefined);
+                            }}
+                          />
+                          {t("Importiertes mtDNA-Ergebnis aufnehmen")}
+                        </label>
+                      )}
                       <div className="actions">
+                        <button
+                          className="button"
+                          disabled={!!busy}
+                          onClick={savePdf}
+                        >
+                          {t("PDF exportieren")}
+                          <ArrowDownToLine size={16} />
+                        </button>
                         <button
                           className="button secondary"
                           disabled={!!busy}
+                          onClick={renderPdf}
+                        >
+                          {t("Vorschau")}
+                        </button>
+                      </div>
+                    </div>
+                    <div className="preview">
+                      {preview ? (
+                        <Suspense
+                          fallback={
+                            <p role="status">{t("PDF wird geöffnet …")}</p>
+                          }
+                        >
+                          <PdfPreview bytes={preview} />
+                        </Suspense>
+                      ) : (
+                        <div className="mock-report">
+                          <span>ROOTS LOCAL</span>
+                          <strong>
+                            {t("Dein")}
+                            <br />
+                            {t("DNA-Report")}
+                          </strong>
+                          <i />
+                          <p>{t("Entdecke deine DNA. Offline.")}</p>
+                          <small>
+                            {options.short
+                              ? t("Kurzreport")
+                              : t("Vollreport · 17 Kapitel")}
+                          </small>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ) : (
+                  <div className="empty">
+                    <FileText size={22} />
+                    {t("Öffne eine DNA-Datei, um einen Report zu erstellen.")}
+                  </div>
+                )}
+              </>
+            )}
+            {page === "data" && (
+              <>
+                <Heading
+                  title={t("Datenquellen")}
+                  description={t(
+                    "Lokale Begleitdateien und Referenzkataloge für deine Auswertung.",
+                  )}
+                />
+                <div className="data-grid">
+                  <section className="panel data-card">
+                    <Dna size={22} />
+                    <h2>{t("Genotypdatei")}</h2>
+                    <p>
+                      {model
+                        ? `${model.summary.format} · ${model.summary.build || t("Build unbekannt")} · ${resultText(model.summary.strand)}`
+                        : t("Keine Datei geöffnet.")}
+                    </p>
+                    <div className="actions">
+                      <button
+                        className="button secondary"
+                        disabled={!!busy}
+                        onClick={() => importData(false)}
+                      >
+                        {t("Öffnen")}
+                      </button>
+                      {model && (
+                        <button
+                          className="text-button"
+                          disabled={!!busy}
                           onClick={() =>
                             void run(
-                              t("Herkunft übernehmen"),
-                              () =>
-                                invoke<Report>("save_origins", {
-                                  entries: origins,
-                                }),
-                              (result) => {
-                                setReport(result);
-                                setNotice(t("Herkunftsangaben übernommen."));
+                              t("Sitzung schließen"),
+                              () => invoke("reset"),
+                              () => {
+                                setModel(undefined);
+                                setVariantJump(undefined);
+                                setOrigins("");
+                                setPreview(undefined);
+                                navigate("home");
                               },
                             )
                           }
                         >
-                          {t("Herkunft speichern")}
+                          {t("Sitzung schließen")}
                         </button>
-                        <button
-                          className="button secondary"
-                          disabled={!!busy}
-                          onClick={() =>
-                            extra("relatives", t("Begleitdatei einlesen"))
-                          }
-                        >
-                          {t("Matches oder Segmente")}
-                        </button>
-                        <button
-                          className="button secondary"
-                          disabled={!!busy}
-                          onClick={() =>
-                            extra("family", t("Familiendatei vergleichen"))
-                          }
-                        >
-                          {t("Familiendatei")}
-                        </button>
-                        <button
-                          className="button secondary"
-                          disabled={!!busy}
-                          onClick={() =>
-                            extra("trio", t("Elterndateien abgleichen"))
-                          }
-                        >
-                          {t("Zwei Elterndateien")}
-                        </button>
-                      </div>
-                      <small>
-                        {model.external.origins.length}
-                        {t("Herkunftsangaben ·")}{" "}
-                        {model.external.matches.length} Matches ·{" "}
-                        {model.external.segments.length}
-                        {t("Segmente")}
-                      </small>
-                      {model.family && (
-                        <>
-                          <p>
-                            {number.format(model.family.compared)}{" "}
-                            {t("gemeinsam ausgewertete Positionen ·")}{" "}
-                            {number.format(model.family.discordant)}{" "}
-                            {t("ohne gemeinsames Allel")}
-                          </p>
-                          {model.family.kinship !== null && (
-                            <p>
-                              {t("KING-Koeffizient (Forschungswert)")}{" "}
-                              {number.format(
-                                Number(model.family.kinship.toFixed(4)),
-                              )}{" "}
-                              · {number.format(model.family.kinship_markers)}{" "}
-                              {t("geprüfte Marker")}
-                            </p>
-                          )}
-                        </>
                       )}
-                      {model.trio && <TrioSummary trio={model.trio} />}
-                    </section>
-                    <section className="panel data-card">
-                      <GitBranch size={22} />
-                      <h2>{t("Mütterliche Linie")}</h2>
+                    </div>
+                  </section>
+                  <section className="panel data-card">
+                    <Database size={22} />
+                    <h2>{t("Referenzkatalog")}</h2>
+                    <p>
+                      {t("Aktiver Katalog")}
+                      {version}
+                      {t(". Signierte Pakete können lokal geladen werden.")}
+                    </p>
+                    <label className="field">
+                      {t("Öffentlicher Ed25519-Schlüssel")}
+                      <input
+                        value={key}
+                        maxLength={64}
+                        placeholder={t("64 Hex-Zeichen")}
+                        onChange={(e) => setKey(e.target.value)}
+                      />
+                    </label>
+                    <button
+                      className="button secondary"
+                      disabled={!!busy || !/^[0-9a-f]{64}$/i.test(key)}
+                      onClick={() =>
+                        void run(
+                          t("Katalog überprüfen"),
+                          () =>
+                            invoke<{
+                              version: string;
+                              model: Report | null;
+                            } | null>("load_catalog", {
+                              trustedKey: key,
+                              language,
+                            }),
+                          (value) => {
+                            if (value) {
+                              setVersion(value.version);
+                              if (value.model) setReport(value.model);
+                              setNotice(t("Der Katalog wurde übernommen."));
+                            }
+                          },
+                        )
+                      }
+                    >
+                      {t("Paket öffnen")}
+                    </button>
+                    {model && model.gwas_total > 0 && (
                       <p>
-                        {t(
-                          "Übernimm Kandidaten und Qualitätswerte aus einer lokal erstellten Haplogrep-Zusammenfassung.",
-                        )}
+                        {number.format(
+                          model.findings.filter((finding) => finding.study)
+                            .length,
+                        )}{" "}
+                        {t("passende Studienassoziationen von")}{" "}
+                        {number.format(model.gwas_total)}
+                        {t("GWAS-Katalogeinträgen.")}
                       </p>
-                      <button
-                        className="button secondary"
-                        disabled={!!busy}
-                        onClick={() =>
-                          extra(
-                            "maternal_lineage",
-                            t("Haplogrep-Ergebnis einlesen"),
-                          )
-                        }
-                      >
-                        {t("Haplogrep-Ergebnis öffnen")}
-                      </button>
-                      {model.maternal_lineage && (
-                        <MaternalResult data={model.maternal_lineage} />
-                      )}
-                    </section>
-                    <section className="panel data-card">
-                      <Database size={22} />
-                      <h2>ClinVar</h2>
-                      <p>
-                        {t(
-                          "Gleiche eine lokale ClinVar-VCF mit deiner Genotypdatei ab. Treffer aus Verbrauchertests benötigen eine unabhängige Bestätigung.",
-                        )}
-                      </p>
-                      <button
-                        className="button secondary"
-                        disabled={!!busy}
-                        onClick={() =>
-                          extra("clinical", t("ClinVar-Datei abgleichen"))
-                        }
-                      >
-                        {t("ClinVar-VCF öffnen")}
-                      </button>
-                      {model.clinical && (
-                        <>
+                    )}
+                  </section>
+                  {model && (
+                    <>
+                      <section className="panel data-card">
+                        <GitBranch size={22} />
+                        <h2>{t("Herkunft & Familie")}</h2>
+                        <label className="field">
+                          {t("Vorhandene Herkunftsergebnisse")}
+                          <textarea
+                            value={origins}
+                            onChange={(e) => setOrigins(e.target.value)}
+                            placeholder={t("Region; 42.5\nGenetische Gruppe")}
+                            rows={3}
+                            maxLength={18000}
+                          />
+                        </label>
+                        <div className="actions">
                           <button
                             className="button secondary"
                             disabled={!!busy}
                             onClick={() =>
-                              extra(
-                                "gene_validity",
-                                t("ClinGen-Datei abgleichen"),
+                              void run(
+                                t("Herkunft übernehmen"),
+                                () =>
+                                  invoke<Report>("save_origins", {
+                                    entries: origins,
+                                  }),
+                                (result) => {
+                                  setReport(result);
+                                  setNotice(t("Herkunftsangaben übernommen."));
+                                },
                               )
                             }
                           >
-                            {t("ClinGen-CSV öffnen")}
+                            {t("Herkunft speichern")}
                           </button>
-                          <ClinicalMatches data={model.clinical} />
-                        </>
-                      )}
-                    </section>
-                    <section className="panel data-card">
-                      <ScanLine size={22} />
-                      <h2>{t("Sequenzierdaten")}</h2>
-                      <p>
-                        {t(
-                          "CRAM und passende lokale FASTA mit Index. Die App ermittelt die Abdeckung der Katalogmarker.",
+                          <button
+                            className="button secondary"
+                            disabled={!!busy}
+                            onClick={() =>
+                              extra("relatives", t("Begleitdatei einlesen"))
+                            }
+                          >
+                            {t("Matches oder Segmente")}
+                          </button>
+                          <button
+                            className="button secondary"
+                            disabled={!!busy}
+                            onClick={() =>
+                              extra("family", t("Familiendatei vergleichen"))
+                            }
+                          >
+                            {t("Familiendatei")}
+                          </button>
+                          <button
+                            className="button secondary"
+                            disabled={!!busy}
+                            onClick={() =>
+                              extra("trio", t("Elterndateien abgleichen"))
+                            }
+                          >
+                            {t("Zwei Elterndateien")}
+                          </button>
+                        </div>
+                        <small>
+                          {model.external.origins.length}
+                          {t("Herkunftsangaben ·")}{" "}
+                          {model.external.matches.length} Matches ·{" "}
+                          {model.external.segments.length}
+                          {t("Segmente")}
+                        </small>
+                        {model.family && (
+                          <>
+                            <p>
+                              {number.format(model.family.compared)}{" "}
+                              {t("gemeinsam ausgewertete Positionen ·")}{" "}
+                              {number.format(model.family.discordant)}{" "}
+                              {t("ohne gemeinsames Allel")}
+                            </p>
+                            {model.family.kinship !== null && (
+                              <p>
+                                {t("KING-Koeffizient (Forschungswert)")}{" "}
+                                {number.format(
+                                  Number(model.family.kinship.toFixed(4)),
+                                )}{" "}
+                                · {number.format(model.family.kinship_markers)}{" "}
+                                {t("geprüfte Marker")}
+                              </p>
+                            )}
+                          </>
                         )}
-                      </p>
-                      <button
-                        className="button secondary"
-                        disabled={!!busy}
-                        onClick={() =>
-                          extra("cram", t("CRAM-Abdeckung berechnen"))
-                        }
-                      >
-                        {t("CRAM öffnen")}
-                      </button>
-                      {model.sequence && (
-                        <SequenceCoverage data={model.sequence} />
-                      )}
-                    </section>
-                  </>
-                )}
-              </div>
-            </>
-          )}
-        </div>
-      </main>
-    </div>
+                        {model.trio && <TrioSummary trio={model.trio} />}
+                      </section>
+                      <section className="panel data-card">
+                        <GitBranch size={22} />
+                        <h2>{t("Mütterliche Linie")}</h2>
+                        <p>
+                          {t(
+                            "Übernimm Kandidaten und Qualitätswerte aus einer lokal erstellten Haplogrep-Zusammenfassung.",
+                          )}
+                        </p>
+                        <button
+                          className="button secondary"
+                          disabled={!!busy}
+                          onClick={() =>
+                            extra(
+                              "maternal_lineage",
+                              t("Haplogrep-Ergebnis einlesen"),
+                            )
+                          }
+                        >
+                          {t("Haplogrep-Ergebnis öffnen")}
+                        </button>
+                        {model.maternal_lineage && (
+                          <MaternalResult data={model.maternal_lineage} />
+                        )}
+                      </section>
+                      <section className="panel data-card">
+                        <Database size={22} />
+                        <h2>ClinVar</h2>
+                        <p>
+                          {t(
+                            "Gleiche eine lokale ClinVar-VCF mit deiner Genotypdatei ab. Treffer aus Verbrauchertests benötigen eine unabhängige Bestätigung.",
+                          )}
+                        </p>
+                        <button
+                          className="button secondary"
+                          disabled={!!busy}
+                          onClick={() =>
+                            extra("clinical", t("ClinVar-Datei abgleichen"))
+                          }
+                        >
+                          {t("ClinVar-VCF öffnen")}
+                        </button>
+                        {model.clinical && (
+                          <>
+                            <button
+                              className="button secondary"
+                              disabled={!!busy}
+                              onClick={() =>
+                                extra(
+                                  "gene_validity",
+                                  t("ClinGen-Datei abgleichen"),
+                                )
+                              }
+                            >
+                              {t("ClinGen-CSV öffnen")}
+                            </button>
+                            <ClinicalMatches data={model.clinical} />
+                          </>
+                        )}
+                      </section>
+                      <section className="panel data-card">
+                        <ScanLine size={22} />
+                        <h2>{t("Sequenzierdaten")}</h2>
+                        <p>
+                          {t(
+                            "CRAM und passende lokale FASTA mit Index. Die App ermittelt die Abdeckung der Katalogmarker.",
+                          )}
+                        </p>
+                        <button
+                          className="button secondary"
+                          disabled={!!busy}
+                          onClick={() =>
+                            extra("cram", t("CRAM-Abdeckung berechnen"))
+                          }
+                        >
+                          {t("CRAM öffnen")}
+                        </button>
+                        {model.sequence && (
+                          <SequenceCoverage data={model.sequence} />
+                        )}
+                      </section>
+                    </>
+                  )}
+                </div>
+              </>
+            )}
+          </div>
+        </main>
+        {inspectedFinding && (
+          <Inspector
+            key={inspectedFinding.id}
+            finding={inspectedFinding}
+            showMedical={showMedical}
+            onShowMedical={() => setShowMedical(true)}
+            onClose={() => setInspected(undefined)}
+            openVariant={openVariant}
+          />
+        )}
+        {paletteOpen && (
+          <CommandPalette
+            commands={commands}
+            onClose={() => setPaletteOpen(false)}
+          />
+        )}
+      </div>
+    </MedicalContext.Provider>
   );
 }
 

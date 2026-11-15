@@ -170,7 +170,11 @@ fn outcome<'a>(item: &'a Trait, checks: &[Check]) -> Option<&'a crate::catalog::
 
 fn dosage(item: &Trait, checks: &[Check]) -> Option<u8> {
     let effect = item.effect.as_ref()?;
-    let call = checks.iter().find(|c| c.id == effect.marker)?.call.as_deref()?;
+    let call = checks
+        .iter()
+        .find(|c| c.id == effect.marker)?
+        .call
+        .as_deref()?;
     Some(call.chars().filter(|c| *c == effect.allele).count() as u8)
 }
 
@@ -292,7 +296,11 @@ pub fn evaluate_with_coverage(
         } else if let (Some(effect), Some(n)) = (&item.effect, copies) {
             conclusion = Some(effect.conclusions[n as usize].clone());
             confidence = Some(effect.confidence);
-            (Status::Personal, "Die Anzahl der Kopien des geprüften Allels wurde aus der Rohdatei bestimmt.".into())
+            (
+                Status::Personal,
+                "Die Anzahl der Kopien des geprüften Allels wurde aus der Rohdatei bestimmt."
+                    .into(),
+            )
         } else if item.method == Method::Research {
             (Status::Research, "Der dokumentierte Marker liegt in der Datei vor. Die Quelle beschreibt einen Studienzusammenhang.".into())
         } else if let Some(result) = outcome(&item, &checks) {

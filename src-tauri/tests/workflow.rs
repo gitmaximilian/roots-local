@@ -158,7 +158,10 @@ fn full_taxonomy_and_four_reviewed_interpretations() {
         Some("Wahrscheinlich laktosetolerant im Erwachsenenalter")
     );
     assert_eq!(by_id("lactase").confidence, Some(Confidence::Moderate));
-    assert_eq!(by_id("earwax").conclusion.as_deref(), Some("Trockenes Ohrenschmalz"));
+    assert_eq!(
+        by_id("earwax").conclusion.as_deref(),
+        Some("Trockenes Ohrenschmalz")
+    );
     assert_eq!(by_id("slco").dosage, Some(1));
     assert_eq!(by_id("alcohol").dosage, Some(0));
     assert_eq!(by_id("diabetes").dosage, Some(1));
@@ -194,8 +197,26 @@ fn curated_hair_associations_match_supported_builds_and_alleles() {
         ("GRCh38", 89919709, 152110849),
     ] {
         for (id, section, chromosome, position, observed, reference, unsupported, matched) in [
-            ("rs1805007", "04.1", 16, mc1r, "CT", "CC", "CG", Status::Personal),
-            ("rs11803731", "04.2", 1, tchh, "AT", "AA", "AC", Status::Research),
+            (
+                "rs1805007",
+                "04.1",
+                16,
+                mc1r,
+                "CT",
+                "CC",
+                "CG",
+                Status::Personal,
+            ),
+            (
+                "rs11803731",
+                "04.2",
+                1,
+                tchh,
+                "AT",
+                "AA",
+                "AC",
+                Status::Research,
+            ),
         ] {
             for (marker, coordinate, call, expected) in [
                 (id, position, observed, matched.clone()),
@@ -645,10 +666,19 @@ fn verify_pdf_contents(
                 assert_eq!(text.contains(unresolved), !include_clinical);
                 if !short {
                     let (conclusion, medical) = language.select2(
-                        ("Likely lactose tolerant as an adult", "TCF7L2 risk allele T"),
-                        ("Wahrscheinlich laktosetolerant im Erwachsenenalter", "TCF7L2-Risikoallels T"),
+                        (
+                            "Likely lactose tolerant as an adult",
+                            "TCF7L2 risk allele T",
+                        ),
+                        (
+                            "Wahrscheinlich laktosetolerant im Erwachsenenalter",
+                            "TCF7L2-Risikoallels T",
+                        ),
                     );
-                    assert!(text.contains(conclusion), "Missing conclusion in {language:?}");
+                    assert!(
+                        text.contains(conclusion),
+                        "Missing conclusion in {language:?}"
+                    );
                     assert_eq!(
                         text.contains(medical),
                         include_clinical,

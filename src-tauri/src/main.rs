@@ -17,7 +17,10 @@ use std::{
         Arc, Mutex,
     },
 };
-use tauri::{AppHandle, Builder, State};
+use tauri::{
+    menu::{Menu, MenuItem, PredefinedMenuItem, Submenu},
+    AppHandle, Builder, Emitter, State,
+};
 use tauri_plugin_dialog::DialogExt;
 
 const SAMPLE: &[u8] = include_bytes!("../../fixtures/synthetic-myheritage.txt");
@@ -152,17 +155,120 @@ async fn import_dna(
             };
             import::file(&path, &job.cancel)?
         };
-        let (summary, conflicts) = analysis::summary_with_conflicts(&data);
-        let mut state = workspace.session.lock().map_err(state_error)?;
-        let model = make_model(&data, summary, state.catalog.as_ref(), example)?;
-        if job.cancel.load(Relaxed) {
-            return Err("Import abgebrochen.".into());
-        }
-        state.imported = Some(Arc::new(ImportedProfile { data, conflicts }));
-        state.model = Some(model.clone());
-        Ok(Some(model))
+        finish_import(&workspace, &job, data, example).map(Some)
     })
     .await
+}
+
+fn finish_import(
+    workspace: &Workspace,
+    job: &Job,
+    data: Import,
+    example: bool,
+) -> Result<Model, String> {
+    let (summary, conflicts) = analysis::summary_with_conflicts(&data);
+    let mut state = workspace.session.lock().map_err(state_error)?;
+    let model = make_model(&data, summary, state.catalog.as_ref(), example)?;
+    if job.cancel.load(Relaxed) {
+        return Err("Import abgebrochen.".into());
+    }
+    state.imported = Some(Arc::new(ImportedProfile { data, conflicts }));
+    state.model = Some(model.clone());
+    Ok(model)
+}
+
+/// Imports a raw data file dropped onto the window from Finder.
+#[tauri::command]
+async fn import_path(workspace: State<'_, Workspace>, path: String) -> Result<Model, String> {
+    let path = PathBuf::from(path);
+    let supported = path.extension().and_then(|e| e.to_str()).is_some_and(|e| {
+        ["csv", "tsv", "txt", "zip"]
+            .iter()
+            .any(|x| e.eq_ignore_ascii_case(x))
+    });
+    if !supported || !path.is_file() {
+        return Err("Bitte eine CSV-, TSV-, TXT- oder ZIP-Datei verwenden.".into());
+    }
+    let workspace = workspace.inner().clone();
+    background(move || {
+        let job = workspace.start_job()?;
+        let data = import::file(&path, &job.cancel)?;
+        finish_import(&workspace, &job, data, false)
+    })
+    .await
+}
+
+fn build_menu(handle: &AppHandle) -> tauri::Result<Menu<tauri::Wry>> {
+    let item = |id: &str, label: &str, accelerator: Option<&str>| {
+        MenuItem::with_id(handle, id, label, true, accelerator)
+    };
+    let separator = || PredefinedMenuItem::separator(handle);
+    let app = Submenu::with_items(
+        handle,
+        "Roots Local",
+        true,
+        &[
+            &PredefinedMenuItem::about(handle, None, None)?,
+            &separator()?,
+            &PredefinedMenuItem::services(handle, None)?,
+            &separator()?,
+            &PredefinedMenuItem::hide(handle, None)?,
+            &PredefinedMenuItem::hide_others(handle, None)?,
+            &PredefinedMenuItem::show_all(handle, None)?,
+            &separator()?,
+            &PredefinedMenuItem::quit(handle, None)?,
+        ],
+    )?;
+    let file = Submenu::with_items(
+        handle,
+        "File",
+        true,
+        &[
+            &item("open", "Open DNA File…", Some("CmdOrCtrl+O"))?,
+            &item("example", "View Example", None)?,
+            &separator()?,
+            &item("export", "Export PDF Report…", Some("CmdOrCtrl+E"))?,
+            &separator()?,
+            &PredefinedMenuItem::close_window(handle, None)?,
+        ],
+    )?;
+    let edit = Submenu::with_items(
+        handle,
+        "Edit",
+        true,
+        &[
+            &PredefinedMenuItem::undo(handle, None)?,
+            &PredefinedMenuItem::redo(handle, None)?,
+            &separator()?,
+            &PredefinedMenuItem::cut(handle, None)?,
+            &PredefinedMenuItem::copy(handle, None)?,
+            &PredefinedMenuItem::paste(handle, None)?,
+            &PredefinedMenuItem::select_all(handle, None)?,
+        ],
+    )?;
+    let view = Submenu::with_items(
+        handle,
+        "View",
+        true,
+        &[
+            &item("palette", "Search and Commands…", Some("CmdOrCtrl+K"))?,
+            &separator()?,
+            &item("language-en", "English", None)?,
+            &item("language-de", "Deutsch", None)?,
+            &separator()?,
+            &PredefinedMenuItem::fullscreen(handle, None)?,
+        ],
+    )?;
+    let window = Submenu::with_items(
+        handle,
+        "Window",
+        true,
+        &[
+            &PredefinedMenuItem::minimize(handle, None)?,
+            &PredefinedMenuItem::maximize(handle, None)?,
+        ],
+    )?;
+    Menu::with_items(handle, &[&app, &file, &edit, &view, &window])
 }
 
 #[tauri::command]
@@ -571,6 +677,10 @@ fn main() {
         .manage(Workspace::default())
         .plugin(tauri_plugin_dialog::init())
         .setup(|app| {
+            app.set_menu(build_menu(app.handle())?)?;
+            app.on_menu_event(|app, event| {
+                let _ = app.emit("menu", event.id().0.as_str());
+            });
             tauri::WebviewWindowBuilder::from_config(app, &app.config().app.windows[0])?
                 .on_navigation(|url| {
                     matches!(
@@ -589,6 +699,7 @@ fn main() {
             cancel_job,
             reset,
             import_dna,
+            import_path,
             variants,
             import_extra,
             save_origins,

@@ -12,6 +12,7 @@ fn run() -> Result<(), String> {
     let mut include_clinical = false;
     let mut include_lineage = false;
     let mut short = false;
+    let mut model_json: Option<std::ffi::OsString> = None;
     let mut catalog = None;
     let mut clinvar = None;
     let mut clingen = None;
@@ -26,6 +27,9 @@ fn run() -> Result<(), String> {
             Some("--include-clinical") => include_clinical = true,
             Some("--include-lineage") => include_lineage = true,
             Some("--short") => short = true,
+            Some("--model-json") if model_json.is_none() => {
+                model_json = Some(args.next().ok_or("Missing model JSON path.")?);
+            }
             Some("--clinvar") if clinvar.is_none() => {
                 clinvar = Some(args.next().ok_or("Missing ClinVar VCF file.")?);
             }
@@ -122,6 +126,10 @@ fn run() -> Result<(), String> {
         Path::new(&typst),
         Path::new(&output),
     )?;
+    if let Some(path) = &model_json {
+        let json = serde_json::to_vec(&model).map_err(|_| "Model could not be serialized.")?;
+        std::fs::write(path, json).map_err(|_| "Model JSON could not be written.")?;
+    }
     println!(
         "{} chapters · {} sections · {} results · {} genotype rows",
         model.chapters.len(),

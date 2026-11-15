@@ -161,7 +161,9 @@ pub struct Manifest {
 }
 
 fn valid_text(value: &str, limit: usize) -> bool {
-    !value.trim().is_empty() && value.chars().count() <= limit && !value.chars().any(char::is_control)
+    !value.trim().is_empty()
+        && value.chars().count() <= limit
+        && !value.chars().any(char::is_control)
 }
 
 pub struct Catalog {

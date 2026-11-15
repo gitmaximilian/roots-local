@@ -61,3 +61,7 @@ Out of scope for array data: CYP2D6 copy number, HLA typing beyond tag SNPs, str
 | Next | T7–T13 and the category batches above | Each batch with sources and tests |
 
 Allele verification for M2 used the NCBI dbSNP pages of each marker. Verified effect alleles (plus strand): rs671 A, rs7903146 T, rs1800562 A, rs6025 T, rs4149056 C, rs4244285 A, rs3918290 T, rs55886062 C, rs1805007 T, rs4988235 A. rs776746 C is inferred from strand mapping and population frequency. rs762551, rs12913832, rs72921001, and rs11803731 still need a primary source and stay without dosage statements.
+
+## Status
+
+M1–M5 are implemented on the `redesign/native-mac` branch. The verification record is in [test-status.md](test-status.md). T7–T13 and the category batches remain open.

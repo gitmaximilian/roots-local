@@ -16,9 +16,11 @@
         "title": "Roots Local",
         "width": 1250,
         "height": 850,
-        "minWidth": 800,
+        "minWidth": 940,
         "minHeight": 590,
-        "create": false
+        "create": false,
+        "titleBarStyle": "Overlay",
+        "hiddenTitle": true
       }
     ],
     "security": {
@@ -39,7 +41,8 @@
       "binaries/typst"
     ],
     "macOS": {
-      "minimumSystemVersion": "15.6"
+      "minimumSystemVersion": "15.6",
+      "signingIdentity": "-"
     },
     "resources": {
       "../licenses/": "licenses/"
