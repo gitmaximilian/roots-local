@@ -270,5 +270,14 @@
   "Die CPIC-Leitlinie beschreibt den Zusammenhang zwischen CYP3A5-Expression und dem Stoffwechsel von Tacrolimus.": "The CPIC guideline describes how CYP3A5 expression relates to tacrolimus metabolism.",
   "Die Auswertung zeigt die Abdeckung eines einzelnen Markers. Ein vollständiger Genotyp und eine klinische Beurteilung sind für Therapieentscheidungen erforderlich.": "This result shows coverage at a single marker. Treatment decisions require a complete genotype and clinical assessment.",
   "CPIC-Leitlinie": "CPIC guideline",
-  "Die Elterndateien ordnen die drei Marker als AVI/PAV zu. Studien verbinden diese Kombination mit mittlerer PTC-Empfindlichkeit.": "The parent files resolve the three markers as AVI/PAV. Studies associate this combination with intermediate PTC sensitivity."
+  "Die Elterndateien ordnen die drei Marker als AVI/PAV zu. Studien verbinden diese Kombination mit mittlerer PTC-Empfindlichkeit.": "The parent files resolve the three markers as AVI/PAV. Studies associate this combination with intermediate PTC sensitivity.",
+  "Die Datei enthält kein unterstütztes Haplogrep-Ergebnis.": "The file does not contain a supported Haplogrep result.",
+  "Die Auswertung zeigt einen passenden Marker. Weitere Varianten beeinflussen das Merkmal, daher lässt sich daraus die eigene Haarfarbe oder Haarform nicht ableiten.": "The analysis reports a matching marker. Other variants affect the trait, so this result cannot establish your hair colour or shape.",
+  "Studienassoziation für Pigmentierung oder Haarform": "Research association for pigmentation or hair shape",
+  "MC1R und rote Haarfarbe": "MC1R and red hair colour",
+  "Eine Studie in der UK Biobank fand einen Zusammenhang zwischen dem T-Allel an rs1805007 und roter Haarfarbe.": "A UK Biobank study found an association between the T allele at rs1805007 and red hair colour.",
+  "Untersuchte Personen britischer Abstammung in der UK Biobank": "Participants of British ancestry in the UK Biobank",
+  "TCHH und Haarform": "TCHH and hair shape",
+  "Die Studie von Medland und Kollegen fand einen Zusammenhang zwischen rs11803731 und der Form des Kopfhaars.": "Medland and colleagues found an association between rs11803731 and scalp hair shape.",
+  "Australische Studienkohorten europäischer Abstammung": "Australian study cohorts of European ancestry"
 }

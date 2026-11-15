@@ -25,4 +25,4 @@ Roots Local helps a MyHeritage customer inspect a DNA export on their own comput
 
 The [implementation brief](implementation-brief.md) defines the engineering requirements. The [report outline](report-structure.md) defines the report contents. The [verification record](test-status.md) documents what has run and what remains open.
 
-The P0 report changes and automated content checks are implemented. The P1 work now includes an explanation for exports with no supported assembly and a local CRAM command for reproducible acceptance. Provider validation, interactive Windows acceptance, and signing remain open. The P2 work is pending method-specific data and validation.
+The P0 report changes and automated content checks are implemented. P1 includes the missing assembly explanation and a reproducible comparison against HTSlib on synthetic CRAM records. P2 includes curated hair research and a local Haplogrep workflow for prepared rCRS inputs, with a versioned tree, fit score, quality checks, and separate export consent. MyHeritage provider validation, interactive Windows acceptance, release signing, and validation of the remaining inference methods are open.

@@ -149,7 +149,7 @@
 
 #for chapter in report.chapters {
   let chapter-findings = report.findings.filter(f => f.section.split(".").first() == chapter.id)
-  let has-import = (chapter.id == "01" and report.external.origins.len() > 0) or (chapter.id == "02" and report.external.matches.len() + report.external.segments.len() > 0)
+  let has-import = (chapter.id == "01" and (report.external.origins.len() > 0 or report.maternal_lineage != none)) or (chapter.id == "02" and report.external.matches.len() + report.external.segments.len() > 0)
   if not report.options.short or has-import or (chapter.id == "14" and (report.scores.len() > 0 or report.clinical != none)) or chapter-findings.any(f => f.status != "missing") {
     if not report.options.short { pagebreak(weak: true) }
     heading(level: 1, [#chapter.id · #chapter.title])
@@ -176,9 +176,26 @@
       let cross = report.findings.filter(f => section.id in f.cross and (not report.options.short or f.status != "missing"))
       let has-clinvar = section.id == "14.1" and report.clinical != none
       let has-scores = section.id == "14.4" and report.scores.len() > 0
-      if not report.options.short or own.len() > 0 or has-clinvar or has-scores {
+      let has-maternal = section.id == "01.3" and report.maternal_lineage != none
+      if not report.options.short or own.len() > 0 or has-clinvar or has-scores or has-maternal {
         heading(level: 2, [#section.id · #section.title])
         if not report.options.short { caption(section.scope); parbreak() }
+        if has-maternal {
+          let result = report.maternal_lineage
+          [
+            *#tr("Importiertes mtDNA-Ergebnis", "Imported mtDNA result")* · Haplogrep #result.tool_version · #result.tree \
+            #result.covered_positions / 16569 #tr("Positionen im angegebenen Bereich", "positions in the reported range") \
+            #result.warnings #if result.warnings == 1 { tr("Warnung", "warning") } else { tr("Warnungen", "warnings") } · #result.errors #if result.errors == 1 { tr("Fehler bei der Qualitätsprüfung", "quality control error") } else { tr("Fehler bei der Qualitätsprüfung", "quality control errors") } \
+            #if result.errors > 0 [
+              #tr("Haplogrep meldet Fehler. Die Zuordnung bleibt offen.", "Haplogrep reported errors. The assignment remains unresolved.") \
+            ]
+            #for hit in result.candidates [
+              *#hit.haplogroup* · #str(calc.round(hit.quality * 100, digits: 2)) % #tr("Übereinstimmung", "tree match score") \
+            ]
+            #link("https://doi.org/10.1093/nar/gkad284", [Haplogrep 3])
+          ]
+          parbreak()
+        }
         if has-clinvar {
           [*ClinVar* · #report.clinical.release · #report.clinical.build · #report.clinical.variants.len() #tr("passende Einträge", "matching records")]
           parbreak()
@@ -213,7 +230,7 @@
             #parbreak()
           ]
         }
-        if own.len() == 0 and cross.len() == 0 and not report.options.short and not has-clinvar and not has-scores {
+        if own.len() == 0 and cross.len() == 0 and not report.options.short and not has-clinvar and not has-scores and not has-maternal {
           if section.id == "03.1" {
             [#report.summary.rows #tr("Zeilen aus", "rows from") #report.summary.format · #tr("Referenzgenom", "Reference genome") #(if report.summary.build == none { tr("unbekannt", "unknown") } else { report.summary.build }).]
           } else if section.id == "03.4" {

@@ -32,6 +32,7 @@ Use `npm run tauri -- build --bundles app` for macOS. The script `scripts/packag
 - **Variant register.** Search by marker ID, exact coordinate, or inclusive range, such as `chr2:136600000-136650000`. Filter by chromosome or genotype status. Open a marker from a finding to inspect the matching rows and return to the finding.
 - **Starter catalog.** Rules for lactase activity, earwax type, bitter taste, and ACTN3 alongside selected studies. Data quality and scientific evidence are shown separately.
 - **Companion data.** Import ancestry results, matches, or shared segments. Compare autosomal calls against one family file or assign alleles at individual markers using two parent files.
+- **Maternal lineage.** Run the local Haplogrep helper from a prepared mitochondrial profile. Import its candidates, tree version, and quality checks into the ancestry chapter. [Offline lineage workflow](docs/catalogs.md#maternal-lineage)
 - **CRAM.** Measures catalog marker coverage using aligned reads and an indexed local FASTA. Checks the lengths and available MD5 values of the reference sequences used during decoding.
 - **Clinical reference data.** Import local ClinVar VCF and ClinGen gene–disease validity CSV files. The report displays matched variant classifications and gene–disease evidence with their sources. [Reference downloads and matching rules](docs/catalogs.md)
 - **GWAS research.** Optional local packages associate matching loci with published studies, samples, and reported effects.

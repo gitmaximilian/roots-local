@@ -1,5 +1,5 @@
 {
-  "version": "1.1.0",
+  "version": "1.2.0",
   "markers": [
     [
       "rs4988235",
@@ -144,6 +144,22 @@
       99270539,
       99672916,
       "CT"
+    ],
+    [
+      "rs1805007",
+      "MC1R",
+      "16",
+      89986117,
+      89919709,
+      "CT"
+    ],
+    [
+      "rs11803731",
+      "TCHH",
+      "1",
+      152083325,
+      152110849,
+      "AT"
     ]
   ],
   "traits": [
@@ -482,6 +498,54 @@
         [
           "CPIC-Leitlinie",
           "https://cpicpgx.org/guidelines/guideline-for-tacrolimus-and-CYP3A5/"
+        ]
+      ]
+    },
+    {
+      "id": "mc1r-red-hair",
+      "section": "04.1",
+      "title": "MC1R und rote Haarfarbe",
+      "markers": [
+        "rs1805007"
+      ],
+      "method": "research",
+      "require_identifier": true,
+      "evidence": "Studienassoziation für Pigmentierung oder Haarform",
+      "summary": "Eine Studie in der UK Biobank fand einen Zusammenhang zwischen dem T-Allel an rs1805007 und roter Haarfarbe.",
+      "limits": "Die Auswertung zeigt einen passenden Marker. Weitere Varianten beeinflussen das Merkmal, daher lässt sich daraus die eigene Haarfarbe oder Haarform nicht ableiten.",
+      "population": "Untersuchte Personen britischer Abstammung in der UK Biobank",
+      "sources": [
+        [
+          "Morgan et al. (2018)",
+          "https://doi.org/10.1038/s41467-018-07691-z"
+        ],
+        [
+          "dbSNP",
+          "https://www.ncbi.nlm.nih.gov/snp/rs1805007"
+        ]
+      ]
+    },
+    {
+      "id": "tchh-hair-shape",
+      "section": "04.2",
+      "title": "TCHH und Haarform",
+      "markers": [
+        "rs11803731"
+      ],
+      "method": "research",
+      "require_identifier": true,
+      "evidence": "Studienassoziation für Pigmentierung oder Haarform",
+      "summary": "Die Studie von Medland und Kollegen fand einen Zusammenhang zwischen rs11803731 und der Form des Kopfhaars.",
+      "limits": "Die Auswertung zeigt einen passenden Marker. Weitere Varianten beeinflussen das Merkmal, daher lässt sich daraus die eigene Haarfarbe oder Haarform nicht ableiten.",
+      "population": "Australische Studienkohorten europäischer Abstammung",
+      "sources": [
+        [
+          "Medland et al. (2009)",
+          "https://doi.org/10.1016/j.ajhg.2009.10.009"
+        ],
+        [
+          "dbSNP",
+          "https://www.ncbi.nlm.nih.gov/snp/rs11803731"
         ]
       ]
     }

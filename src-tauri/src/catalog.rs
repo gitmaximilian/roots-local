@@ -57,6 +57,8 @@ pub struct Trait {
     pub population: String,
     pub sources: Vec<(String, String)>,
     #[serde(default)]
+    pub require_identifier: bool,
+    #[serde(default)]
     pub cross: Vec<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub study: Option<Study>,

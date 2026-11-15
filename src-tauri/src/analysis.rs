@@ -268,7 +268,9 @@ pub fn evaluate_with_coverage(
                     data,
                     &at_pos,
                     &ids,
-                    item.method == Method::Gwas || item.section.starts_with("15."),
+                    item.require_identifier
+                        || item.method == Method::Gwas
+                        || item.section.starts_with("15."),
                 )
             })
             .collect();

@@ -6,6 +6,7 @@ use roots_local::{
     clinical, cram,
     external::{self, External},
     import::{self, Import},
+    lineage,
     locale::Language,
     report::{self, Model, Options},
     variants::{self, Conflicts, Quality},
@@ -211,6 +212,7 @@ async fn import_extra(
             "trio",
             "clinical",
             "gene_validity",
+            "maternal_lineage",
             "cram",
         ]
         .contains(&kind.as_str())
@@ -316,6 +318,17 @@ async fn import_extra(
                     .ok_or("Bitte zuerst eine ClinVar-Datei importieren.")?;
                 Extra::GeneValidity(clinical::gene_validity(&path, &matches, &job.cancel)?)
             }
+            "maternal_lineage" => {
+                let Some(path) = choose(
+                    &handle,
+                    language.select("Haplogrep result summary", "Haplogrep-Ergebnis"),
+                    &["json"],
+                )?
+                else {
+                    return Ok(None);
+                };
+                Extra::Maternal(lineage::maternal_file(&path)?)
+            }
             "cram" => {
                 let Some(path) = choose(
                     &handle,
@@ -369,6 +382,7 @@ async fn import_extra(
                     .gene_validity = Some(validity);
             }
             Extra::Cram(coverage) => model.sequence = Some(coverage),
+            Extra::Maternal(lineage) => model.maternal_lineage = Some(lineage),
         }
         Ok(Some(model.clone()))
     })
@@ -390,6 +404,7 @@ enum Extra {
     Clinical(clinical::Matches),
     GeneValidity(clinical::GeneValidity),
     Cram(cram::Coverage),
+    Maternal(lineage::Maternal),
 }
 
 #[tauri::command]

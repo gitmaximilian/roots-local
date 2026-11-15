@@ -168,5 +168,18 @@
   "Ausgewählte Ergebnisse und importierte Zusatzdaten": "Selected findings and imported data",
   "ClinVar- und ClinGen-Einträge aufnehmen": "Include ClinVar and ClinGen records",
   "Quellenlinks können beobachtete Varianten offenlegen.": "Source links can reveal observed variants.",
-  "Der Dateikopf nennt kein unterstütztes Referenzgenom. Die Rohdaten bleiben im Variantenregister sichtbar.": "The file header does not identify a supported reference assembly. You can still inspect the raw rows in the variant register."
+  "Der Dateikopf nennt kein unterstütztes Referenzgenom. Die Rohdaten bleiben im Variantenregister sichtbar.": "The file header does not identify a supported reference assembly. You can still inspect the raw rows in the variant register.",
+  "Importiertes mtDNA-Ergebnis": "Imported mtDNA result",
+  "Haplogrep-Übereinstimmung mit dem Referenzbaum": "Haplogrep match to the reference tree",
+  "Positionen im angegebenen Bereich": "positions in the reported range",
+  "Warnungen": "warnings",
+  "Fehler bei der Qualitätsprüfung": "quality control errors",
+  "Importiertes mtDNA-Ergebnis aufnehmen": "Include imported mtDNA result",
+  "Mütterliche Linie": "Maternal lineage",
+  "Übernimm Kandidaten und Qualitätswerte aus einer lokal erstellten Haplogrep-Zusammenfassung.": "Import candidates and quality scores from a local Haplogrep summary.",
+  "Haplogrep-Ergebnis einlesen": "Import Haplogrep result",
+  "Haplogrep-Ergebnis öffnen": "Open Haplogrep result",
+  "Haplogrep meldet Fehler. Die Zuordnung bleibt offen.": "Haplogrep reported errors. The assignment remains unresolved.",
+  "Warnung": "warning",
+  "Fehler bei der Qualitätsprüfung (Einzahl)": "quality control error"
 }

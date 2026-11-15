@@ -19,6 +19,7 @@ pub struct Options {
     pub include_calls: bool,
     pub include_relatives: bool,
     pub include_clinical: bool,
+    pub include_lineage: bool,
     pub language: Language,
 }
 
@@ -32,6 +33,7 @@ pub struct Model {
     pub family: Option<Family>,
     pub trio: Option<crate::external::Trio>,
     pub clinical: Option<crate::clinical::Matches>,
+    pub maternal_lineage: Option<crate::lineage::Maternal>,
     pub sequence: Option<crate::cram::Coverage>,
     pub example: bool,
     pub scores: Vec<crate::pgs::Result>,
@@ -66,6 +68,7 @@ impl Model {
             family: None,
             trio: None,
             clinical: None,
+            maternal_lineage: None,
             sequence: None,
             example,
             scores: Vec::new(),
@@ -163,6 +166,9 @@ fn document(model: &Model, mut options: Options) -> Document {
     let missing = model.findings.len() - personal - research;
     if !options.include_clinical {
         model.clinical = None;
+    }
+    if !options.include_lineage {
+        model.maternal_lineage = None;
     }
     if !options.include_relatives {
         for (i, relative) in model.external.matches.iter_mut().enumerate() {

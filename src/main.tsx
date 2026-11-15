@@ -106,6 +106,14 @@ type Report = {
       cm: number;
     }[];
   };
+  maternal_lineage: {
+    tool_version: string;
+    tree: string;
+    covered_positions: number;
+    candidates: { haplogroup: string; quality: number }[];
+    warnings: number;
+    errors: number;
+  } | null;
   family: {
     compared: number;
     compatible: number;
@@ -188,6 +196,7 @@ type Options = {
   include_calls: boolean;
   include_relatives: boolean;
   include_clinical: boolean;
+  include_lineage: boolean;
 };
 
 const number = {
@@ -552,6 +561,44 @@ function VariantRegister({
   );
 }
 
+function MaternalResult({
+  data,
+}: {
+  data: NonNullable<Report["maternal_lineage"]>;
+}) {
+  return (
+    <div className="score">
+      <strong>{t("Importiertes mtDNA-Ergebnis")}</strong>
+      <p>
+        {data.candidates
+          .map(
+            (hit) =>
+              `${hit.haplogroup} · ${number.format(hit.quality * 100)} %`,
+          )
+          .join(" / ")}
+      </p>
+      <p>{t("Haplogrep-Übereinstimmung mit dem Referenzbaum")}</p>
+      <p>
+        Haplogrep {data.tool_version} · {data.tree}
+      </p>
+      <p>
+        {number.format(data.covered_positions)} / {number.format(16_569)}{" "}
+        {t("Positionen im angegebenen Bereich")}
+      </p>
+      <p>
+        {data.warnings} {data.warnings === 1 ? t("Warnung") : t("Warnungen")} ·{" "}
+        {data.errors}{" "}
+        {data.errors === 1
+          ? t("Fehler bei der Qualitätsprüfung (Einzahl)")
+          : t("Fehler bei der Qualitätsprüfung")}
+      </p>
+      {data.errors > 0 && (
+        <p>{t("Haplogrep meldet Fehler. Die Zuordnung bleibt offen.")}</p>
+      )}
+    </div>
+  );
+}
+
 function ClinicalMatches({ data }: { data: NonNullable<Report["clinical"]> }) {
   const [limit, setLimit] = useState(25);
   return (
@@ -764,6 +811,7 @@ function App() {
     include_calls: false,
     include_relatives: false,
     include_clinical: false,
+    include_lineage: false,
   });
   const [preview, setPreview] = useState<ArrayBuffer>();
   const [anchor, setAnchor] = useState("");
@@ -872,6 +920,7 @@ function App() {
             include_calls: false,
             include_relatives: false,
             include_clinical: false,
+            include_lineage: false,
           });
           navigate("home");
         }
@@ -1206,6 +1255,10 @@ function App() {
                       <>
                         <h2>{chapter.title}</h2>
                         {chapter.sections.map((section) => {
+                          const maternal =
+                            section.id === "01.3"
+                              ? model?.maternal_lineage
+                              : null;
                           const findings = visible.filter(
                             (item) => item.section === section.id,
                           );
@@ -1219,6 +1272,7 @@ function App() {
                                 {section.title}
                               </h3>
                               <p>{section.scope}</p>
+                              {maternal && <MaternalResult data={maternal} />}
                               {section.id === "14.4" &&
                                 model?.scores.map((score) => (
                                   <div className="score" key={score.id}>
@@ -1257,13 +1311,16 @@ function App() {
                                   {resultText(f.title)} <ArrowRight size={14} />
                                 </button>
                               ))}
-                              {model && !findings.length && !cross.length && (
-                                <small>
-                                  {t(
-                                    "Für diesen Abschnitt liegt aktuell keine passende Merkmalsregel vor.",
-                                  )}
-                                </small>
-                              )}
+                              {model &&
+                                !findings.length &&
+                                !cross.length &&
+                                !maternal && (
+                                  <small>
+                                    {t(
+                                      "Für diesen Abschnitt liegt aktuell keine passende Merkmalsregel vor.",
+                                    )}
+                                  </small>
+                                )}
                             </section>
                           );
                         })}
@@ -1406,6 +1463,23 @@ function App() {
                             )}
                           </small>
                         </span>
+                      </label>
+                    )}
+                    {model.maternal_lineage && (
+                      <label className="choice">
+                        <input
+                          type="checkbox"
+                          checked={options.include_lineage}
+                          disabled={!!busy}
+                          onChange={(event) => {
+                            setOptions({
+                              ...options,
+                              include_lineage: event.target.checked,
+                            });
+                            setPreview(undefined);
+                          }}
+                        />
+                        {t("Importiertes mtDNA-Ergebnis aufnehmen")}
                       </label>
                     )}
                     <div className="actions">
@@ -1656,6 +1730,30 @@ function App() {
                         </>
                       )}
                       {model.trio && <TrioSummary trio={model.trio} />}
+                    </section>
+                    <section className="panel data-card">
+                      <GitBranch size={22} />
+                      <h2>{t("Mütterliche Linie")}</h2>
+                      <p>
+                        {t(
+                          "Übernimm Kandidaten und Qualitätswerte aus einer lokal erstellten Haplogrep-Zusammenfassung.",
+                        )}
+                      </p>
+                      <button
+                        className="button secondary"
+                        disabled={!!busy}
+                        onClick={() =>
+                          extra(
+                            "maternal_lineage",
+                            t("Haplogrep-Ergebnis einlesen"),
+                          )
+                        }
+                      >
+                        {t("Haplogrep-Ergebnis öffnen")}
+                      </button>
+                      {model.maternal_lineage && (
+                        <MaternalResult data={model.maternal_lineage} />
+                      )}
                     </section>
                     <section className="panel data-card">
                       <Database size={22} />

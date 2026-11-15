@@ -2,13 +2,30 @@ use ed25519_dalek::{Signer, SigningKey};
 use roots_local::{
     analysis::{self, Status},
     catalog::{self, Catalog},
-    clinical, external, import, report,
+    clinical, external, import, lineage, report,
 };
 use sha2::{Digest, Sha256};
 use std::{fs, io::Write, path::Path, sync::atomic::AtomicBool};
 
 const SAMPLE: &[u8] = include_bytes!("../../fixtures/synthetic-myheritage.txt");
+const MATERNAL: &str = include_str!("../../fixtures/synthetic-maternal.json");
 const COLUMNS: &str = "##reference=build37\nRSID,CHROMOSOME,POSITION,RESULT\n";
+
+#[test]
+fn maternal_summary_rejects_other_references_and_invalid_coverage() {
+    let file = tempfile::NamedTempFile::new().unwrap();
+    fs::write(file.path(), MATERNAL).unwrap();
+    assert!(lineage::maternal_file(file.path()).is_ok());
+    for invalid in [
+        MATERNAL.replace("phylotree-rcrs@17.3", "phylotree-rsrs@17.2"),
+        MATERNAL.replace("1200", "16570"),
+        MATERNAL.replace("0.8351", "0.02"),
+        MATERNAL.replace("H100", "unsupported markup"),
+    ] {
+        fs::write(file.path(), invalid).unwrap();
+        assert!(lineage::maternal_file(file.path()).is_err());
+    }
+}
 
 #[test]
 fn trio_counts_unique_ambiguous_and_inconsistent_transmissions() {
@@ -140,6 +157,41 @@ fn full_taxonomy_and_four_reviewed_interpretations() {
             .count(),
         9
     );
+}
+
+#[test]
+fn curated_hair_associations_match_supported_builds_and_alleles() {
+    let catalog = Catalog::starter().unwrap();
+    for (build_header, mc1r, tchh) in [
+        ("GRCh37", 89986117, 152083325),
+        ("GRCh38", 89919709, 152110849),
+    ] {
+        for (id, section, chromosome, position, observed, reference, unsupported) in [
+            ("rs1805007", "04.1", 16, mc1r, "CT", "CC", "CG"),
+            ("rs11803731", "04.2", 1, tchh, "AT", "AA", "AC"),
+        ] {
+            for (marker, coordinate, call, expected) in [
+                (id, position, observed, Status::Research),
+                (id, position, reference, Status::Research),
+                (id, position, unsupported, Status::Missing),
+                (id, position + 1, observed, Status::Missing),
+                ("", position, observed, Status::Missing),
+                (id, position, "--", Status::Missing),
+            ] {
+                let raw = format!("# reference={build_header}\nRSID,CHROMOSOME,POSITION,RESULT\n{marker},{chromosome},{coordinate},{call}\n");
+                let data = import::parse(raw.as_bytes(), &AtomicBool::new(false)).unwrap();
+                let findings = analysis::evaluate(&data, &catalog).unwrap();
+                let finding = findings
+                    .iter()
+                    .find(|finding| finding.item.section == section && finding.checks[0].id == id)
+                    .unwrap();
+                assert_eq!(
+                    finding.status, expected,
+                    "{build_header} {marker} {coordinate} {call}"
+                );
+            }
+        }
+    }
 }
 
 #[test]
@@ -482,6 +534,9 @@ fn verify_pdf_contents(
         }],
     });
     pdf.clinical = Some(clinical);
+    let maternal = directory.path().join("maternal.json");
+    fs::write(&maternal, MATERNAL).unwrap();
+    pdf.maternal_lineage = Some(lineage::maternal_file(&maternal).unwrap());
     for (language, score, coverage, marker, unavailable) in [
         (
             Language::En,
@@ -510,6 +565,7 @@ fn verify_pdf_contents(
                         short,
                         include_clinical,
                         include_calls,
+                        include_lineage: !include_clinical,
                         ..Default::default()
                     },
                     typst,
@@ -553,6 +609,13 @@ fn verify_pdf_contents(
                     );
                 }
                 assert_eq!(text.contains("G × 1"), include_clinical && include_calls);
+                assert_eq!(text.contains("H100 · 83.51 %"), !include_clinical);
+                assert_eq!(text.contains("phylotree-rcrs@17.3"), !include_clinical);
+                let unresolved = language.select(
+                    "The assignment remains unresolved.",
+                    "Die Zuordnung bleibt offen.",
+                );
+                assert_eq!(text.contains(unresolved), !include_clinical);
             }
         }
     }

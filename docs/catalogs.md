@@ -47,3 +47,23 @@ Download the official ClinVar VCF for the same reference assembly as the raw DNA
 After ClinVar, open the **Gene-Disease Validity Curations** CSV from ClinGen. Roots Local looks up single-gene ClinVar records when the gene symbol and the MONDO condition both agree. The report shows ClinGen evidence for the gene–disease relationship with its own source link. [ClinGen downloads](https://search.clinicalgenome.org/kb/downloads)
 
 Independent confirmation is required for a clinical finding from consumer raw data. A missing match leaves the condition unresolved. Raw DNA and selected reference files stay on the device during the import. Select **Include ClinVar and ClinGen records** in the PDF settings to export the clinical annotations. Their source links can reveal a variant even when explicit allele details are hidden.
+
+## Maternal lineage
+
+Use a single mitochondrial HSD profile aligned to rCRS with the assayed positions identified in its range. The standard tabular kit file and the coverage report are separate inputs. Obtain an HSD profile independently from mitochondrial sequence results or a validated assay conversion. [Haplogrep input formats](https://haplogrep.readthedocs.io/en/latest/input-formats/)
+
+Download the Haplogrep 3.3.2 Linux archive and the PhyloTree rCRS 17.3 archive, then disconnect from the internet. The helper uses the cross-platform JAR in the Linux archive. Run it with Python 3.11 or newer and Java 21. The helper verifies both archive SHA-256 values before loading the local tree. Its output contains the candidates, version, reported range size, and counts of warnings and errors. [Haplogrep 3.3.2 release](https://github.com/genepi/haplogrep3/releases/tag/v3.3.2) · [PhyloTree rCRS 17.3 release](https://github.com/genepi/phylotree-rcrs-17/releases/tag/17.3)
+
+```sh
+python scripts/classify_mtdna.py \
+  --input mitochondrial-profile.hsd \
+  --tool-archive haplogrep3-3.3.2-linux.tar.gz \
+  --tree-archive phylotree-rcrs-17.3.zip \
+  --output maternal-result.json
+```
+
+Open the JSON in **Data sources → Maternal lineage** after opening the corresponding raw DNA profile. Check that the mtDNA input belongs to that profile. The haplogroup score measures fit to the tree. The app keeps the candidates visible when Haplogrep reports errors and labels the assignment unresolved. Select **Include imported mtDNA result** to add it to section 01.3 in the PDF. [Haplogrep quality checks](https://haplogrep.readthedocs.io/en/latest/errors-warnings/)
+
+## Curated hair research
+
+The starter catalog adds MC1R rs1805007 for pigmentation and TCHH rs11803731 for hair shape. The rules require matching rsID, position, forward-strand alleles used in the cited study, and the declared reference assembly. The app reports the study context, tested populations, and limits. [MC1R study](https://doi.org/10.1038/s41467-018-07691-z) · [TCHH study](https://doi.org/10.1016/j.ajhg.2009.10.009) · [dbSNP rs1805007](https://www.ncbi.nlm.nih.gov/snp/rs1805007) · [dbSNP rs11803731](https://www.ncbi.nlm.nih.gov/snp/rs11803731)
