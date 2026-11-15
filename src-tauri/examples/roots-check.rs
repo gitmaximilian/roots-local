@@ -1,23 +1,28 @@
-use roots_local::{analysis, catalog::Catalog, clinical, external, import, report};
+use roots_local::{analysis, catalog::Catalog, clinical, cram, external, import, report};
 use std::{env, path::Path, sync::atomic::AtomicBool};
 
 fn run() -> Result<(), String> {
     let mut args = env::args_os().skip(1);
     let [Some(input), Some(output), Some(typst)] = [args.next(), args.next(), args.next()] else {
-        return Err("Usage: roots-check <raw-data> <report.pdf> <typst> [--synthetic] [--german] [--include-calls] [--catalog <package> <public-key>] [--clinvar <vcf> [--clingen <csv>]] [--parents <first> <second>]".into());
+        return Err("Usage: roots-check <raw-data> <report.pdf> <typst> [--synthetic] [--german] [--short] [--include-calls] [--include-clinical] [--catalog <package> <public-key>] [--clinvar <vcf> [--clingen <csv>]] [--parents <first> <second>] [--cram <cram> <indexed-fasta>]".into());
     };
     let mut example = false;
     let mut language = roots_local::locale::Language::En;
     let mut include_calls = false;
+    let mut include_clinical = false;
+    let mut short = false;
     let mut catalog = None;
     let mut clinvar = None;
     let mut clingen = None;
     let mut parents = None;
+    let mut sequencing = None;
     while let Some(option) = args.next() {
         match option.to_str() {
             Some("--synthetic") if !example => example = true,
             Some("--german") => language = roots_local::locale::Language::De,
             Some("--include-calls") => include_calls = true,
+            Some("--include-clinical") => include_clinical = true,
+            Some("--short") => short = true,
             Some("--clinvar") if clinvar.is_none() => {
                 clinvar = Some(args.next().ok_or("Missing ClinVar VCF file.")?);
             }
@@ -28,6 +33,11 @@ fn run() -> Result<(), String> {
                 let first = args.next().ok_or("Missing first parent file.")?;
                 let second = args.next().ok_or("Missing second parent file.")?;
                 parents = Some((first, second));
+            }
+            Some("--cram") if sequencing.is_none() => {
+                let path = args.next().ok_or("Missing CRAM file.")?;
+                let reference = args.next().ok_or("Missing indexed FASTA file.")?;
+                sequencing = Some((path, reference));
             }
             Some("--catalog") if catalog.is_none() => {
                 let path = args.next().ok_or("Missing catalog file.")?;
@@ -72,11 +82,31 @@ fn run() -> Result<(), String> {
         println!("{} shared trio markers", result.compared);
         model.apply_trio(result);
     }
+    if let Some((path, reference)) = sequencing {
+        let coverage = cram::coverage(
+            Path::new(&path),
+            Path::new(&reference),
+            &catalog.markers()?,
+            &cancel,
+        )?;
+        let covered = coverage
+            .targets
+            .iter()
+            .filter(|site| site.depth > 0)
+            .count();
+        println!(
+            "{covered}/{} catalog targets with qualifying bases",
+            coverage.targets.len()
+        );
+        model.sequence = Some(coverage);
+    }
     report::export(
         &model,
         report::Options {
             language,
             include_calls,
+            include_clinical,
+            short,
             ..Default::default()
         },
         Path::new(&typst),

@@ -424,7 +424,17 @@ fn additive_score_requires_full_matching_build_and_alleles() {
             analysis::evaluate(&input, &catalog).unwrap(),
             true,
         );
-        pdf.scores = calculate(&input, &[model]);
+        pdf.scores = calculate(&input, std::slice::from_ref(&model));
+        let mut incomplete = calculate(&malformed, &[model]).remove(0);
+        incomplete.title = "Incomplete synthetic score".into();
+        pdf.scores.push(incomplete);
+        // A normal finding in the same section must not suppress the score.
+        pdf.findings
+            .iter_mut()
+            .find(|entry| entry.item.id == "lactase")
+            .unwrap()
+            .item
+            .section = "14.4".into();
         for short in [false, true] {
             let data = report::render(
                 &pdf,
@@ -436,6 +446,114 @@ fn additive_score_requires_full_matching_build_and_alleles() {
             )
             .unwrap();
             assert!(data.starts_with(b"%PDF"));
+        }
+        if let Some(python) = std::env::var_os("ROOTS_TEST_PYTHON") {
+            verify_pdf_contents(&mut pdf, &input, Path::new(&typst), Path::new(&python));
+        }
+    }
+}
+
+fn verify_pdf_contents(
+    pdf: &mut report::Model,
+    input: &import::Import,
+    typst: &Path,
+    python: &Path,
+) {
+    use roots_local::locale::Language;
+    let directory = tempfile::tempdir().unwrap();
+    let vcf = directory.path().join("reference.vcf");
+    fs::write(&vcf, concat!(
+        "##fileformat=VCFv4.1\n##source=ClinVar\n##fileDate=2026-01-01\n##reference=GRCh37\n",
+        "#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\n",
+        "2\t136608646\t999999991\tA\tG\t.\t.\tRS=4988235;CLNSIG=Pathogenic;CLNREVSTAT=criteria_provided;CLNDN=Synthetic_condition\n",
+    )).unwrap();
+    let mut clinical = clinical::file(&vcf, input, &AtomicBool::new(false)).unwrap();
+    clinical.gene_validity = Some(clinical::GeneValidity {
+        date: "2026-01-01".into(),
+        records: vec![clinical::GeneDisease {
+            gene: "TESTGENE".into(),
+            hgnc: "HGNC:999999".into(),
+            disease: "Synthetic curation".into(),
+            mondo: "MONDO:9999999".into(),
+            inheritance: "AR".into(),
+            classification: "Strong".into(),
+            evidence_url: "https://search.clinicalgenome.org/kb/gene-validity/synthetic-test"
+                .into(),
+        }],
+    });
+    pdf.clinical = Some(clinical);
+    for (language, score, coverage, marker, unavailable) in [
+        (
+            Language::En,
+            "Raw score 1.25",
+            "2 / 2 model positions",
+            "Lactase activity in adulthood",
+            "A raw score requires complete coverage",
+        ),
+        (
+            Language::De,
+            "Rohscore 1.25",
+            "2 / 2 Modellpositionen",
+            "Laktaseaktivität im Erwachsenenalter",
+            "Kein Rohscore bei unvollständiger Abdeckung",
+        ),
+    ] {
+        for short in [false, true] {
+            for (include_clinical, include_calls) in
+                [(false, false), (false, true), (true, false), (true, true)]
+            {
+                let path = directory.path().join("report.pdf");
+                report::export(
+                    pdf,
+                    report::Options {
+                        language,
+                        short,
+                        include_clinical,
+                        include_calls,
+                        ..Default::default()
+                    },
+                    typst,
+                    &path,
+                )
+                .unwrap();
+                let result = std::process::Command::new(python)
+                    .env("PYTHONIOENCODING", "utf-8")
+                    .arg("-c")
+                    .arg("from pypdf import PdfReader; import sys; print(' '.join(' '.join(p.extract_text() for p in PdfReader(sys.argv[1]).pages).split()))")
+                    .arg(&path)
+                    .output().unwrap();
+                assert!(
+                    result.status.success(),
+                    "{}",
+                    String::from_utf8_lossy(&result.stderr)
+                );
+                let text = String::from_utf8(result.stdout).unwrap();
+                for required in [
+                    score,
+                    coverage,
+                    marker,
+                    unavailable,
+                    "Synthetic model",
+                    "Incomplete synthetic score",
+                ] {
+                    assert!(
+                        text.contains(required),
+                        "Missing {required:?} in {language:?}, short={short}"
+                    );
+                }
+                for clinical_detail in [
+                    "ClinVar 999999991",
+                    "Synthetic condition",
+                    "Synthetic curation",
+                ] {
+                    assert_eq!(
+                        text.contains(clinical_detail),
+                        include_clinical,
+                        "Unexpected {clinical_detail} in {language:?}, short={short}"
+                    );
+                }
+                assert_eq!(text.contains("G × 1"), include_clinical && include_calls);
+            }
         }
     }
 }

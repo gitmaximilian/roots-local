@@ -73,7 +73,6 @@
   "Vollreport": "Full report",
   "17 Hauptkapitel und Variantenanhang": "17 chapters and an appendix of variants",
   "Kurzreport": "Summary report",
-  "Auswertbare Merkmale und Studienbezüge": "Interpretable traits and research associations",
   "Persönliche Angaben": "Personal details",
   "Name im Report": "Name in report",
   "Konkrete Genotypen anzeigen": "Include specific genotypes",
@@ -165,5 +164,9 @@
   "ClinGen-CSV öffnen": "Open ClinGen CSV",
   "Marker mit Basen nach Qualitätsfilter": "markers with bases passing quality filters",
   "Lesetiefe pro Marker": "Read depth by marker",
-  "Lesetiefe": "Read depth"
+  "Lesetiefe": "Read depth",
+  "Ausgewählte Ergebnisse und importierte Zusatzdaten": "Selected findings and imported data",
+  "ClinVar- und ClinGen-Einträge aufnehmen": "Include ClinVar and ClinGen records",
+  "Quellenlinks können beobachtete Varianten offenlegen.": "Source links can reveal observed variants.",
+  "Der Dateikopf nennt kein unterstütztes Referenzgenom. Die Rohdaten bleiben im Variantenregister sichtbar.": "The file header does not identify a supported reference assembly. You can still inspect the raw rows in the variant register."
 }

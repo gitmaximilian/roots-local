@@ -18,6 +18,7 @@ pub struct Options {
     pub name: Option<String>,
     pub include_calls: bool,
     pub include_relatives: bool,
+    pub include_clinical: bool,
     pub language: Language,
 }
 
@@ -114,11 +115,7 @@ pub fn typst_binary() -> Result<PathBuf, String> {
         .ok_or_else(|| "Das gebündelte PDF-Werkzeug wurde nicht gefunden.".into())
 }
 
-pub fn render(model: &Model, mut options: Options, typst: &Path) -> Result<Vec<u8>, String> {
-    let directory = tempfile::tempdir()
-        .map_err(|_| "Der temporäre Exportordner konnte nicht geöffnet werden.")?;
-    let view = directory.path().join("report.typ");
-    let data = directory.path().join("report.json");
+fn document(model: &Model, mut options: Options) -> Document {
     options.name = options
         .name
         .take()
@@ -164,6 +161,9 @@ pub fn render(model: &Model, mut options: Options, typst: &Path) -> Result<Vec<u
         .filter(|f| f.status == Status::Research)
         .count();
     let missing = model.findings.len() - personal - research;
+    if !options.include_clinical {
+        model.clinical = None;
+    }
     if !options.include_relatives {
         for (i, relative) in model.external.matches.iter_mut().enumerate() {
             relative.name = format!(
@@ -186,6 +186,20 @@ pub fn render(model: &Model, mut options: Options, typst: &Path) -> Result<Vec<u
                 check.call = None;
             }
         }
+        if let Some(trio) = &mut model.trio {
+            trio.assignments.clear();
+        }
+        if let Some(sequence) = &mut model.sequence {
+            for target in &mut sequence.targets {
+                target.bases = [0; 4];
+            }
+        }
+        if let Some(clinical) = &mut model.clinical {
+            for variant in &mut clinical.variants {
+                variant.alternate = ' ';
+                variant.copies = 0;
+            }
+        }
     }
     let mut variant_index: Vec<_> = model
         .findings
@@ -198,7 +212,7 @@ pub fn render(model: &Model, mut options: Options, typst: &Path) -> Result<Vec<u
         .collect();
     variant_index.sort();
     variant_index.dedup();
-    let document = Document {
+    Document {
         model,
         options,
         personal,
@@ -206,7 +220,15 @@ pub fn render(model: &Model, mut options: Options, typst: &Path) -> Result<Vec<u
         missing,
         variant_index,
         version: env!("CARGO_PKG_VERSION"),
-    };
+    }
+}
+
+pub fn render(model: &Model, options: Options, typst: &Path) -> Result<Vec<u8>, String> {
+    let directory = tempfile::tempdir()
+        .map_err(|_| "Der temporäre Exportordner konnte nicht geöffnet werden.")?;
+    let view = directory.path().join("report.typ");
+    let data = directory.path().join("report.json");
+    let document = document(model, options);
     fs::write(&view, include_str!("../../report/report.typ"))
         .map_err(|_| "Die PDF-Vorlage konnte nicht geöffnet werden.")?;
     fs::write(

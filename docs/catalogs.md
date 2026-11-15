@@ -46,4 +46,4 @@ Download the official ClinVar VCF for the same reference assembly as the raw DNA
 
 After ClinVar, open the **Gene-Disease Validity Curations** CSV from ClinGen. Roots Local looks up single-gene ClinVar records when the gene symbol and the MONDO condition both agree. The report shows ClinGen evidence for the gene–disease relationship with its own source link. [ClinGen downloads](https://search.clinicalgenome.org/kb/downloads)
 
-Independent confirmation is required for a clinical finding from consumer raw data. A missing match leaves the condition unresolved. Raw DNA and selected reference files stay on the device during the import. An exported report includes any imported clinical annotations and may disclose a variant even with explicit genotype display disabled.
+Independent confirmation is required for a clinical finding from consumer raw data. A missing match leaves the condition unresolved. Raw DNA and selected reference files stay on the device during the import. Select **Include ClinVar and ClinGen records** in the PDF settings to export the clinical annotations. Their source links can reveal a variant even when explicit allele details are hidden.

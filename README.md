@@ -11,6 +11,7 @@ Open the app and select **View example** or import the [synthetic MyHeritage fil
 - [Platform verification and remaining milestones](docs/test-status.md)
 - [Report outline](docs/report-structure.md)
 - [Implementation brief](docs/implementation-brief.md)
+- [Product review and delivery plan](docs/product-plan.md)
 - [Build and import reference catalogs](docs/catalogs.md)
 
 ## Build from source
@@ -35,7 +36,7 @@ Use `npm run tauri -- build --bundles app` for macOS. The script `scripts/packag
 - **Clinical reference data.** Import local ClinVar VCF and ClinGen gene–disease validity CSV files. The report displays matched variant classifications and gene–disease evidence with their sources. [Reference downloads and matching rules](docs/catalogs.md)
 - **GWAS research.** Optional local packages associate matching loci with published studies, samples, and reported effects.
 - **Polygenic research.** Signed catalog packages can contain additive scores. The app requires complete marker coverage and displays a raw score without personal disease-risk calibration.
-- **PDF export.** Full and summary reports, clickable contents, sources, and coverage. Names and explicit genotypes are optional. The full report shows sections that have no applicable rule.
+- **PDF export.** Full and summary reports, clickable contents, sources, and coverage. Names, explicit genotype details, and imported ClinVar and ClinGen annotations are optional. The full report shows sections that have no applicable rule.
 
 Raw DNA stays in the active session. PDF generation uses a temporary directory and cleans it up after rendering. The chosen PDF destination may be synchronized by other software. Clinically relevant findings from consumer data require independent clinical confirmation.
 
@@ -47,7 +48,7 @@ cargo test --locked --manifest-path src-tauri/Cargo.toml --no-default-features
 npm run build
 ```
 
-Set `ROOTS_TEST_TYPST` to the absolute path of the prepared Typst binary to include PDF rendering tests. Please use synthetic data in GitHub issues, pull requests, and CI.
+Set `ROOTS_TEST_TYPST` to the absolute path of the prepared Typst binary to include PDF rendering tests. Set `ROOTS_TEST_PYTHON` to a Python interpreter with `pypdf` installed to also verify exported content in both languages. Please use synthetic data in GitHub issues, pull requests, and CI.
 
 ## License
 

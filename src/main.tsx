@@ -187,6 +187,7 @@ type Options = {
   name: string | null;
   include_calls: boolean;
   include_relatives: boolean;
+  include_clinical: boolean;
 };
 
 const number = {
@@ -762,6 +763,7 @@ function App() {
     name: "",
     include_calls: false,
     include_relatives: false,
+    include_clinical: false,
   });
   const [preview, setPreview] = useState<ArrayBuffer>();
   const [anchor, setAnchor] = useState("");
@@ -869,6 +871,7 @@ function App() {
             name: "",
             include_calls: false,
             include_relatives: false,
+            include_clinical: false,
           });
           navigate("home");
         }
@@ -1066,9 +1069,13 @@ function App() {
                 {!totals.personal && !totals.research && (
                   <div className="empty">
                     <CircleHelp size={20} />
-                    {t(
-                      "Die Datenbasis für die vorhandenen Merkmalsregeln ist nicht ausreichend.",
-                    )}
+                    {model.summary.build
+                      ? t(
+                          "Die Datenbasis für die vorhandenen Merkmalsregeln ist nicht ausreichend.",
+                        )
+                      : t(
+                          "Der Dateikopf nennt kein unterstütztes Referenzgenom. Die Rohdaten bleiben im Variantenregister sichtbar.",
+                        )}
                   </div>
                 )}
                 <header className="section-heading">
@@ -1298,6 +1305,7 @@ function App() {
                         type="radio"
                         name="scope"
                         checked={!options.short}
+                        disabled={!!busy}
                         onChange={() => {
                           setOptions({ ...options, short: false });
                           setPreview(undefined);
@@ -1315,6 +1323,7 @@ function App() {
                         type="radio"
                         name="scope"
                         checked={options.short}
+                        disabled={!!busy}
                         onChange={() => {
                           setOptions({ ...options, short: true });
                           setPreview(undefined);
@@ -1323,7 +1332,9 @@ function App() {
                       <span>
                         <strong>{t("Kurzreport")}</strong>
                         <small>
-                          {t("Auswertbare Merkmale und Studienbezüge")}
+                          {t(
+                            "Ausgewählte Ergebnisse und importierte Zusatzdaten",
+                          )}
                         </small>
                       </span>
                     </label>
@@ -1332,6 +1343,7 @@ function App() {
                       {t("Name im Report")}{" "}
                       <input
                         value={options.name || ""}
+                        disabled={!!busy}
                         placeholder="Optional"
                         maxLength={120}
                         onChange={(e) => {
@@ -1344,6 +1356,7 @@ function App() {
                       <input
                         type="checkbox"
                         checked={options.include_calls}
+                        disabled={!!busy}
                         onChange={(e) => {
                           setOptions({
                             ...options,
@@ -1358,6 +1371,7 @@ function App() {
                       <input
                         type="checkbox"
                         checked={options.include_relatives}
+                        disabled={!!busy}
                         onChange={(e) => {
                           setOptions({
                             ...options,
@@ -1368,6 +1382,32 @@ function App() {
                       />
                       {t("Namen von DNA-Matches anzeigen")}
                     </label>
+                    {model.clinical && (
+                      <label className="choice">
+                        <input
+                          type="checkbox"
+                          checked={options.include_clinical}
+                          disabled={!!busy}
+                          onChange={(e) => {
+                            setOptions({
+                              ...options,
+                              include_clinical: e.target.checked,
+                            });
+                            setPreview(undefined);
+                          }}
+                        />
+                        <span>
+                          <strong>
+                            {t("ClinVar- und ClinGen-Einträge aufnehmen")}
+                          </strong>
+                          <small>
+                            {t(
+                              "Quellenlinks können beobachtete Varianten offenlegen.",
+                            )}
+                          </small>
+                        </span>
+                      </label>
+                    )}
                     <div className="actions">
                       <button
                         className="button"

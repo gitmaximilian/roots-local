@@ -91,6 +91,11 @@
 #v(5mm)
 #tr("Der Bericht wertet die importierten Positionen anhand des dokumentierten Referenzkatalogs aus. Die Quellen sind bei den Befunden verlinkt.", "The report evaluates imported positions using the documented reference catalog. Sources are linked alongside each finding.")
 
+#if report.summary.build == none [
+  #parbreak()
+  #tr("Der Dateikopf nennt kein unterstütztes Referenzgenom. Merkmalsregeln bleiben für diesen Import offen.", "The file header does not identify a supported reference assembly. Trait interpretations remain unresolved for this import.")
+]
+
 #if report.gwas_total > 0 [
   #tr("GWAS-Katalog", "GWAS Catalog") · #report.findings.filter(f => "study" in f).len() #tr("passende Studienassoziationen von", "matching research associations out of") #report.gwas_total #tr("Katalogeinträgen.", "catalog entries.")
   #parbreak()
@@ -170,7 +175,8 @@
       let own = chapter-findings.filter(f => f.section == section.id and (not report.options.short or f.status != "missing"))
       let cross = report.findings.filter(f => section.id in f.cross and (not report.options.short or f.status != "missing"))
       let has-clinvar = section.id == "14.1" and report.clinical != none
-      if not report.options.short or own.len() > 0 or has-clinvar or (section.id == "14.4" and report.scores.len() > 0) {
+      let has-scores = section.id == "14.4" and report.scores.len() > 0
+      if not report.options.short or own.len() > 0 or has-clinvar or has-scores {
         heading(level: 2, [#section.id · #section.title])
         if not report.options.short { caption(section.scope); parbreak() }
         if has-clinvar {
@@ -197,17 +203,18 @@
             ]
           ]
         }
-        if own.len() == 0 and cross.len() == 0 and not report.options.short and not has-clinvar {
-          if section.id == "14.4" and report.scores.len() > 0 {
-            for score in report.scores [
-              *#score.title* · #score.id \
-              #score.matched / #score.total #tr("Modellpositionen.", "model positions.")
-              #if score.raw != none [#tr("Rohscore", "Raw score") #str(calc.round(score.raw, digits: 5)).] else [#tr("Kein Rohscore bei unvollständiger Abdeckung.", "A raw score requires complete coverage.")]
-              #tr("Studienpopulation", "Study population") · #score.population. #link(score.source, [#tr("Quelle", "Source")]). \
-              #tr("Forschungswert ohne Perzentil oder persönliche Erkrankungswahrscheinlichkeit.", "Research score without a percentile or individual disease risk estimate.")
-              #parbreak()
-            ]
-          } else if section.id == "03.1" {
+        if has-scores {
+          for score in report.scores [
+            *#score.title* · #score.id \
+            #score.matched / #score.total #tr("Modellpositionen.", "model positions.")
+            #if score.raw != none [#tr("Rohscore", "Raw score") #str(calc.round(score.raw, digits: 5)).] else [#tr("Kein Rohscore bei unvollständiger Abdeckung.", "A raw score requires complete coverage.")]
+            #tr("Studienpopulation", "Study population") · #score.population. #link(score.source, [#tr("Quelle", "Source")]). \
+            #tr("Forschungswert ohne Perzentil oder persönliche Erkrankungswahrscheinlichkeit.", "Research score without a percentile or individual disease risk estimate.")
+            #parbreak()
+          ]
+        }
+        if own.len() == 0 and cross.len() == 0 and not report.options.short and not has-clinvar and not has-scores {
+          if section.id == "03.1" {
             [#report.summary.rows #tr("Zeilen aus", "rows from") #report.summary.format · #tr("Referenzgenom", "Reference genome") #(if report.summary.build == none { tr("unbekannt", "unknown") } else { report.summary.build }).]
           } else if section.id == "03.4" {
             link(label("method"), [#tr("Siehe Methodik und Abdeckung.", "See methods and coverage.")])

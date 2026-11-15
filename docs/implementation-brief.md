@@ -4,6 +4,8 @@ Implement and maintain a distributable open-source desktop app that analyzes MyH
 
 Use the [report outline](report-structure.md) as the product specification. Include its 17 chapters and 76 sections in the full PDF and the application. English is the default language. Provide a persistent German switch for the interface and reports, preserving the active analysis when it changes. Keep GitHub documentation in English. Use synthetic samples or licensed reference data suitable for testing and public CI.
 
+Use the [product review and delivery plan](product-plan.md) to prioritize work and decide when a capability is ready to ship. An existing chapter heading meets the outline requirement. Verify scientific coverage separately against the inputs and rules available for that chapter.
+
 ## Architecture
 
 - Use Tauri 2, Rust, React, and TypeScript. Validate the native builds and packaging dependencies on macOS arm64 and Windows x64.
@@ -16,7 +18,7 @@ Use the [report outline](report-structure.md) as the product specification. Incl
 
 - Bundle fonts, assets, templates, examples, and the starter catalog locally. Importing, analysis, preview, and PDF export must work without a network connection.
 - Keep the WebView local using a restrictive content policy and narrowly scoped Tauri capabilities. External citations may be copied or explicitly opened outside the app. The runtime requires no account, backend, telemetry, or remote model.
-- Keep genotypes, names, match data, and private paths out of logs. Avoid extra copies and clean up temporary export files. Let users choose the export destination and whether names, genotypes, or relatives are included.
+- Keep genotypes, names, match data, and private paths out of logs. Avoid extra copies and clean up temporary export files. Let users choose the export destination and whether names, explicit allele detail, match names, or imported clinical annotations are included. Clinical annotations require a separate opt-in because a reference link can identify the observed allele.
 - Activate an offline catalog update only after verifying its signature, manifest, checksums, and schema. Keep the previous catalog usable if validation fails. Build reference packages separately from private analysis.
 
 ## Import and normalization
@@ -41,7 +43,7 @@ Use the [report outline](report-structure.md) as the product specification. Incl
 - Provide import, overview, chapter browser, trait details, variant index, data sources, and PDF preview and export. Make controls usable with the keyboard and keep status labels understandable without color. Preserve the current result and settings during locale changes.
 - Show interpretation, evidence, coverage, missing markers, and linked sources on each result. Enable search by trait, gene, disease, and variant.
 - Use the bundled Typst compiler and a local, data-driven template. Treat imported text as text. Verify page breaks, fonts, tables, links, bookmarks, and cross-references.
-- Default to the full A4 report with a cover, summary, contents, all chapters, research findings, methods, coverage, and a variant index. Offer a shorter report and optional identity fields. Preserve every included finding in very long exports, with numbered volumes if needed.
+- Default to the full A4 report with a cover, summary, contents, all chapters, research findings, methods, coverage, and a variant index. Offer a shorter report and optional identity fields. Both formats show the coverage and availability of imported scores. Preserve every included finding in very long exports, with numbered volumes if needed.
 
 ## Milestones and acceptance
 
