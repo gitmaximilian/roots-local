@@ -37,3 +37,19 @@ pub fn translate(message: &mut String) {
         *message = format!("Publication · {suffix}");
     }
 }
+
+pub fn english_if(language: Language, message: &str) -> String {
+    match language {
+        Language::En => english(message).to_owned(),
+        Language::De => message.to_owned(),
+    }
+}
+
+impl Language {
+    pub fn select2<T>(self, en: T, de: T) -> T {
+        match self {
+            Self::En => en,
+            Self::De => de,
+        }
+    }
+}

@@ -135,6 +135,9 @@ fn document(model: &Model, mut options: Options) -> Document {
             locale::translate(&mut finding.item.population);
             locale::translate(&mut finding.item.limits);
             locale::translate(&mut finding.message);
+            if let Some(conclusion) = &mut finding.conclusion {
+                locale::translate(conclusion);
+            }
             for (label, _) in &mut finding.item.sources {
                 locale::translate(label);
             }
@@ -148,6 +151,21 @@ fn document(model: &Model, mut options: Options) -> Document {
             locale::translate(&mut score.population);
         }
     }
+    if !options.include_clinical {
+        model.clinical = None;
+        for finding in &mut model.findings {
+            if finding.item.effect.as_ref().is_some_and(|e| e.clinical) {
+                finding.conclusion = None;
+                finding.confidence = None;
+                finding.dosage = None;
+                finding.status = Status::Research;
+                finding.message = locale::english_if(
+                    options.language,
+                    "Medizinischer Befund ausgeblendet. Aktiviere medizinische Befunde, um ihn zu sehen.",
+                );
+            }
+        }
+    }
     let personal = model
         .findings
         .iter()
@@ -159,9 +177,6 @@ fn document(model: &Model, mut options: Options) -> Document {
         .filter(|f| f.status == Status::Research)
         .count();
     let missing = model.findings.len() - personal - research;
-    if !options.include_clinical {
-        model.clinical = None;
-    }
     if !options.include_lineage {
         model.maternal_lineage = None;
     }
@@ -183,6 +198,7 @@ fn document(model: &Model, mut options: Options) -> Document {
     }
     if !options.include_calls {
         for finding in &mut model.findings {
+            finding.dosage = None;
             for check in &mut finding.checks {
                 check.call = None;
             }

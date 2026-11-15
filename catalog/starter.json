@@ -1,5 +1,5 @@
 {
-  "version": "1.2.0",
+  "version": "1.3.0",
   "markers": [
     [
       "rs4988235",
@@ -184,6 +184,25 @@
           "Tishkoff et al. · Nature Genetics (2007)",
           "https://pubmed.ncbi.nlm.nih.gov/17159977/"
         ]
+      ],
+      "outcomes": [
+        {
+          "calls": [
+            "AA",
+            "AG"
+          ],
+          "conclusion": "Wahrscheinlich laktosetolerant im Erwachsenenalter",
+          "message": "Der Genotyp enthält die hier untersuchte Variante, die mit erhaltener Laktaseaktivität im Erwachsenenalter verbunden ist.",
+          "confidence": "moderate"
+        },
+        {
+          "calls": [
+            "GG"
+          ],
+          "conclusion": "Laktaseaktivität nimmt im Erwachsenenalter wahrscheinlich ab",
+          "message": "Die hier untersuchte Variante für erhaltene Laktaseaktivität liegt an dieser Position nicht vor. Andere Varianten können ebenfalls eine Rolle spielen.",
+          "confidence": "moderate"
+        }
       ]
     },
     {
@@ -203,6 +222,25 @@
           "Yoshiura et al. · Nature Genetics (2006)",
           "https://pubmed.ncbi.nlm.nih.gov/16444273/"
         ]
+      ],
+      "outcomes": [
+        {
+          "calls": [
+            "TT"
+          ],
+          "conclusion": "Trockenes Ohrenschmalz",
+          "message": "Dieser Genotyp ist mit trockenem Ohrenschmalz verbunden.",
+          "confidence": "high"
+        },
+        {
+          "calls": [
+            "CC",
+            "CT"
+          ],
+          "conclusion": "Feuchtes Ohrenschmalz",
+          "message": "Dieser Genotyp ist mit überwiegend feuchtem Ohrenschmalz verbunden.",
+          "confidence": "high"
+        }
       ]
     },
     {
@@ -226,6 +264,25 @@
           "Sportgenetik-Konsens (2015)",
           "https://bjsm.bmj.com/content/49/23/1486"
         ]
+      ],
+      "outcomes": [
+        {
+          "calls": [
+            "TT"
+          ],
+          "conclusion": "Kein Alpha-Actinin-3 in schnellen Muskelfasern",
+          "message": "Der vorliegende Genotyp entspricht zwei Stoppvarianten am untersuchten Marker. Das ist mit fehlendem Alpha-Actinin-3 verbunden.",
+          "confidence": "high"
+        },
+        {
+          "calls": [
+            "CC",
+            "CT"
+          ],
+          "conclusion": "Alpha-Actinin-3 wird gebildet",
+          "message": "Am untersuchten Marker ist mindestens eine Kopie ohne diese Stoppvariante vorhanden.",
+          "confidence": "high"
+        }
       ]
     },
     {
@@ -247,6 +304,24 @@
           "Kim et al. · Science (2003)",
           "https://pubmed.ncbi.nlm.nih.gov/12595690/"
         ]
+      ],
+      "outcomes": [
+        {
+          "calls": [
+            "GG/AA/CC"
+          ],
+          "conclusion": "Wahrscheinlich ausgeprägte Bitter-Wahrnehmung (PAV/PAV)",
+          "message": "Die drei Positionen sind mit zwei PAV-Kopien vereinbar. PAV ist in Studien mit stärkerer Wahrnehmung von PTC verbunden.",
+          "confidence": "moderate"
+        },
+        {
+          "calls": [
+            "CC/GG/TT"
+          ],
+          "conclusion": "Wahrscheinlich kaum Bitter-Wahrnehmung für PTC (AVI/AVI)",
+          "message": "Die drei Positionen sind mit zwei AVI-Kopien vereinbar. AVI ist in Studien mit schwächerer Wahrnehmung von PTC verbunden.",
+          "confidence": "moderate"
+        }
       ]
     },
     {
@@ -285,7 +360,18 @@
           "Rwere et al. (2024)",
           "https://pubmed.ncbi.nlm.nih.gov/39075523/"
         ]
-      ]
+      ],
+      "effect": {
+        "marker": "rs671",
+        "allele": "A",
+        "conclusions": [
+          "Keine Kopie von ALDH2*2. Eine starke Gesichtsrötung nach Alkohol ist von dieser Variante her nicht zu erwarten.",
+          "Eine Kopie von ALDH2*2. Sie ist mit Gesichtsrötung nach Alkohol und verlangsamtem Acetaldehyd-Abbau verbunden.",
+          "Zwei Kopien von ALDH2*2. Das ist mit sehr geringer ALDH2-Aktivität und deutlicher Gesichtsrötung nach Alkohol verbunden."
+        ],
+        "confidence": "high",
+        "clinical": false
+      }
     },
     {
       "id": "caffeine",
@@ -342,7 +428,18 @@
           "Grant et al. · Nature Genetics (2006)",
           "https://pubmed.ncbi.nlm.nih.gov/16415884/"
         ]
-      ]
+      ],
+      "effect": {
+        "marker": "rs7903146",
+        "allele": "T",
+        "conclusions": [
+          "Keine Kopie des TCF7L2-Risikoallels T.",
+          "Eine Kopie des TCF7L2-Risikoallels T. In Studien ist das Typ-2-Diabetes-Risiko damit moderat erhöht.",
+          "Zwei Kopien des TCF7L2-Risikoallels T. In Studien ist das Typ-2-Diabetes-Risiko damit moderat erhöht. Gewicht und Bewegung wiegen deutlich stärker."
+        ],
+        "confidence": "moderate",
+        "clinical": true
+      }
     },
     {
       "id": "iron",
@@ -366,7 +463,18 @@
         "10.3",
         "07.3",
         "16.1"
-      ]
+      ],
+      "effect": {
+        "marker": "rs1800562",
+        "allele": "A",
+        "conclusions": [
+          "Keine Kopie von HFE C282Y.",
+          "Eine Kopie von HFE C282Y. Trägerschaft allein führt selten zu Eisenüberladung.",
+          "Zwei Kopien von HFE C282Y. Das ist die häufigste genetische Ursache erblicher Hämochromatose. Eine Laborbestätigung und Eisenwerte sind sinnvoll."
+        ],
+        "confidence": "high",
+        "clinical": true
+      }
     },
     {
       "id": "slco",
@@ -385,7 +493,18 @@
           "CPIC-Leitlinie zu Statinen (2022)",
           "https://pubmed.ncbi.nlm.nih.gov/35152405/"
         ]
-      ]
+      ],
+      "effect": {
+        "marker": "rs4149056",
+        "allele": "C",
+        "conclusions": [
+          "Keine Kopie von SLCO1B1 c.521C.",
+          "Eine Kopie von SLCO1B1 c.521C. Sie ist mit verminderter Transporterfunktion und höherem Muskelrisiko unter Simvastatin verbunden.",
+          "Zwei Kopien von SLCO1B1 c.521C. Sie sind mit geringer Transporterfunktion und deutlich höherem Muskelrisiko unter Simvastatin verbunden."
+        ],
+        "confidence": "moderate",
+        "clinical": true
+      }
     },
     {
       "id": "clotting-study",
@@ -404,7 +523,18 @@
           "Klarin et al. (2019)",
           "https://pubmed.ncbi.nlm.nih.gov/31676865/"
         ]
-      ]
+      ],
+      "effect": {
+        "marker": "rs6025",
+        "allele": "T",
+        "conclusions": [
+          "Keine Kopie von Faktor-V-Leiden.",
+          "Eine Kopie von Faktor-V-Leiden. Sie ist mit einem erhöhten Thromboserisiko verbunden.",
+          "Zwei Kopien von Faktor-V-Leiden. Sie sind mit einem deutlich erhöhten Thromboserisiko verbunden."
+        ],
+        "confidence": "high",
+        "clinical": true
+      }
     },
     {
       "id": "lactase-evolution",
@@ -423,7 +553,18 @@
           "Tishkoff et al. (2007)",
           "https://pubmed.ncbi.nlm.nih.gov/17159977/"
         ]
-      ]
+      ],
+      "effect": {
+        "marker": "rs4988235",
+        "allele": "A",
+        "conclusions": [
+          "Keine Kopie der europäischen Laktasepersistenz-Variante.",
+          "Eine Kopie der europäischen Laktasepersistenz-Variante, die sich in den letzten Jahrtausenden stark ausgebreitet hat.",
+          "Zwei Kopien der europäischen Laktasepersistenz-Variante, die sich in den letzten Jahrtausenden stark ausgebreitet hat."
+        ],
+        "confidence": "high",
+        "clinical": false
+      }
     },
     {
       "id": "cyp2c19-clopidogrel",
@@ -442,7 +583,18 @@
           "CPIC-Leitlinie",
           "https://files.cpicpgx.org/data/guideline/publication/clopidogrel/2022/35034351.pdf"
         ]
-      ]
+      ],
+      "effect": {
+        "marker": "rs4244285",
+        "allele": "A",
+        "conclusions": [
+          "Keine Kopie von CYP2C19*2. Andere CYP2C19-Varianten wurden nicht geprüft.",
+          "Eine Kopie von CYP2C19*2. Sie verringert die Aktivierung von Clopidogrel.",
+          "Zwei Kopien von CYP2C19*2. Das entspricht einer langsamen Aktivierung von Clopidogrel."
+        ],
+        "confidence": "moderate",
+        "clinical": true
+      }
     },
     {
       "id": "dpyd-splice-fluoropyrimidines",
@@ -461,7 +613,18 @@
           "CPIC-Leitlinie",
           "https://files.cpicpgx.org/data/guideline/publication/fluoropyrimidines/2017/29152729.pdf"
         ]
-      ]
+      ],
+      "effect": {
+        "marker": "rs3918290",
+        "allele": "T",
+        "conclusions": [
+          "Keine Kopie von DPYD*2A.",
+          "Eine Kopie von DPYD*2A. Sie verringert die DPD-Aktivität. Fluoropyrimidine erfordern eine ärztliche Dosisprüfung.",
+          "Zwei Kopien von DPYD*2A. Das ist mit fehlender DPD-Aktivität verbunden. Fluoropyrimidine erfordern eine ärztliche Prüfung."
+        ],
+        "confidence": "high",
+        "clinical": true
+      }
     },
     {
       "id": "dpyd-ile560ser-fluoropyrimidines",
@@ -480,7 +643,18 @@
           "CPIC-Leitlinie",
           "https://files.cpicpgx.org/data/guideline/publication/fluoropyrimidines/2017/29152729.pdf"
         ]
-      ]
+      ],
+      "effect": {
+        "marker": "rs55886062",
+        "allele": "C",
+        "conclusions": [
+          "Keine Kopie von DPYD c.1679T>G (I560S).",
+          "Eine Kopie von DPYD c.1679T>G (I560S). Sie verringert die DPD-Aktivität. Fluoropyrimidine erfordern eine ärztliche Dosisprüfung.",
+          "Zwei Kopien von DPYD c.1679T>G (I560S). Das ist mit fehlender DPD-Aktivität verbunden. Fluoropyrimidine erfordern eine ärztliche Prüfung."
+        ],
+        "confidence": "high",
+        "clinical": true
+      }
     },
     {
       "id": "cyp3a5-tacrolimus",
@@ -523,7 +697,18 @@
           "dbSNP",
           "https://www.ncbi.nlm.nih.gov/snp/rs1805007"
         ]
-      ]
+      ],
+      "effect": {
+        "marker": "rs1805007",
+        "allele": "T",
+        "conclusions": [
+          "Keine Kopie von MC1R R151C.",
+          "Eine Kopie von MC1R R151C. Sie ist mit hellerer Haut und Sommersprossen verbunden, allein aber selten mit roten Haaren.",
+          "Zwei Kopien von MC1R R151C. Das ist stark mit roten Haaren und heller Haut verbunden."
+        ],
+        "confidence": "moderate",
+        "clinical": false
+      }
     },
     {
       "id": "tchh-hair-shape",

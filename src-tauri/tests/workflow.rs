@@ -1,7 +1,7 @@
 use ed25519_dalek::{Signer, SigningKey};
 use roots_local::{
     analysis::{self, Status},
-    catalog::{self, Catalog},
+    catalog::{self, Catalog, Confidence},
     clinical, external, import, lineage, report,
 };
 use sha2::{Digest, Sha256};
@@ -131,12 +131,39 @@ fn full_taxonomy_and_four_reviewed_interpretations() {
     let catalog = Catalog::starter().unwrap();
     let data = import::parse(SAMPLE, &AtomicBool::new(false)).unwrap();
     let findings = analysis::evaluate(&data, &catalog).unwrap();
-    let rules: Vec<_> = findings
+    let mut rules: Vec<_> = findings
         .iter()
         .filter(|x| x.status == Status::Personal)
         .map(|x| x.item.id.as_str())
         .collect();
-    assert_eq!(rules, ["earwax", "bitter", "actn3", "lactase"]);
+    rules.sort_unstable();
+    assert_eq!(
+        rules,
+        [
+            "actn3",
+            "alcohol",
+            "bitter",
+            "clotting-study",
+            "diabetes",
+            "earwax",
+            "iron",
+            "lactase",
+            "lactase-evolution",
+            "slco"
+        ]
+    );
+    let by_id = |id: &str| findings.iter().find(|f| f.item.id == id).unwrap();
+    assert_eq!(
+        by_id("lactase").conclusion.as_deref(),
+        Some("Wahrscheinlich laktosetolerant im Erwachsenenalter")
+    );
+    assert_eq!(by_id("lactase").confidence, Some(Confidence::Moderate));
+    assert_eq!(by_id("earwax").conclusion.as_deref(), Some("Trockenes Ohrenschmalz"));
+    assert_eq!(by_id("slco").dosage, Some(1));
+    assert_eq!(by_id("alcohol").dosage, Some(0));
+    assert_eq!(by_id("diabetes").dosage, Some(1));
+    assert!(by_id("caffeine").conclusion.is_none());
+    assert!(by_id("cyp2c19-clopidogrel").dosage.is_none());
     let model = report::Model::new(analysis::summary(&data), catalog.version, findings, true);
     assert_eq!(
         model
@@ -155,7 +182,7 @@ fn full_taxonomy_and_four_reviewed_interpretations() {
             .iter()
             .filter(|x| x.status == Status::Research)
             .count(),
-        9
+        3
     );
 }
 
@@ -166,13 +193,13 @@ fn curated_hair_associations_match_supported_builds_and_alleles() {
         ("GRCh37", 89986117, 152083325),
         ("GRCh38", 89919709, 152110849),
     ] {
-        for (id, section, chromosome, position, observed, reference, unsupported) in [
-            ("rs1805007", "04.1", 16, mc1r, "CT", "CC", "CG"),
-            ("rs11803731", "04.2", 1, tchh, "AT", "AA", "AC"),
+        for (id, section, chromosome, position, observed, reference, unsupported, matched) in [
+            ("rs1805007", "04.1", 16, mc1r, "CT", "CC", "CG", Status::Personal),
+            ("rs11803731", "04.2", 1, tchh, "AT", "AA", "AC", Status::Research),
         ] {
             for (marker, coordinate, call, expected) in [
-                (id, position, observed, Status::Research),
-                (id, position, reference, Status::Research),
+                (id, position, observed, matched.clone()),
+                (id, position, reference, matched.clone()),
                 (id, position, unsupported, Status::Missing),
                 (id, position + 1, observed, Status::Missing),
                 ("", position, observed, Status::Missing),
@@ -616,6 +643,18 @@ fn verify_pdf_contents(
                     "Die Zuordnung bleibt offen.",
                 );
                 assert_eq!(text.contains(unresolved), !include_clinical);
+                if !short {
+                    let (conclusion, medical) = language.select2(
+                        ("Likely lactose tolerant as an adult", "TCF7L2 risk allele T"),
+                        ("Wahrscheinlich laktosetolerant im Erwachsenenalter", "TCF7L2-Risikoallels T"),
+                    );
+                    assert!(text.contains(conclusion), "Missing conclusion in {language:?}");
+                    assert_eq!(
+                        text.contains(medical),
+                        include_clinical,
+                        "Medical conclusion gating failed in {language:?}"
+                    );
+                }
             }
         }
     }

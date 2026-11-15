@@ -62,6 +62,40 @@ pub struct Trait {
     pub cross: Vec<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub study: Option<Study>,
+    /// Genotype patterns and the conclusion each one supports. Calls of several
+    /// markers are joined with "/" in marker order; each call is sorted, e.g. "AG".
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub outcomes: Vec<Outcome>,
+    /// A verified plus-strand effect allele for dosage-based conclusions.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub effect: Option<EffectAllele>,
+}
+#[derive(Clone, Copy, Debug, Serialize, Deserialize, PartialEq, Eq)]
+#[serde(rename_all = "snake_case")]
+pub enum Confidence {
+    High,
+    Moderate,
+    Low,
+}
+#[derive(Clone, Debug, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct Outcome {
+    pub calls: Vec<String>,
+    pub conclusion: String,
+    pub message: String,
+    pub confidence: Confidence,
+}
+#[derive(Clone, Debug, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct EffectAllele {
+    pub marker: String,
+    pub allele: char,
+    /// Conclusions for zero, one, and two copies of the effect allele.
+    pub conclusions: [String; 3],
+    pub confidence: Confidence,
+    /// Medically relevant conclusions stay hidden until the user opts in.
+    #[serde(default)]
+    pub clinical: bool,
 }
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -124,6 +158,10 @@ pub struct Manifest {
     pub license: String,
     pub builds: Vec<String>,
     pub sha256: String,
+}
+
+fn valid_text(value: &str, limit: usize) -> bool {
+    !value.trim().is_empty() && value.chars().count() <= limit && !value.chars().any(char::is_control)
 }
 
 pub struct Catalog {
@@ -198,20 +236,52 @@ impl Catalog {
             }
         }
         for item in &payload.traits {
-            let signature_ok = match item.method {
-                Method::Single => {
-                    matches!((item.id.as_str(), item.markers.as_slice()), ("earwax", [id]) if id == "rs17822931")
-                        || matches!((item.id.as_str(), item.markers.as_slice()), ("lactase", [id]) if id == "rs4988235")
-                        || matches!((item.id.as_str(), item.markers.as_slice()), ("actn3", [id]) if id == "rs1815739")
-                }
-                Method::Bitter => {
-                    item.id == "bitter" && item.markers == ["rs713598", "rs1726866", "rs10246939"]
-                }
-                Method::Research => true,
-                Method::Gwas => {
-                    item.markers.len() == 1 && item.study.as_ref().is_some_and(Study::valid)
-                }
+            let alleles_of = |id: &str| {
+                payload
+                    .markers
+                    .iter()
+                    .find(|marker| marker.0 == id)
+                    .map(|marker| marker.5.as_str())
             };
+            let outcomes_ok = item.outcomes.iter().all(|outcome| {
+                !outcome.calls.is_empty()
+                    && valid_text(&outcome.conclusion, 160)
+                    && valid_text(&outcome.message, 600)
+                    && outcome.calls.iter().all(|key| {
+                        let parts: Vec<_> = key.split('/').collect();
+                        parts.len() == item.markers.len()
+                            && parts.iter().zip(&item.markers).all(|(call, marker)| {
+                                let allowed = alleles_of(marker).unwrap_or("");
+                                call.len() == 2
+                                    && call.as_bytes()[0] <= call.as_bytes()[1]
+                                    && call.bytes().all(|c| allowed.as_bytes().contains(&c))
+                            })
+                    })
+            });
+            let effect_ok = item.effect.as_ref().is_none_or(|effect| {
+                item.method == Method::Research
+                    && item.markers.contains(&effect.marker)
+                    && alleles_of(&effect.marker)
+                        .is_some_and(|a| a.len() == 2 && a.contains(effect.allele))
+                    && effect.conclusions.iter().all(|c| valid_text(c, 600))
+            });
+            let signature_ok = outcomes_ok
+                && effect_ok
+                && match item.method {
+                    Method::Single => !item.outcomes.is_empty(),
+                    Method::Bitter => {
+                        item.id == "bitter"
+                            && item.markers == ["rs713598", "rs1726866", "rs10246939"]
+                            && !item.outcomes.is_empty()
+                    }
+                    Method::Research => item.outcomes.is_empty(),
+                    Method::Gwas => {
+                        item.markers.len() == 1
+                            && item.study.as_ref().is_some_and(Study::valid)
+                            && item.outcomes.is_empty()
+                            && item.effect.is_none()
+                    }
+                };
             if !valid_id(&item.id)
                 || !sections.contains(&item.section)
                 || !item.cross.iter().all(|s| sections.contains(s))

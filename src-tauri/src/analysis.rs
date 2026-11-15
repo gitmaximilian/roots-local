@@ -1,5 +1,5 @@
 use crate::{
-    catalog::{Catalog, Marker, Method, Trait},
+    catalog::{Catalog, Confidence, Marker, Method, Trait},
     import::{Build, Import, Variant},
     variants::Conflicts,
 };
@@ -28,6 +28,11 @@ pub struct Finding {
     pub status: Status,
     pub message: String,
     pub checks: Vec<Check>,
+    /// One-line answer to "what does this mean for me?".
+    pub conclusion: Option<String>,
+    pub confidence: Option<Confidence>,
+    /// Copies of the verified effect allele, when the rule defines one.
+    pub dosage: Option<u8>,
 }
 #[derive(Clone, Debug, Serialize)]
 pub struct Summary {
@@ -152,30 +157,21 @@ fn check(
     check
 }
 
-fn interpretation(item: &Trait, checks: &[Check]) -> Option<String> {
-    let first = checks.first()?.call.as_deref()?;
-    if item.method == Method::Bitter {
-        let (second, third) = (
-            checks.get(1)?.call.as_deref()?,
-            checks.get(2)?.call.as_deref()?,
-        );
-        let message = match (first, second, third) {
-            ("GG", "AA", "CC") => "Die drei Positionen sind mit zwei PAV-Kopien vereinbar. PAV ist in Studien mit stärkerer Wahrnehmung von PTC verbunden.",
-            ("CC", "GG", "TT") => "Die drei Positionen sind mit zwei AVI-Kopien vereinbar. AVI ist in Studien mit schwächerer Wahrnehmung von PTC verbunden.",
-            _ => return None,
-        };
-        return Some(message.into());
-    }
-    let message = match (item.id.as_str(), first) {
-        ("earwax", "TT") => "Dieser Genotyp ist mit trockenem Ohrenschmalz verbunden.",
-        ("earwax", "CC" | "CT") => "Dieser Genotyp ist mit überwiegend feuchtem Ohrenschmalz verbunden.",
-        ("lactase", "AA" | "AG") => "Der Genotyp enthält die hier untersuchte Variante, die mit erhaltener Laktaseaktivität im Erwachsenenalter verbunden ist.",
-        ("lactase", "GG") => "Die hier untersuchte Variante für erhaltene Laktaseaktivität liegt an dieser Position nicht vor. Andere Varianten können ebenfalls eine Rolle spielen.",
-        ("actn3", "TT") => "Der vorliegende Genotyp entspricht zwei Stoppvarianten am untersuchten Marker. Das ist mit fehlendem Alpha-Actinin-3 verbunden.",
-        ("actn3", "CC" | "CT") => "Am untersuchten Marker ist mindestens eine Kopie ohne diese Stoppvariante vorhanden.",
-        _ => return None,
-    };
-    Some(message.into())
+fn outcome<'a>(item: &'a Trait, checks: &[Check]) -> Option<&'a crate::catalog::Outcome> {
+    let key = checks
+        .iter()
+        .map(|check| check.call.as_deref())
+        .collect::<Option<Vec<_>>>()?
+        .join("/");
+    item.outcomes
+        .iter()
+        .find(|outcome| outcome.calls.iter().any(|call| *call == key))
+}
+
+fn dosage(item: &Trait, checks: &[Check]) -> Option<u8> {
+    let effect = item.effect.as_ref()?;
+    let call = checks.iter().find(|c| c.id == effect.marker)?.call.as_deref()?;
+    Some(call.chars().filter(|c| *c == effect.allele).count() as u8)
 }
 
 pub fn evaluate(data: &Import, catalog: &Catalog) -> Result<Vec<Finding>, String> {
@@ -198,7 +194,7 @@ pub fn resolve_bitter_phase(findings: &mut [Finding], trio: &crate::external::Tr
         return;
     }
     if finding.checks.iter().any(|check| check.call.is_none())
-        || interpretation(&finding.item, &finding.checks).is_some()
+        || outcome(&finding.item, &finding.checks).is_some()
     {
         return;
     }
@@ -225,6 +221,8 @@ pub fn resolve_bitter_phase(findings: &mut [Finding], trio: &crate::external::Tr
     ) {
         finding.status = Status::Personal;
         finding.message = "Die Elterndateien ordnen die drei Marker als AVI/PAV zu. Studien verbinden diese Kombination mit mittlerer PTC-Empfindlichkeit.".into();
+        finding.conclusion = Some("Wahrscheinlich mittlere Bitter-Wahrnehmung (AVI/PAV)".into());
+        finding.confidence = Some(Confidence::Moderate);
     }
 }
 
@@ -281,6 +279,9 @@ pub fn evaluate_with_coverage(
         if item.method == Method::Gwas && !complete {
             continue;
         }
+        let mut conclusion = None;
+        let mut confidence = None;
+        let copies = dosage(&item, &checks);
         let (status, message) = if item.method == Method::Gwas {
             (Status::Research, "rsID und Koordinate stimmen mit dem Katalog überein. Die Effektallel-Zuordnung wurde nicht geprüft.".into())
         } else if !complete {
@@ -288,10 +289,16 @@ pub fn evaluate_with_coverage(
                 Status::Missing,
                 "Mindestens eine benötigte Position ist für diese Regel nicht auswertbar.".into(),
             )
+        } else if let (Some(effect), Some(n)) = (&item.effect, copies) {
+            conclusion = Some(effect.conclusions[n as usize].clone());
+            confidence = Some(effect.confidence);
+            (Status::Personal, "Die Anzahl der Kopien des geprüften Allels wurde aus der Rohdatei bestimmt.".into())
         } else if item.method == Method::Research {
             (Status::Research, "Der dokumentierte Marker liegt in der Datei vor. Die Quelle beschreibt einen Studienzusammenhang.".into())
-        } else if let Some(result) = interpretation(&item, &checks) {
-            (Status::Personal, result)
+        } else if let Some(result) = outcome(&item, &checks) {
+            conclusion = Some(result.conclusion.clone());
+            confidence = Some(result.confidence);
+            (Status::Personal, result.message.clone())
         } else {
             (Status::Missing, "Die Kombination oder Phase lässt sich mit der implementierten Regel nicht eindeutig einordnen.".into())
         };
@@ -300,6 +307,9 @@ pub fn evaluate_with_coverage(
             status,
             message,
             checks,
+            conclusion,
+            confidence,
+            dosage: copies,
         });
     }
     Ok((gwas_total, findings))

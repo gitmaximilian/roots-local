@@ -22,6 +22,7 @@
   }
 )
 #let status(value) = (personal: tr("Persönlich auswertbar", "Interpretable"), research: tr("Studienbezug", "Research association"), missing: tr("Nicht beurteilbar", "Unresolved")).at(value)
+#let confidence(value) = (high: tr("Hohe Sicherheit", "High confidence"), moderate: tr("Mittlere Sicherheit", "Moderate confidence"), low: tr("Geringe Sicherheit", "Low confidence")).at(value)
 #let box-stat(number, title) = block(width: 100%, fill: paper, inset: 12pt, radius: 5pt)[
   #text(size: 20pt, fill: theme, weight: "bold")[#number]
   #linebreak()
@@ -32,6 +33,11 @@
   block(breakable: false, width: 100%, inset: (left: 11pt, top: 8pt, bottom: 6pt), stroke: (left: 1.6pt + theme))[
     #text(size: 12.5pt, fill: theme, weight: "bold")[#finding.title] #h(0.5em) #caption(status(finding.status))
     #parbreak()
+    #if finding.conclusion != none [
+      #text(size: 11.5pt, weight: "bold")[#finding.conclusion]
+      #if finding.confidence != none [ #h(0.4em) #caption(confidence(finding.confidence)) ]
+      #parbreak()
+    ]
     #finding.summary #finding.message
     #parbreak()
     #caption([#tr("Evidenz", "Evidence") · #finding.evidence \
