@@ -3,7 +3,7 @@
 use roots_local::{
     analysis,
     catalog::{self, Catalog, Chapter},
-    cram,
+    clinical, cram,
     external::{self, External},
     import::{self, Import},
     locale::Language,
@@ -205,18 +205,25 @@ async fn import_extra(
     let workspace = workspace.inner().clone();
     background(move || {
         let job = workspace.start_job()?;
-        if !["relatives", "family", "cram"].contains(&kind.as_str()) {
+        if ![
+            "relatives",
+            "family",
+            "trio",
+            "clinical",
+            "gene_validity",
+            "cram",
+        ]
+        .contains(&kind.as_str())
+        {
             return Err("Unbekannter Importtyp.".into());
         }
-        if workspace
+        let profile = workspace
             .session
             .lock()
             .map_err(state_error)?
-            .model
-            .is_none()
-        {
-            return Err("Bitte zuerst eine DNA-Datei importieren.".into());
-        }
+            .imported
+            .clone()
+            .ok_or("Bitte zuerst eine DNA-Datei importieren.")?;
         let extra = match kind.as_str() {
             "relatives" => {
                 let Some(path) = choose(
@@ -242,15 +249,72 @@ async fn import_extra(
                     return Ok(None);
                 };
                 let relative = import::file(&path, &job.cancel)?;
-                let state = workspace.session.lock().map_err(state_error)?;
-                Extra::Family(external::compare(
-                    state
-                        .imported
-                        .as_ref()
-                        .map(|profile| &profile.data)
-                        .ok_or("Keine Genotypdatei importiert.")?,
+                Extra::Family(external::compare_with_cancel(
+                    &profile.data,
                     &relative,
+                    &job.cancel,
                 )?)
+            }
+            "trio" => {
+                let extensions = &["csv", "tsv", "txt", "zip"];
+                let Some(first) = choose(
+                    &handle,
+                    language.select("First parent file", "Datei des ersten Elternteils"),
+                    extensions,
+                )?
+                else {
+                    return Ok(None);
+                };
+                let Some(second) = choose(
+                    &handle,
+                    language.select("Second parent file", "Datei des zweiten Elternteils"),
+                    extensions,
+                )?
+                else {
+                    return Ok(None);
+                };
+                let first = import::file(&first, &job.cancel)?;
+                let second = import::file(&second, &job.cancel)?;
+                Extra::Trio(external::trio(
+                    &profile.data,
+                    &first,
+                    &second,
+                    &active_markers(&workspace)?,
+                    &job.cancel,
+                )?)
+            }
+            "clinical" => {
+                let Some(path) = choose(
+                    &handle,
+                    language.select("ClinVar VCF reference", "ClinVar-VCF-Referenz"),
+                    &["vcf", "gz"],
+                )?
+                else {
+                    return Ok(None);
+                };
+                Extra::Clinical(clinical::file(&path, &profile.data, &job.cancel)?)
+            }
+            "gene_validity" => {
+                let Some(path) = choose(
+                    &handle,
+                    language.select(
+                        "ClinGen gene-disease validity",
+                        "ClinGen-Gen-Krankheits-Evidenz",
+                    ),
+                    &["csv"],
+                )?
+                else {
+                    return Ok(None);
+                };
+                let matches = workspace
+                    .session
+                    .lock()
+                    .map_err(state_error)?
+                    .model
+                    .as_ref()
+                    .and_then(|model| model.clinical.clone())
+                    .ok_or("Bitte zuerst eine ClinVar-Datei importieren.")?;
+                Extra::GeneValidity(clinical::gene_validity(&path, &matches, &job.cancel)?)
             }
             "cram" => {
                 let Some(path) = choose(
@@ -272,14 +336,7 @@ async fn import_extra(
                 else {
                     return Ok(None);
                 };
-                let markers = {
-                    let state = workspace.session.lock().map_err(state_error)?;
-                    if let Some(catalog) = &state.catalog {
-                        catalog.markers()?
-                    } else {
-                        Catalog::starter()?.markers()?
-                    }
-                };
+                let markers = active_markers(&workspace)?;
                 Extra::Cram(cram::coverage(&path, &reference, &markers, &job.cancel)?)
             }
             _ => unreachable!(),
@@ -302,15 +359,36 @@ async fn import_extra(
                 }
             }
             Extra::Family(family) => model.family = Some(family),
+            Extra::Trio(trio) => model.trio = Some(trio),
+            Extra::Clinical(matches) => model.clinical = Some(matches),
+            Extra::GeneValidity(validity) => {
+                model
+                    .clinical
+                    .as_mut()
+                    .ok_or("Bitte zuerst eine ClinVar-Datei importieren.")?
+                    .gene_validity = Some(validity);
+            }
             Extra::Cram(coverage) => model.sequence = Some(coverage),
         }
         Ok(Some(model.clone()))
     })
     .await
 }
+
+fn active_markers(workspace: &Workspace) -> Result<Vec<catalog::Marker>, String> {
+    let state = workspace.session.lock().map_err(state_error)?;
+    match &state.catalog {
+        Some(catalog) => catalog.markers(),
+        None => Catalog::starter()?.markers(),
+    }
+}
+
 enum Extra {
     Relatives(External),
     Family(external::Family),
+    Trio(external::Trio),
+    Clinical(clinical::Matches),
+    GeneValidity(clinical::GeneValidity),
     Cram(cram::Coverage),
 }
 

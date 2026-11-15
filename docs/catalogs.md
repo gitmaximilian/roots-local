@@ -40,3 +40,10 @@ The builder keeps significant single-marker associations for mapped topics. It c
 GWAS Catalog positions use GRCh38. The optional [UCSC chain](https://hgdownload.soe.ucsc.edu/goldenPath/hg38/liftOver/) maps unambiguous forward positions on the same chromosome to GRCh37. Without that chain, newly imported loci require GRCh38. A report association requires a matching rsID, position, and usable genotype. The UI and PDF show the study, reported trait, sample description, p-value, and effect where available. The user's effect allele and personal effect direction are undetermined.
 
 The November 2, 2026 export yielded 4,153 associations across 46 topics under the default filter. The synthetic MyHeritage file matched 52 of them. Reference data and packages are stored locally. Original study descriptions and third-party catalog entries retain the language and terms supplied by their authors.
+## Clinical reference files
+
+Download the official ClinVar VCF for the same reference assembly as the raw DNA export. In **Data sources → ClinVar**, open its `.vcf` or `.vcf.gz` file. Roots Local matches diploid autosomal SNPs by assembly, chromosome, position, rsID, and compatible alleles. It shows matching alternate alleles with pathogenic, likely pathogenic, or conflicting germline classifications. The report preserves ClinVar's classification, review status, and available conflicting submissions. [NCBI ClinVar downloads](https://www.ncbi.nlm.nih.gov/clinvar/docs/downloads/)
+
+After ClinVar, open the **Gene-Disease Validity Curations** CSV from ClinGen. Roots Local looks up single-gene ClinVar records when the gene symbol and the MONDO condition both agree. The report shows ClinGen evidence for the gene–disease relationship with its own source link. [ClinGen downloads](https://search.clinicalgenome.org/kb/downloads)
+
+Independent confirmation is required for a clinical finding from consumer raw data. A missing match leaves the condition unresolved. Raw DNA and selected reference files stay on the device during the import. An exported report includes any imported clinical annotations and may disclose a variant even with explicit genotype display disabled.

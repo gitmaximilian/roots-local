@@ -222,7 +222,7 @@ pub fn evaluate_with_coverage(
                     data,
                     &at_pos,
                     &ids,
-                    item.method == Method::Gwas,
+                    item.method == Method::Gwas || item.section.starts_with("15."),
                 )
             })
             .collect();

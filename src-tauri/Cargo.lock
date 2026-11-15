@@ -3147,6 +3147,8 @@ version = "0.1.0"
 dependencies = [
  "csv",
  "ed25519-dalek",
+ "flate2",
+ "md-5",
  "noodles",
  "rusqlite",
  "serde",

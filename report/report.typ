@@ -102,7 +102,31 @@
   #report.family.compared #tr("gemeinsam auswertbare autosomale Positionen.", "comparable autosomal positions.")
   #report.family.compatible #tr("mit mindestens einem geteilten Allel.", "with at least one shared allele.")
   #report.family.discordant #tr("ohne geteiltes Allel.", "without a shared allele.")
+  #report.family.identical #tr("mit identischem Genotyp.", "with identical genotypes.")
+  #if report.family.kinship != none [
+    #parbreak()
+    #tr("KING-Koeffizient (Forschungswert)", "KING coefficient (research use)") #str(calc.round(report.family.kinship, digits: 4)) · #report.family.kinship_markers #tr("geprüfte Marker", "markers checked"). #link("https://doi.org/10.1093/bioinformatics/btq559", [#tr("Methode", "Method")]).
+    #parbreak()
+  ]
   #tr("Dieser Vergleich ist keine Verwandtschaftsbestimmung.", "This comparison on its own cannot determine a family relationship.")
+]
+#if report.trio != none [
+  #heading(level: 2, [#tr("Abgleich zweier Elterndateien", "Two-parent comparison")])
+  #report.trio.compared #tr("gemeinsam geprüfte autosomale Marker.", "shared autosomal markers checked.")
+  #report.trio.phased_heterozygous #tr("heterozygote Marker mit eindeutiger Zuordnung.", "heterozygous markers with a unique assignment.")
+  #report.trio.ambiguous #tr("mehrdeutige Zuordnungen.", "ambiguous assignments.")
+  #report.trio.homozygous #tr("kompatible homozygote Marker.", "compatible homozygous markers.")
+  #report.trio.inconsistent #tr("unvereinbare Genotypen.", "inconsistent genotypes.")
+  #tr("Die Auswertung prüft einzelne Positionen und setzt die angegebenen Elternrollen voraus.", "The comparison evaluates single positions and assumes the supplied parent roles.")
+  #if report.options.include_calls and report.trio.assignments.len() > 0 [
+    #parbreak()
+    *#tr("Allelzuordnung für Katalogmarker", "Allele assignments at catalog markers")*
+    #block(breakable: true, table(
+      columns: (1fr, 1fr, 1fr, 1fr),
+      table.header([Marker], [Position], [#tr("Erster Elternteil", "First parent")], [#tr("Zweiter Elternteil", "Second parent")]),
+      ..report.trio.assignments.map(row => (row.marker, [#row.chromosome:#row.position], row.first, row.second)).flatten()
+    ))
+  ]
 ]
 #if report.sequence != none [
   #heading(level: 2, [#tr("Sequenzierdaten", "Sequencing data")])
@@ -117,7 +141,7 @@
 #for chapter in report.chapters {
   let chapter-findings = report.findings.filter(f => f.section.split(".").first() == chapter.id)
   let has-import = (chapter.id == "01" and report.external.origins.len() > 0) or (chapter.id == "02" and report.external.matches.len() + report.external.segments.len() > 0)
-  if not report.options.short or has-import or (chapter.id == "14" and report.scores.len() > 0) or chapter-findings.any(f => f.status != "missing") {
+  if not report.options.short or has-import or (chapter.id == "14" and (report.scores.len() > 0 or report.clinical != none)) or chapter-findings.any(f => f.status != "missing") {
     if not report.options.short { pagebreak(weak: true) }
     heading(level: 1, [#chapter.id · #chapter.title])
     if chapter.id == "01" and report.external.origins.len() > 0 {
@@ -141,10 +165,35 @@
     for section in chapter.sections {
       let own = chapter-findings.filter(f => f.section == section.id and (not report.options.short or f.status != "missing"))
       let cross = report.findings.filter(f => section.id in f.cross and (not report.options.short or f.status != "missing"))
-      if not report.options.short or own.len() > 0 or (section.id == "14.4" and report.scores.len() > 0) {
+      let has-clinvar = section.id == "14.1" and report.clinical != none
+      if not report.options.short or own.len() > 0 or has-clinvar or (section.id == "14.4" and report.scores.len() > 0) {
         heading(level: 2, [#section.id · #section.title])
         if not report.options.short { caption(section.scope); parbreak() }
-        if own.len() == 0 and cross.len() == 0 and not report.options.short {
+        if has-clinvar {
+          [*ClinVar* · #report.clinical.release · #report.clinical.build · #report.clinical.variants.len() #tr("passende Einträge", "matching records")]
+          parbreak()
+          [#tr("Treffer aus Verbrauchertests benötigen eine unabhängige Bestätigung. Fehlende Treffer erlauben keine Aussage über Erkrankungsrisiken.", "Matches from consumer DNA data require independent confirmation. An empty result gives no information about disease risk.")]
+          parbreak()
+          for variant in report.clinical.variants [
+            *#variant.marker* · #variant.chromosome:#variant.position · #link("https://www.ncbi.nlm.nih.gov/clinvar/variation/" + str(variant.id) + "/", [ClinVar #variant.id]) \
+            #variant.classifications · #variant.review_status
+            #if report.options.include_calls [ · #variant.alternate × #variant.copies]
+            #if variant.conditions != "" [\ #variant.conditions]
+            #if variant.conflicting_classifications != "" [\ #variant.conflicting_classifications]
+            #parbreak()
+          ]
+          if report.clinical.gene_validity != none [
+            *#tr("ClinGen-Gen-Krankheits-Evidenz", "ClinGen gene–disease validity")* · #report.clinical.gene_validity.date
+            #parbreak()
+            #tr("ClinGen beurteilt den Zusammenhang zwischen Gen und Erkrankung.", "ClinGen evaluates the evidence linking a gene to a disease.")
+            #parbreak()
+            #for entry in report.clinical.gene_validity.records [
+              #entry.gene (#entry.hgnc) · #entry.disease (#entry.mondo) · #entry.inheritance · #entry.classification ·
+              #link(entry.evidence_url, [ClinGen]) \
+            ]
+          ]
+        }
+        if own.len() == 0 and cross.len() == 0 and not report.options.short and not has-clinvar {
           if section.id == "14.4" and report.scores.len() > 0 {
             for score in report.scores [
               *#score.title* · #score.id \

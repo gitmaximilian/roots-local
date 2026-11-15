@@ -2,13 +2,88 @@ use ed25519_dalek::{Signer, SigningKey};
 use roots_local::{
     analysis::{self, Status},
     catalog::{self, Catalog},
-    external, import, report,
+    clinical, external, import, report,
 };
 use sha2::{Digest, Sha256};
 use std::{fs, io::Write, path::Path, sync::atomic::AtomicBool};
 
 const SAMPLE: &[u8] = include_bytes!("../../fixtures/synthetic-myheritage.txt");
 const COLUMNS: &str = "##reference=build37\nRSID,CHROMOSOME,POSITION,RESULT\n";
+
+#[test]
+fn trio_counts_unique_ambiguous_and_inconsistent_transmissions() {
+    let parse = |rows: &str| {
+        import::parse(
+            format!("{COLUMNS}{rows}").as_bytes(),
+            &AtomicBool::new(false),
+        )
+        .unwrap()
+    };
+    let child = parse("rs1,2,1,AG\nrs2,2,2,AG\nrs3,2,3,AA\nrs4,2,4,GG\nrs5,2,5,AG\n");
+    let first = parse("rs1,2,1,AA\nrs2,2,2,AG\nrs3,2,3,AG\nrs4,2,4,AA\nrs5,2,5,AA\nrs5,2,5,GG\n");
+    let second = parse("rs1,2,1,GG\nrs2,2,2,AG\nrs3,2,3,AA\nrs4,2,4,GG\nrs5,2,5,GG\n");
+    let markers = [catalog::Marker(
+        "rs1".into(),
+        "Synthetic".into(),
+        "2".into(),
+        1,
+        0,
+        "AG".into(),
+    )];
+    let result =
+        external::trio(&child, &first, &second, &markers, &AtomicBool::new(false)).unwrap();
+    assert_eq!(result.compared, 4);
+    assert_eq!(result.phased_heterozygous, 1);
+    assert_eq!(result.ambiguous, 1);
+    assert_eq!(result.homozygous, 1);
+    assert_eq!(result.inconsistent, 1);
+    assert_eq!(result.assignments.len(), 1);
+    assert_eq!(
+        (result.assignments[0].first, result.assignments[0].second),
+        ('A', 'G')
+    );
+}
+
+#[test]
+fn clinvar_vcf_requires_consistent_assembly_identifier_and_alleles() {
+    let cancel = AtomicBool::new(false);
+    let data = import::parse(
+        format!("{COLUMNS}rs1,2,1,AG\nrs2,2,2,AA\nrs3,2,3,AG\nrs4,2,4,AG\nrs4,2,4,GG\n").as_bytes(),
+        &cancel,
+    )
+    .unwrap();
+    let file = tempfile::NamedTempFile::new().unwrap();
+    let source = concat!(
+        "##fileformat=VCFv4.1\n##source=ClinVar\n##fileDate=2026-01-01\n##reference=GRCh37\n",
+        "#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\n",
+        "2\t1\t999999991\tA\tG\t.\t.\tRS=1;CLNSIG=Conflicting_classifications_of_pathogenicity;CLNSIGCONF=Pathogenic(1)|Benign(2);CLNREVSTAT=criteria_provided;CLNDN=Synthetic_condition;GENEINFO=TESTGENE:123;CLNDISDB=MONDO:MONDO:9999999\n",
+        "2\t2\t999999992\tA\tG\t.\t.\tRS=2;CLNSIG=Pathogenic;CLNREVSTAT=criteria_provided\n",
+        "2\t3\t999999993\tA\tG\t.\t.\tRS=10;CLNSIG=Pathogenic;CLNREVSTAT=criteria_provided\n",
+        "2\t4\t999999994\tA\tG\t.\t.\tRS=4;CLNSIG=Pathogenic;CLNREVSTAT=criteria_provided\n",
+    );
+    let mut compressed = flate2::write::GzEncoder::new(Vec::new(), flate2::Compression::fast());
+    compressed.write_all(source.as_bytes()).unwrap();
+    fs::write(file.path(), compressed.finish().unwrap()).unwrap();
+    let matched = clinical::file(file.path(), &data, &cancel).unwrap();
+    assert_eq!(matched.variants.len(), 1);
+    assert_eq!(matched.variants[0].copies, 1);
+    assert_eq!(
+        matched.variants[0].conflicting_classifications,
+        "Pathogenic(1) · Benign(2)"
+    );
+    let validity = concat!(
+        "CLINGEN GENE DISEASE VALIDITY CURATIONS\nFILE CREATED: 2026-01-01\nWEBPAGE: example\n+++++\n",
+        "GENE SYMBOL,GENE ID (HGNC),DISEASE LABEL,DISEASE ID (MONDO),MOI,SOP,CLASSIFICATION,ONLINE REPORT\n+++++\n",
+        "TESTGENE,HGNC:123,Synthetic condition,MONDO:9999999,AR,SOP12,Strong,https://search.clinicalgenome.org/kb/gene-validity/test-1\n",
+        "TESTGENE,HGNC:123,Other condition,MONDO:9999998,AR,SOP12,Strong,https://search.clinicalgenome.org/kb/gene-validity/test-2\n",
+    );
+    fs::write(file.path(), validity).unwrap();
+    let evidence = clinical::gene_validity(file.path(), &matched, &cancel).unwrap();
+    assert_eq!(evidence.records.len(), 1);
+    assert_eq!(evidence.records[0].mondo, "MONDO:9999999");
+    fs::write(file.path(), source.replace("GRCh37", "GRCh38")).unwrap();
+    assert!(clinical::file(file.path(), &data, &cancel).is_err());
+}
 
 #[test]
 fn full_taxonomy_and_four_reviewed_interpretations() {
@@ -179,8 +254,9 @@ fn signed_catalog_rejects_tampering() {
                 "effect_context": "OR"
             }
         }));
+    let version = payload["version"].as_str().unwrap().to_owned();
     let payload = payload.to_string();
-    let manifest = serde_json::json!({"schema":1,"version":"1.0.0","origin":"Test",
+    let manifest = serde_json::json!({"schema":1,"version":version,"origin":"Test",
         "license":"Apache-2.0","builds":["GRCh37","GRCh38"],"sha256":format!("{:x}",Sha256::digest(payload.as_bytes()))}).to_string();
     let signature = hex(&key.sign(manifest.as_bytes()).to_bytes());
     let temp = tempfile::tempdir().unwrap();
@@ -189,7 +265,7 @@ fn signed_catalog_rejects_tampering() {
         serde_json::json!({"manifest":manifest,"payload":payload,"signature":signature});
     fs::write(&path, package.to_string()).unwrap();
     let verified = catalog::package(&path, &pubkey).unwrap();
-    assert_eq!(verified.version, "1.0.0");
+    assert_eq!(verified.version, version);
     for (row, matched) in [
         ("rs90000001,1,12000,AG", true),
         ("rs90000001,1,12001,AG", false),

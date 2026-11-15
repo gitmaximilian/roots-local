@@ -30,8 +30,9 @@ Use `npm run tauri -- build --bundles app` for macOS. The script `scripts/packag
 - **Raw exports.** CSV, TSV, TXT, and ZIP with declared GRCh37 or GRCh38 assemblies. Unknown assemblies, missing markers, and conflicting entries remain unresolved.
 - **Variant register.** Search by marker ID, exact coordinate, or inclusive range, such as `chr2:136600000-136650000`. Filter by chromosome or genotype status. Open a marker from a finding to inspect the matching rows and return to the finding.
 - **Starter catalog.** Rules for lactase activity, earwax type, bitter taste, and ACTN3 alongside selected studies. Data quality and scientific evidence are shown separately.
-- **Companion data.** Manually entered ancestry results, match and shared segment lists, and comparison of autosomal alleles against a family file.
-- **CRAM.** Measures catalog marker coverage using aligned reads and a matching, indexed local FASTA. Genotype and haplogroup inference are pending.
+- **Companion data.** Import ancestry results, matches, or shared segments. Compare autosomal calls against one family file or assign alleles at individual markers using two parent files.
+- **CRAM.** Measures catalog marker coverage using aligned reads and an indexed local FASTA. Checks the lengths and available MD5 values of the reference sequences used during decoding.
+- **Clinical reference data.** Import local ClinVar VCF and ClinGen gene–disease validity CSV files. The report displays matched variant classifications and gene–disease evidence with their sources. [Reference downloads and matching rules](docs/catalogs.md)
 - **GWAS research.** Optional local packages associate matching loci with published studies, samples, and reported effects.
 - **Polygenic research.** Signed catalog packages can contain additive scores. The app requires complete marker coverage and displays a raw score without personal disease-risk calibration.
 - **PDF export.** Full and summary reports, clickable contents, sources, and coverage. Names and explicit genotypes are optional. The full report shows sections that have no applicable rule.

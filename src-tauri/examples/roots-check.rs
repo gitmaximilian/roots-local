@@ -1,18 +1,34 @@
-use roots_local::{analysis, catalog::Catalog, import, report};
+use roots_local::{analysis, catalog::Catalog, clinical, external, import, report};
 use std::{env, path::Path, sync::atomic::AtomicBool};
 
 fn run() -> Result<(), String> {
     let mut args = env::args_os().skip(1);
     let [Some(input), Some(output), Some(typst)] = [args.next(), args.next(), args.next()] else {
-        return Err("Usage: roots-check <raw-data> <report.pdf> <typst> [--synthetic] [--german] [--catalog <package> <public-key>]".into());
+        return Err("Usage: roots-check <raw-data> <report.pdf> <typst> [--synthetic] [--german] [--include-calls] [--catalog <package> <public-key>] [--clinvar <vcf> [--clingen <csv>]] [--parents <first> <second>]".into());
     };
     let mut example = false;
     let mut language = roots_local::locale::Language::En;
+    let mut include_calls = false;
     let mut catalog = None;
+    let mut clinvar = None;
+    let mut clingen = None;
+    let mut parents = None;
     while let Some(option) = args.next() {
         match option.to_str() {
             Some("--synthetic") if !example => example = true,
             Some("--german") => language = roots_local::locale::Language::De,
+            Some("--include-calls") => include_calls = true,
+            Some("--clinvar") if clinvar.is_none() => {
+                clinvar = Some(args.next().ok_or("Missing ClinVar VCF file.")?);
+            }
+            Some("--clingen") if clingen.is_none() => {
+                clingen = Some(args.next().ok_or("Missing ClinGen CSV file.")?);
+            }
+            Some("--parents") if parents.is_none() => {
+                let first = args.next().ok_or("Missing first parent file.")?;
+                let second = args.next().ok_or("Missing second parent file.")?;
+                parents = Some((first, second));
+            }
             Some("--catalog") if catalog.is_none() => {
                 let path = args.next().ok_or("Missing catalog file.")?;
                 let key = args
@@ -24,7 +40,8 @@ fn run() -> Result<(), String> {
             _ => return Err("Unknown or repeated option.".into()),
         }
     }
-    let data = import::file(Path::new(&input), &AtomicBool::new(false))?;
+    let cancel = AtomicBool::new(false);
+    let data = import::file(Path::new(&input), &cancel)?;
     let catalog = match catalog {
         Some(catalog) => catalog,
         None => Catalog::starter()?,
@@ -36,10 +53,30 @@ fn run() -> Result<(), String> {
         example,
     );
     model.apply_catalog(&data, &catalog)?;
+    if let Some(path) = clinvar {
+        let mut matches = clinical::file(Path::new(&path), &data, &cancel)?;
+        println!("{} matching ClinVar records", matches.variants.len());
+        if let Some(path) = clingen {
+            let validity = clinical::gene_validity(Path::new(&path), &matches, &cancel)?;
+            println!("{} matching ClinGen curations", validity.records.len());
+            matches.gene_validity = Some(validity);
+        }
+        model.clinical = Some(matches);
+    } else if clingen.is_some() {
+        return Err("ClinGen import requires a ClinVar file.".into());
+    }
+    if let Some((first, second)) = parents {
+        let first = import::file(Path::new(&first), &cancel)?;
+        let second = import::file(Path::new(&second), &cancel)?;
+        let result = external::trio(&data, &first, &second, &catalog.markers()?, &cancel)?;
+        println!("{} shared trio markers", result.compared);
+        model.trio = Some(result);
+    }
     report::export(
         &model,
         report::Options {
             language,
+            include_calls,
             ..Default::default()
         },
         Path::new(&typst),

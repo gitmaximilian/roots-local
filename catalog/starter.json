@@ -1,5 +1,5 @@
 {
-  "version": "1.0.0",
+  "version": "1.1.0",
   "markers": [
     [
       "rs4988235",
@@ -112,6 +112,38 @@
       28365618,
       28120472,
       "AG"
+    ],
+    [
+      "rs4244285",
+      "CYP2C19",
+      "10",
+      96541616,
+      94781859,
+      "AG"
+    ],
+    [
+      "rs3918290",
+      "DPYD",
+      "1",
+      97915614,
+      97450058,
+      "CT"
+    ],
+    [
+      "rs55886062",
+      "DPYD",
+      "1",
+      97981343,
+      97515787,
+      "AC"
+    ],
+    [
+      "rs776746",
+      "CYP3A5",
+      "7",
+      99270539,
+      99672916,
+      "CT"
     ]
   ],
   "traits": [
@@ -374,6 +406,82 @@
         [
           "Tishkoff et al. (2007)",
           "https://pubmed.ncbi.nlm.nih.gov/17159977/"
+        ]
+      ]
+    },
+    {
+      "id": "cyp2c19-clopidogrel",
+      "section": "15.2",
+      "title": "CYP2C19 und Clopidogrel",
+      "markers": [
+        "rs4244285"
+      ],
+      "method": "research",
+      "evidence": "Gen-Wirkstoff-Beziehung in Leitlinie",
+      "summary": "Die CPIC-Leitlinie erklärt den Zusammenhang zwischen CYP2C19-Funktion und der Aktivierung von Clopidogrel.",
+      "limits": "Die Auswertung zeigt die Abdeckung eines einzelnen Markers. Ein vollständiger Genotyp und eine klinische Beurteilung sind für Therapieentscheidungen erforderlich.",
+      "population": "Mehrere untersuchte Populationen",
+      "sources": [
+        [
+          "CPIC-Leitlinie",
+          "https://files.cpicpgx.org/data/guideline/publication/clopidogrel/2022/35034351.pdf"
+        ]
+      ]
+    },
+    {
+      "id": "dpyd-splice-fluoropyrimidines",
+      "section": "15.2",
+      "title": "DPYD-Spleißvariante und Fluoropyrimidine",
+      "markers": [
+        "rs3918290"
+      ],
+      "method": "research",
+      "evidence": "Gen-Wirkstoff-Beziehung in Leitlinie",
+      "summary": "Die CPIC-Leitlinie berücksichtigt die DPYD-Spleißvariante c.1905+1G>A bei Fluoropyrimidinen.",
+      "limits": "Die Auswertung zeigt die Abdeckung eines einzelnen Markers. Ein vollständiger Genotyp und eine klinische Beurteilung sind für Therapieentscheidungen erforderlich.",
+      "population": "Mehrere untersuchte Populationen",
+      "sources": [
+        [
+          "CPIC-Leitlinie",
+          "https://files.cpicpgx.org/data/guideline/publication/fluoropyrimidines/2017/29152729.pdf"
+        ]
+      ]
+    },
+    {
+      "id": "dpyd-ile560ser-fluoropyrimidines",
+      "section": "15.2",
+      "title": "DPYD-Ile560Ser und Fluoropyrimidine",
+      "markers": [
+        "rs55886062"
+      ],
+      "method": "research",
+      "evidence": "Gen-Wirkstoff-Beziehung in Leitlinie",
+      "summary": "Die CPIC-Leitlinie berücksichtigt die DPYD-Variante Ile560Ser bei Fluoropyrimidinen.",
+      "limits": "Die Auswertung zeigt die Abdeckung eines einzelnen Markers. Ein vollständiger Genotyp und eine klinische Beurteilung sind für Therapieentscheidungen erforderlich.",
+      "population": "Mehrere untersuchte Populationen",
+      "sources": [
+        [
+          "CPIC-Leitlinie",
+          "https://files.cpicpgx.org/data/guideline/publication/fluoropyrimidines/2017/29152729.pdf"
+        ]
+      ]
+    },
+    {
+      "id": "cyp3a5-tacrolimus",
+      "section": "15.2",
+      "title": "CYP3A5 und Tacrolimus",
+      "markers": [
+        "rs776746"
+      ],
+      "method": "research",
+      "evidence": "Gen-Wirkstoff-Beziehung in Leitlinie",
+      "summary": "Die CPIC-Leitlinie beschreibt den Zusammenhang zwischen CYP3A5-Expression und dem Stoffwechsel von Tacrolimus.",
+      "limits": "Die Auswertung zeigt die Abdeckung eines einzelnen Markers. Ein vollständiger Genotyp und eine klinische Beurteilung sind für Therapieentscheidungen erforderlich.",
+      "population": "Mehrere untersuchte Populationen",
+      "sources": [
+        [
+          "CPIC-Leitlinie",
+          "https://cpicpgx.org/guidelines/guideline-for-tacrolimus-and-CYP3A5/"
         ]
       ]
     }

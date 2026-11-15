@@ -1,5 +1,6 @@
 pub mod analysis;
 pub mod catalog;
+pub mod clinical;
 pub mod cram;
 pub mod external;
 pub mod import;

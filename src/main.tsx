@@ -5,6 +5,7 @@ import {
   resultText,
   type Language,
 } from "./locale";
+import starterCatalog from "../catalog/starter.json";
 import englishChapters from "../catalog/report-structure.en.json";
 import germanChapters from "../catalog/report-structure.de.json";
 import React, { lazy, Suspense, useEffect, useMemo, useState } from "react";
@@ -105,7 +106,56 @@ type Report = {
       cm: number;
     }[];
   };
-  family: { compared: number; compatible: number; discordant: number } | null;
+  family: {
+    compared: number;
+    compatible: number;
+    discordant: number;
+    identical: number;
+    kinship: number | null;
+    kinship_markers: number;
+  } | null;
+  trio: {
+    compared: number;
+    phased_heterozygous: number;
+    ambiguous: number;
+    homozygous: number;
+    inconsistent: number;
+    assignments: {
+      marker: string;
+      chromosome: number;
+      position: number;
+      first: string;
+      second: string;
+    }[];
+  } | null;
+  clinical: {
+    build: string;
+    release: string;
+    gene_validity: {
+      date: string;
+      records: {
+        gene: string;
+        hgnc: string;
+        disease: string;
+        mondo: string;
+        inheritance: string;
+        classification: string;
+        evidence_url: string;
+      }[];
+    } | null;
+    variants: {
+      id: number;
+      marker: string;
+      chromosome: string;
+      position: number;
+      copies: number;
+      alternate: string;
+      classifications: string;
+      conflicting_classifications: string;
+      review_status: string;
+      conditions: string;
+    }[];
+  } | null;
   sequence: {
     reads: number;
     build: string;
@@ -501,6 +551,137 @@ function VariantRegister({
   );
 }
 
+function ClinicalMatches({ data }: { data: NonNullable<Report["clinical"]> }) {
+  const [limit, setLimit] = useState(25);
+  return (
+    <>
+      <p>
+        {data.release} · {data.build} · {number.format(data.variants.length)}{" "}
+        {t("passende ClinVar-Einträge")}
+      </p>
+      {data.variants.slice(0, limit).map((variant) => (
+        <details className="finding" key={variant.id}>
+          <summary>
+            <span>
+              {variant.marker} · {variant.classifications}
+            </span>
+            <ChevronDown size={16} />
+          </summary>
+          <dl className="definition finding-content">
+            <dt>{t("Position")}</dt>
+            <dd>
+              {variant.chromosome}:{variant.position}
+            </dd>
+            <dt>{t("Alternativallel")}</dt>
+            <dd>
+              {variant.alternate} × {variant.copies}
+            </dd>
+            <dt>{t("Review-Status")}</dt>
+            <dd>{variant.review_status}</dd>
+            {variant.conflicting_classifications && (
+              <>
+                <dt>{t("Abweichende Einreichungen")}</dt>
+                <dd>{variant.conflicting_classifications}</dd>
+              </>
+            )}
+            <dt>{t("Erfasste Erkrankungen")}</dt>
+            <dd>{variant.conditions || "–"}</dd>
+            <dt>ClinVar</dt>
+            <dd>Variation ID {variant.id}</dd>
+          </dl>
+        </details>
+      ))}
+      {limit < data.variants.length && (
+        <button
+          className="text-button more-findings"
+          onClick={() => setLimit(limit + 25)}
+        >
+          {t("Weitere Einträge anzeigen (")}
+          {number.format(data.variants.length - limit)})
+        </button>
+      )}
+      {data.gene_validity && (
+        <details>
+          <summary>
+            {t("ClinGen-Gen-Krankheits-Evidenz")} ·{" "}
+            {data.gene_validity.records.length}
+          </summary>
+          <p>
+            {data.gene_validity.date} ·{" "}
+            {t(
+              "ClinGen beurteilt den Zusammenhang zwischen Gen und Erkrankung.",
+            )}
+          </p>
+          <ul>
+            {data.gene_validity.records.map((entry) => (
+              <li key={entry.evidence_url}>
+                {entry.gene} · {entry.disease} ({entry.mondo}) ·{" "}
+                {entry.inheritance} · {entry.classification}
+              </li>
+            ))}
+          </ul>
+        </details>
+      )}
+    </>
+  );
+}
+
+function TrioSummary({ trio }: { trio: NonNullable<Report["trio"]> }) {
+  const [limit, setLimit] = useState(25);
+  return (
+    <>
+      <dl className="definition">
+        <dt>{t("Gemeinsam geprüfte Marker")}</dt>
+        <dd>{number.format(trio.compared)}</dd>
+        <dt>{t("Zuordenbare heterozygote Marker")}</dt>
+        <dd>{number.format(trio.phased_heterozygous)}</dd>
+        <dt>{t("Mehrdeutige Zuordnung")}</dt>
+        <dd>{number.format(trio.ambiguous)}</dd>
+        <dt>{t("Kompatible homozygote Marker")}</dt>
+        <dd>{number.format(trio.homozygous)}</dd>
+        <dt>{t("Unvereinbare Genotypen")}</dt>
+        <dd>{number.format(trio.inconsistent)}</dd>
+      </dl>
+      {trio.assignments.length > 0 && (
+        <details>
+          <summary>{t("Allelzuordnung für Katalogmarker")}</summary>
+          <table>
+            <thead>
+              <tr>
+                <th>Marker</th>
+                <th>Position</th>
+                <th>{t("Erster Elternteil")}</th>
+                <th>{t("Zweiter Elternteil")}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {trio.assignments.slice(0, limit).map((row) => (
+                <tr key={`${row.marker}-${row.chromosome}-${row.position}`}>
+                  <td>{row.marker}</td>
+                  <td>
+                    {row.chromosome}:{row.position}
+                  </td>
+                  <td>{row.first}</td>
+                  <td>{row.second}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          {limit < trio.assignments.length && (
+            <button
+              className="text-button more-findings"
+              onClick={() => setLimit(limit + 25)}
+            >
+              {t("Weitere Einträge anzeigen (")}
+              {number.format(trio.assignments.length - limit)})
+            </button>
+          )}
+        </details>
+      )}
+    </>
+  );
+}
+
 function App() {
   const [page, setPage] = useState<Page>("home");
   const [language, setUiLanguage] = useState<Language>(getLanguage);
@@ -522,7 +703,7 @@ function App() {
   const [notice, setNotice] = useState("");
   const [origins, setOrigins] = useState("");
   const [key, setKey] = useState("");
-  const [version, setVersion] = useState("1.0.0");
+  const [version, setVersion] = useState(starterCatalog.version);
   const [options, setOptions] = useState<Options>({
     short: false,
     name: "",
@@ -1344,6 +1525,15 @@ function App() {
                         >
                           {t("Familiendatei")}
                         </button>
+                        <button
+                          className="button secondary"
+                          disabled={!!busy}
+                          onClick={() =>
+                            extra("trio", t("Elterndateien abgleichen"))
+                          }
+                        >
+                          {t("Zwei Elterndateien")}
+                        </button>
                       </div>
                       <small>
                         {model.external.origins.length}
@@ -1353,12 +1543,60 @@ function App() {
                         {t("Segmente")}
                       </small>
                       {model.family && (
-                        <p>
-                          {number.format(model.family.compared)}
-                          {t("gemeinsam ausgewertete Positionen ·")}{" "}
-                          {number.format(model.family.discordant)}
-                          {t("ohne gemeinsames Allel")}
-                        </p>
+                        <>
+                          <p>
+                            {number.format(model.family.compared)}{" "}
+                            {t("gemeinsam ausgewertete Positionen ·")}{" "}
+                            {number.format(model.family.discordant)}{" "}
+                            {t("ohne gemeinsames Allel")}
+                          </p>
+                          {model.family.kinship !== null && (
+                            <p>
+                              {t("KING-Koeffizient (Forschungswert)")}{" "}
+                              {number.format(
+                                Number(model.family.kinship.toFixed(4)),
+                              )}{" "}
+                              · {number.format(model.family.kinship_markers)}{" "}
+                              {t("geprüfte Marker")}
+                            </p>
+                          )}
+                        </>
+                      )}
+                      {model.trio && <TrioSummary trio={model.trio} />}
+                    </section>
+                    <section className="panel data-card">
+                      <Database size={22} />
+                      <h2>ClinVar</h2>
+                      <p>
+                        {t(
+                          "Gleiche eine lokale ClinVar-VCF mit deiner Genotypdatei ab. Treffer aus Verbrauchertests benötigen eine unabhängige Bestätigung.",
+                        )}
+                      </p>
+                      <button
+                        className="button secondary"
+                        disabled={!!busy}
+                        onClick={() =>
+                          extra("clinical", t("ClinVar-Datei abgleichen"))
+                        }
+                      >
+                        {t("ClinVar-VCF öffnen")}
+                      </button>
+                      {model.clinical && (
+                        <>
+                          <button
+                            className="button secondary"
+                            disabled={!!busy}
+                            onClick={() =>
+                              extra(
+                                "gene_validity",
+                                t("ClinGen-Datei abgleichen"),
+                              )
+                            }
+                          >
+                            {t("ClinGen-CSV öffnen")}
+                          </button>
+                          <ClinicalMatches data={model.clinical} />
+                        </>
                       )}
                     </section>
                     <section className="panel data-card">

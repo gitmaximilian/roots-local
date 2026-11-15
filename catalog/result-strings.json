@@ -253,5 +253,21 @@
   "Unbekannter Importtyp.": "Unknown import type.",
   "Keine Genotypdatei importiert.": "No genotype file was imported.",
   "Keine Centimorgan-Spalte gefunden.": "No centimorgan column found.",
-  "Ungültiger Bereich. Verwende z. B. 2:136608646 oder chr2:136600000-136650000.": "Invalid region. Enter a position such as 2:136608646 or a range such as chr2:136600000-136650000."
+  "Ungültiger Bereich. Verwende z. B. 2:136608646 oder chr2:136600000-136650000.": "Invalid region. Enter a position such as 2:136608646 or a range such as chr2:136600000-136650000.",
+  "Die Datei ist keine unterstützte ClinVar-VCF.": "The file is not a supported ClinVar VCF.",
+  "ClinVar und die Rohdaten benötigen dasselbe bekannte Referenzgenom.": "ClinVar and the raw data must use the same known reference assembly.",
+  "ClinVar benötigt Rohdaten auf dem Vorwärtsstrang.": "ClinVar matching requires forward-strand raw data.",
+  "Die ClinVar-Datei überschreitet das Größenlimit.": "The ClinVar file exceeds the size limit.",
+  "Bitte zuerst eine ClinVar-Datei importieren.": "Import a ClinVar VCF first.",
+  "Die Datei ist keine unterstützte ClinGen-CSV.": "The file is not a supported ClinGen CSV.",
+  "CYP2C19 und Clopidogrel": "CYP2C19 and clopidogrel",
+  "Die CPIC-Leitlinie erklärt den Zusammenhang zwischen CYP2C19-Funktion und der Aktivierung von Clopidogrel.": "The CPIC guideline describes how CYP2C19 function relates to clopidogrel activation.",
+  "DPYD-Spleißvariante und Fluoropyrimidine": "DPYD splice variant and fluoropyrimidines",
+  "Die CPIC-Leitlinie berücksichtigt die DPYD-Spleißvariante c.1905+1G>A bei Fluoropyrimidinen.": "The CPIC guideline includes the DPYD splice variant c.1905+1G>A in its review of fluoropyrimidines.",
+  "DPYD-Ile560Ser und Fluoropyrimidine": "DPYD Ile560Ser and fluoropyrimidines",
+  "Die CPIC-Leitlinie berücksichtigt die DPYD-Variante Ile560Ser bei Fluoropyrimidinen.": "The CPIC guideline includes the DPYD Ile560Ser variant in its review of fluoropyrimidines.",
+  "CYP3A5 und Tacrolimus": "CYP3A5 and tacrolimus",
+  "Die CPIC-Leitlinie beschreibt den Zusammenhang zwischen CYP3A5-Expression und dem Stoffwechsel von Tacrolimus.": "The CPIC guideline describes how CYP3A5 expression relates to tacrolimus metabolism.",
+  "Die Auswertung zeigt die Abdeckung eines einzelnen Markers. Ein vollständiger Genotyp und eine klinische Beurteilung sind für Therapieentscheidungen erforderlich.": "This result shows coverage at a single marker. Treatment decisions require a complete genotype and clinical assessment.",
+  "CPIC-Leitlinie": "CPIC guideline"
 }
