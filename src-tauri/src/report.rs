@@ -79,11 +79,19 @@ impl Model {
     ) -> Result<(), String> {
         let (gwas_total, findings) = crate::analysis::evaluate_with_coverage(data, catalog)?;
         self.findings = findings;
+        if let Some(trio) = &self.trio {
+            crate::analysis::resolve_bitter_phase(&mut self.findings, trio);
+        }
         self.gwas_total = gwas_total;
         self.catalog_version = catalog.version.clone();
         self.scores = crate::pgs::calculate(data, &catalog.scores);
         self.provenance = catalog.provenance.clone();
         Ok(())
+    }
+
+    pub fn apply_trio(&mut self, trio: crate::external::Trio) {
+        crate::analysis::resolve_bitter_phase(&mut self.findings, &trio);
+        self.trio = Some(trio);
     }
 }
 

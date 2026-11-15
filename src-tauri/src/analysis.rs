@@ -182,6 +182,52 @@ pub fn evaluate(data: &Import, catalog: &Catalog) -> Result<Vec<Finding>, String
     Ok(evaluate_with_coverage(data, catalog)?.1)
 }
 
+pub fn resolve_bitter_phase(findings: &mut [Finding], trio: &crate::external::Trio) {
+    let Some(finding) = findings
+        .iter_mut()
+        .find(|finding| finding.item.id == "bitter" && finding.item.method == Method::Bitter)
+    else {
+        return;
+    };
+    let [first, second, third] = finding.checks.as_slice() else {
+        return;
+    };
+    if [first.id.as_str(), second.id.as_str(), third.id.as_str()]
+        != ["rs713598", "rs1726866", "rs10246939"]
+    {
+        return;
+    }
+    if finding.checks.iter().any(|check| check.call.is_none())
+        || interpretation(&finding.item, &finding.checks).is_some()
+    {
+        return;
+    }
+    finding.status = Status::Missing;
+    finding.message = "Die Kombination oder Phase lässt sich mit der implementierten Regel nicht eindeutig einordnen.".into();
+    let alleles = |check: &Check| {
+        let coordinate = check.coordinate.as_deref()?;
+        let call = check.call.as_deref()?;
+        let assignment = trio.assignments.iter().find(|assignment| {
+            assignment.marker == check.id
+                && format!("{}:{}", assignment.chromosome, assignment.position) == coordinate
+        })?;
+        (assignment.first != assignment.second
+            && call.contains(assignment.first)
+            && call.contains(assignment.second))
+        .then_some((assignment.first, assignment.second))
+    };
+    let [Some((a, x)), Some((b, y)), Some((c, z))] = [first, second, third].map(alleles) else {
+        return;
+    };
+    if matches!(
+        ([a, b, c], [x, y, z]),
+        (['G', 'A', 'C'], ['C', 'G', 'T']) | (['C', 'G', 'T'], ['G', 'A', 'C'])
+    ) {
+        finding.status = Status::Personal;
+        finding.message = "Die Elterndateien ordnen die drei Marker als AVI/PAV zu. Studien verbinden diese Kombination mit mittlerer PTC-Empfindlichkeit.".into();
+    }
+}
+
 pub fn evaluate_with_coverage(
     data: &Import,
     catalog: &Catalog,

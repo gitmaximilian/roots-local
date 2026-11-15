@@ -359,7 +359,7 @@ async fn import_extra(
                 }
             }
             Extra::Family(family) => model.family = Some(family),
-            Extra::Trio(trio) => model.trio = Some(trio),
+            Extra::Trio(trio) => model.apply_trio(trio),
             Extra::Clinical(matches) => model.clinical = Some(matches),
             Extra::GeneValidity(validity) => {
                 model

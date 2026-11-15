@@ -269,5 +269,6 @@
   "CYP3A5 und Tacrolimus": "CYP3A5 and tacrolimus",
   "Die CPIC-Leitlinie beschreibt den Zusammenhang zwischen CYP3A5-Expression und dem Stoffwechsel von Tacrolimus.": "The CPIC guideline describes how CYP3A5 expression relates to tacrolimus metabolism.",
   "Die Auswertung zeigt die Abdeckung eines einzelnen Markers. Ein vollständiger Genotyp und eine klinische Beurteilung sind für Therapieentscheidungen erforderlich.": "This result shows coverage at a single marker. Treatment decisions require a complete genotype and clinical assessment.",
-  "CPIC-Leitlinie": "CPIC guideline"
+  "CPIC-Leitlinie": "CPIC guideline",
+  "Die Elterndateien ordnen die drei Marker als AVI/PAV zu. Studien verbinden diese Kombination mit mittlerer PTC-Empfindlichkeit.": "The parent files resolve the three markers as AVI/PAV. Studies associate this combination with intermediate PTC sensitivity."
 }

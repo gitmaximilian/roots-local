@@ -70,7 +70,7 @@ fn run() -> Result<(), String> {
         let second = import::file(Path::new(&second), &cancel)?;
         let result = external::trio(&data, &first, &second, &catalog.markers()?, &cancel)?;
         println!("{} shared trio markers", result.compared);
-        model.trio = Some(result);
+        model.apply_trio(result);
     }
     report::export(
         &model,

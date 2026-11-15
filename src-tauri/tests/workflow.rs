@@ -192,6 +192,38 @@ fn build_38_bom_and_unphased_bitter_markers() {
 }
 
 #[test]
+fn phased_bitter_result_tracks_the_current_parent_files() {
+    let cancel = AtomicBool::new(false);
+    let from_rows =
+        |rows: &str| import::parse(format!("{COLUMNS}{rows}").as_bytes(), &cancel).unwrap();
+    let child =
+        from_rows("rs713598,7,141673345,CG\nrs1726866,7,141672705,AG\nrs10246939,7,141672604,CT\n");
+    let pav =
+        from_rows("rs713598,7,141673345,GG\nrs1726866,7,141672705,AA\nrs10246939,7,141672604,CC\n");
+    let avi =
+        from_rows("rs713598,7,141673345,CC\nrs1726866,7,141672705,GG\nrs10246939,7,141672604,TT\n");
+    let catalog = Catalog::starter().unwrap();
+    let markers = catalog.markers().unwrap();
+    let mut findings = analysis::evaluate(&child, &catalog).unwrap();
+    let bitter = findings
+        .iter()
+        .position(|entry| entry.item.id == "bitter")
+        .unwrap();
+    assert_eq!(findings[bitter].status, Status::Missing);
+    analysis::resolve_bitter_phase(
+        &mut findings,
+        &external::trio(&child, &pav, &avi, &markers, &cancel).unwrap(),
+    );
+    assert_eq!(findings[bitter].status, Status::Personal);
+    assert!(findings[bitter].message.contains("AVI/PAV"));
+    analysis::resolve_bitter_phase(
+        &mut findings,
+        &external::trio(&child, &child, &child, &markers, &cancel).unwrap(),
+    );
+    assert_eq!(findings[bitter].status, Status::Missing);
+}
+
+#[test]
 fn zip_and_cancellation_are_safe_and_repeatable() {
     let temp = tempfile::tempdir().unwrap();
     let path = temp.path().join("Öffnen – Beispieldatei.zip");
