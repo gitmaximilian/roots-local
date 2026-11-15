@@ -389,6 +389,14 @@ mod tests {
             )
         };
         let result = run().unwrap();
+        // Keeps the synthetic files for the browser test in e2e/cram.spec.ts.
+        if let Some(target) = std::env::var_os("ROOTS_KEEP_CRAM") {
+            let target = std::path::Path::new(&target);
+            fs::create_dir_all(target).unwrap();
+            for name in ["synthetic.cram", "reference.fa", "reference.fa.fai"] {
+                fs::copy(directory.path().join(name), target.join(name)).unwrap();
+            }
+        }
         assert_eq!(result.reads, 4);
         assert_eq!(result.targets[0].depth, 2);
         assert_eq!(result.targets[0].bases, [0, 1, 1, 0]);

@@ -64,6 +64,8 @@ Independent confirmation is required for a clinical finding from consumer raw da
 
 Use a single mitochondrial HSD profile aligned to rCRS with the assayed positions identified in its range. The standard tabular kit file and the coverage report are separate inputs. Obtain an HSD profile independently from mitochondrial sequence results or a validated assay conversion. [Haplogrep input formats](https://haplogrep.readthedocs.io/en/latest/input-formats/)
 
+Haplogrep needs Java, so it cannot run inside the browser. Run the helper on a computer, then open its JSON summary in the web app.
+
 Download the Haplogrep 3.3.2 Linux archive and the PhyloTree rCRS 17.3 archive, then disconnect from the internet. The helper uses the cross-platform JAR in the Linux archive. Run it with Python 3.11 or newer and Java 21. The helper verifies both archive SHA-256 values before loading the local tree. Its output contains the candidates, version, reported range size, and counts of warnings and errors. [Haplogrep 3.3.2 release](https://github.com/genepi/haplogrep3/releases/tag/v3.3.2) · [PhyloTree rCRS 17.3 release](https://github.com/genepi/phylotree-rcrs-17/releases/tag/17.3)
 
 ```sh

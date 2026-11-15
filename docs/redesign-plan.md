@@ -1,5 +1,7 @@
 # Roots Local redesign: review and plan
 
+> Historical: this plan describes the macOS interface. Since 2026-11-15 Roots Local is a web app; see [web-plan.md](web-plan.md).
+
 Status: November 15, 2026. Scope decision: **macOS on Apple Silicon only**. Product goal: **interpret the DNA so the user can draw conclusions from it.** Every finding answers "what does this mean for me?" in plain language, with evidence grade, confidence, and limits next to it.
 
 Design decision: a native macOS shell (sidebar, ⌘K command palette, inspector, native menus) with an **Atlas** karyogram view as the signature screen and PDF cover motif. Logo: **Nucleus**, a ring with an off-centre dot.

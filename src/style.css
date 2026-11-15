@@ -1577,8 +1577,13 @@ tr.clickable:hover td {
   .palette-trigger kbd {
     display: none;
   }
-  .switch {
-    font-size: 12px;
+  /* Keep the label for assistive technology, show only the toggle. */
+  .topbar .switch {
+    font-size: 0;
+    gap: 0;
+  }
+  .language-control select {
+    width: 104px;
   }
   .content {
     padding: 16px calc(16px + env(safe-area-inset-right))

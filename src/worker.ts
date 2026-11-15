@@ -30,14 +30,26 @@ function post(message: Response, transfer: Transferable[] = []) {
   self.postMessage(message, transfer);
 }
 
-const ready = init({ module_or_path: analysisUrl }).then(() => new Session());
+// Linear memory only grows, so its size is the peak use of each module.
+const memories: Record<string, WebAssembly.Memory> = {};
+Object.assign(globalThis, {
+  rootsMemory: () =>
+    Object.fromEntries(
+      Object.entries(memories).map(([name, memory]) => [name, memory.buffer.byteLength]),
+    ),
+});
+
+const ready = init({ module_or_path: analysisUrl }).then((exports) => {
+  memories.analysis = exports.memory;
+  return new Session();
+});
 
 type PdfModule = typeof import("./generated/roots_pdf_wasm.js");
 let pdf: Promise<PdfModule> | undefined;
 function loadPdf(): Promise<PdfModule> {
   pdf ??= (async () => {
     const module = await import("./generated/roots_pdf_wasm.js");
-    await module.default({ module_or_path: pdfUrl });
+    memories.pdf = (await module.default({ module_or_path: pdfUrl })).memory;
     const fonts = await Promise.all(
       fontUrls.map(async (url) => {
         const response = await fetch(url);

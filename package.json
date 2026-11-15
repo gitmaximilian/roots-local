@@ -8,7 +8,8 @@
     "build:wasm": "sh scripts/build_wasm.sh",
     "build": "tsc --noEmit && vite build && node scripts/finalize.mjs dist",
     "preview": "vite preview",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "test:parity": "node scripts/parity.mjs"
   },
   "dependencies": {
     "lucide-react": "^0.468.0",

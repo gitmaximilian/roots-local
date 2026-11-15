@@ -90,7 +90,6 @@ def sign_catalog(directory, openssl):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--roots-check", type=Path, required=True)
-    parser.add_argument("--typst", type=Path, required=True)
     parser.add_argument("--openssl", default="openssl", help="OpenSSL 3")
     args = parser.parse_args()
     with tempfile.TemporaryDirectory(prefix="roots-cram-check-") as folder:
@@ -103,7 +102,7 @@ def main():
         report = directory / "coverage.pdf"
         subprocess.run([
             args.roots_check.resolve(), ROOT / "fixtures/synthetic-myheritage.txt", report,
-            args.typst.resolve(), "--synthetic", "--include-calls", "--catalog", package, public_key,
+            "--synthetic", "--include-calls", "--catalog", package, public_key,
             "--cram", cram, reference,
         ], check=True)
         text = " ".join(" ".join(page.extract_text() for page in PdfReader(report).pages).split())
