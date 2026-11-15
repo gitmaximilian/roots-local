@@ -162,5 +162,8 @@
   "ClinGen-Gen-Krankheits-Evidenz": "ClinGen gene–disease validity",
   "ClinGen beurteilt den Zusammenhang zwischen Gen und Erkrankung.": "ClinGen evaluates the evidence linking a gene to a disease.",
   "ClinGen-Datei abgleichen": "Match ClinGen curations",
-  "ClinGen-CSV öffnen": "Open ClinGen CSV"
+  "ClinGen-CSV öffnen": "Open ClinGen CSV",
+  "Marker mit Basen nach Qualitätsfilter": "markers with bases passing quality filters",
+  "Lesetiefe pro Marker": "Read depth by marker",
+  "Lesetiefe": "Read depth"
 }

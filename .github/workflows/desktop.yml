@@ -57,7 +57,7 @@ jobs:
       - run: npm run tauri -- build --target ${{ matrix.target }} --bundles ${{ matrix.bundles }}
       - if: runner.os == 'Windows'
         shell: pwsh
-        run: ./scripts/check_windows_installer.ps1 -BundleDirectory "src-tauri/target/${{ matrix.target }}/release/bundle"
+        run: ./scripts/check_windows_installer.ps1 -BundleDirectory "src-tauri/target/${{ matrix.target }}/release/bundle" -Target "${{ matrix.target }}"
       - if: runner.os == 'macOS'
         shell: bash
         run: |

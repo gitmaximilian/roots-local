@@ -130,10 +130,14 @@
 ]
 #if report.sequence != none [
   #heading(level: 2, [#tr("Sequenzierdaten", "Sequencing data")])
-  #report.sequence.reads #tr("untersuchte Reads.", "reads examined.") #report.sequence.targets.len() #tr("geprüfte Referenzpositionen.", "reference positions checked.")
+  #report.sequence.build · #report.sequence.reads #tr("untersuchte Reads.", "reads examined.") #report.sequence.targets.filter(target => target.depth > 0).len() / #report.sequence.targets.len() #tr("Marker mit Basen nach Qualitätsfilter.", "markers with bases passing quality filters.")
+  #parbreak()
   #tr("Die Lesetiefe bezieht sich auf die ausgewählten Positionen. Sie liefert hier keine Genotypen.", "Read depth is reported for the selected positions. The analysis does not call genotypes.")
   #for target in report.sequence.targets [
     #caption([#target.id · #target.coordinate · #target.depth #tr("qualifizierte Basen", "bases passing quality filters")])
+    #if report.options.include_calls [
+      #caption([A #target.bases.at(0) · C #target.bases.at(1) · G #target.bases.at(2) · T #target.bases.at(3)])
+    ]
     #linebreak()
   ]
 ]

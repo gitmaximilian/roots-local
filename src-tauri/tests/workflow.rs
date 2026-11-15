@@ -45,6 +45,30 @@ fn trio_counts_unique_ambiguous_and_inconsistent_transmissions() {
 }
 
 #[test]
+fn kinship_uses_shared_biallelic_markers_after_coverage_gate() {
+    let mut first = COLUMNS.to_owned();
+    let mut second = COLUMNS.to_owned();
+    for chromosome in 1..=20 {
+        for position in 1..=1000 {
+            let marker = chromosome * 1000 + position;
+            let second_call = if position <= 500 { "AG" } else { "AA" };
+            first.push_str(&format!("rs{marker},{chromosome},{position},AG\n"));
+            second.push_str(&format!(
+                "rs{marker},{chromosome},{position},{second_call}\n"
+            ));
+        }
+    }
+    let cancel = AtomicBool::new(false);
+    let first = import::parse(first.as_bytes(), &cancel).unwrap();
+    let mut second = import::parse(second.as_bytes(), &cancel).unwrap();
+    let full = external::compare(&first, &second).unwrap();
+    assert_eq!(full.kinship, Some(0.25));
+    assert_eq!(full.kinship_markers, 20_000);
+    second.rows.truncate(19_000);
+    assert_eq!(external::compare(&first, &second).unwrap().kinship, None);
+}
+
+#[test]
 fn clinvar_vcf_requires_consistent_assembly_identifier_and_alleles() {
     let cancel = AtomicBool::new(false);
     let data = import::parse(
@@ -295,17 +319,28 @@ fn optional_pdf_full_and_short() {
     let typst = Path::new(&typst);
     let catalog = Catalog::starter().unwrap();
     let data = import::parse(SAMPLE, &AtomicBool::new(false)).unwrap();
-    let model = report::Model::new(
+    let mut model = report::Model::new(
         analysis::summary(&data),
         catalog.version.clone(),
         analysis::evaluate(&data, &catalog).unwrap(),
         true,
     );
+    model.sequence = Some(roots_local::cram::Coverage {
+        build: import::Build::Grch37,
+        reads: 4,
+        targets: vec![roots_local::cram::Target {
+            id: "synthetic".into(),
+            coordinate: "22:2".into(),
+            depth: 2,
+            bases: [0, 1, 1, 0],
+        }],
+    });
     let full = report::render(&model, report::Options::default(), typst).unwrap();
     let short = report::render(
         &model,
         report::Options {
             short: true,
+            include_calls: true,
             ..Default::default()
         },
         typst,

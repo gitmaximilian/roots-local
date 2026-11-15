@@ -270,7 +270,7 @@ mod tests {
             RecordBuf,
         },
     };
-    use std::io::Cursor;
+    use std::fs;
 
     #[test]
     fn rejects_mismatched_reference_checksum() {
@@ -299,21 +299,42 @@ mod tests {
 
     #[test]
     fn measures_only_high_quality_bases_from_local_cram() {
+        let directory = tempfile::tempdir().unwrap();
+        let cram = directory.path().join("synthetic.cram");
+        let fasta = directory.path().join("reference.fa");
+        fs::write(&fasta, ">chr22\nACCTAGGA\n").unwrap();
+        fs::write(
+            directory.path().join("reference.fa.fai"),
+            "chr22\t8\t7\t8\t9\n",
+        )
+        .unwrap();
         let references = vec![fasta::Record::new(
-            fasta::record::Definition::new("chr1", None),
+            fasta::record::Definition::new("chr22", None),
             fasta::record::Sequence::from(b"ACCTAGGA".to_vec()),
         )];
+        let reference_entry = |length: usize| {
+            use sam::header::record::value::map::reference_sequence::tag::MD5_CHECKSUM;
+            use sam::header::record::value::{map::ReferenceSequence, Map};
+            let mut entry = Map::<ReferenceSequence>::new(length.try_into().unwrap());
+            // No alignments use these dictionary entries. Their lengths select GRCh37.
+            entry
+                .other_fields_mut()
+                .insert(MD5_CHECKSUM, "00000000000000000000000000000000".into());
+            entry
+        };
         let header =
             sam::Header::builder()
+                .add_reference_sequence("chr1", reference_entry(249250621))
+                .add_reference_sequence("chr2", reference_entry(243199373))
                 .add_reference_sequence(
-                    "chr1",
+                    "chr22",
                     sam::header::record::value::Map::<
                         sam::header::record::value::map::ReferenceSequence,
                     >::new(8.try_into().unwrap()),
                 )
                 .build();
         let mut buffer = Vec::new();
-        let repo = fasta::Repository::new(references.clone());
+        let repo = fasta::Repository::new(references);
         let mut writer = cram::io::writer::Builder::default()
             .set_reference_sequence_repository(repo)
             .build_from_writer(&mut buffer);
@@ -326,7 +347,7 @@ mod tests {
         ] {
             let read = RecordBuf::builder()
                 .set_flags(flag)
-                .set_reference_sequence_id(0)
+                .set_reference_sequence_id(2)
                 .set_alignment_start(Position::MIN)
                 .set_mapping_quality(MappingQuality::new(60).unwrap())
                 .set_cigar([Op::new(Kind::Match, 8)].into_iter().collect())
@@ -337,25 +358,21 @@ mod tests {
         }
         writer.try_finish(&header).unwrap();
         drop(writer);
-        let mut reader = cram::io::reader::Builder::default()
-            .set_reference_sequence_repository(fasta::Repository::new(references))
-            .build_from_reader(Cursor::new(buffer));
-        let header = reader.read_header().unwrap();
-        let mut sites = [(
-            0,
+        fs::write(&cram, buffer).unwrap();
+        let markers = [Marker(
+            "synthetic".into(),
+            "TEST".into(),
+            "22".into(),
             2,
-            Target {
-                id: "synthetic".into(),
-                coordinate: "1:2".into(),
-                depth: 0,
-                bases: [0; 4],
-            },
+            0,
+            "CG".into(),
         )];
-        assert_eq!(
-            count(&mut reader, &header, &mut sites, &AtomicBool::new(false)).unwrap(),
-            4
-        );
-        assert_eq!(sites[0].2.depth, 2);
-        assert_eq!(sites[0].2.bases, [0, 1, 1, 0]);
+        let cancel = AtomicBool::new(false);
+        let result = coverage(&cram, &fasta, &markers, &cancel).unwrap();
+        assert_eq!(result.reads, 4);
+        assert_eq!(result.targets[0].depth, 2);
+        assert_eq!(result.targets[0].bases, [0, 1, 1, 0]);
+        fs::write(&fasta, ">chr22\nTCCTAGGA\n").unwrap();
+        assert!(coverage(&cram, &fasta, &markers, &cancel).is_err());
     }
 }

@@ -682,6 +682,59 @@ function TrioSummary({ trio }: { trio: NonNullable<Report["trio"]> }) {
   );
 }
 
+function SequenceCoverage({ data }: { data: NonNullable<Report["sequence"]> }) {
+  const [limit, setLimit] = useState(25);
+  const covered = data.targets.filter((target) => target.depth > 0).length;
+  return (
+    <>
+      <p>
+        {data.build} · {number.format(data.reads)} Reads · {covered}/
+        {data.targets.length} {t("Marker mit Basen nach Qualitätsfilter")}
+      </p>
+      {data.targets.length > 0 && (
+        <details>
+          <summary>{t("Lesetiefe pro Marker")}</summary>
+          <div className="variant-table">
+            <table>
+              <thead>
+                <tr>
+                  <th>Marker</th>
+                  <th>Position</th>
+                  <th>{t("Lesetiefe")}</th>
+                  {["A", "C", "G", "T"].map((base) => (
+                    <th key={base}>{base}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {data.targets.slice(0, limit).map((target) => (
+                  <tr key={`${target.id}-${target.coordinate}`}>
+                    <td>{target.id}</td>
+                    <td>{target.coordinate}</td>
+                    <td>{number.format(target.depth)}</td>
+                    {target.bases.map((count, i) => (
+                      <td key={i}>{number.format(count)}</td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          {limit < data.targets.length && (
+            <button
+              className="text-button more-findings"
+              onClick={() => setLimit(limit + 25)}
+            >
+              {t("Weitere Einträge anzeigen (")}
+              {number.format(data.targets.length - limit)})
+            </button>
+          )}
+        </details>
+      )}
+    </>
+  );
+}
+
 function App() {
   const [page, setPage] = useState<Page>("home");
   const [language, setUiLanguage] = useState<Language>(getLanguage);
@@ -1617,11 +1670,7 @@ function App() {
                         {t("CRAM öffnen")}
                       </button>
                       {model.sequence && (
-                        <p>
-                          {number.format(model.sequence.reads)} Reads ·{" "}
-                          {model.sequence.targets.length}
-                          {t("Positionen ·")} {model.sequence.build}
-                        </p>
+                        <SequenceCoverage data={model.sequence} />
                       )}
                     </section>
                   </>
