@@ -39,6 +39,8 @@ The PDF content checks cover 16 combinations of language, report format, clinica
 
 **2026-11-15, life areas, Ask your DNA, Nucleus radar, and Medicine pass.** 5 Python tests and 21 Rust tests passed. A new test renders the medicine pass without a separate clinical opt-in and checks that it has one page, lists the drug-response conclusions, and leaves out non-medical findings. In the browser QA page, 12 typed questions were matched: 11 reached the expected finding and an unrelated question returned the no-rule message. Overview, area filter, radar, pass, and the German locale were checked visually in light and dark. The debug bundle was rebuilt, ad-hoc signed, installed, and started under `--verify-offline`.
 
+**2026-11-15, release v0.2.0.** The [release workflow](https://github.com/gitmaximilian/roots-local/actions/runs/43716508969) built and published [v0.2.0](https://github.com/gitmaximilian/roots-local/releases/tag/v0.2.0). The DMG matched its published SHA-256. The cask was added to `gitmaximilian/homebrew-tap` through a reviewed pull request whose checks passed. `brew install --cask gitmaximilian/tap/roots-local` with Homebrew 7.0.13 downloaded the release, removed the quarantine flag, kept a valid ad-hoc signature, installed version 0.2.0, and the app launched. The test installation was removed afterwards.
+
 **Blocked on external input:**
 
 | Step | Waiting for |
@@ -46,7 +48,6 @@ The PDF content checks cover 16 combinations of language, report format, clinica
 | Provider data validation | An authorized MyHeritage tabular export and a WGS CRAM with its matching indexed FASTA |
 | Native menu and drag-and-drop check | A person using the installed app on the Mac |
 | Further inference validation | Assay benchmarks, known pedigrees, validated clinical diplotype and copy-number references, and suitable risk calibration data |
-| First public Homebrew release | The `gitmaximilian/homebrew-tap` repository and a `v0.2.0` tag |
 
 Tests use synthetic genotype data. The repository contains no personal DNA files.
 
