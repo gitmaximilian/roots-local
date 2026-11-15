@@ -43,7 +43,7 @@ export function ConfidenceMeter({ value }: { value: Confidence }) {
 }
 
 export const isMedical = (finding: Finding) =>
-  Boolean(finding.effect?.clinical);
+  Boolean(finding.clinical || finding.effect?.clinical);
 
 /** The conclusion the user may see, respecting the medical opt-in. */
 export function visibleConclusion(finding: Finding, showMedical: boolean) {

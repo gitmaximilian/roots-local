@@ -27,13 +27,15 @@ The PDF content checks cover 16 combinations of language, report format, clinica
 2. **Catalog breadth.** All chapters, search, filters, coverage, signed packages, and basic ancestry, match, and segment imports are available. The GWAS importer was verified against a full EMBL-EBI export. Its test package contained 4,153 associations across 46 topics. The installed M4 app matched 52 supplemental associations and rendered a 41-page preview. The app imports local ClinVar VCF and ClinGen gene–disease validity CSV files. Four additional marker rules link CYP2C19, DPYD, and CYP3A5 to CPIC sources. More curated coverage remains open. Companion CSV fixtures are synthetic and export schemas may vary.
 3. **Sequencing and family.** CRAM coverage agrees with HTSlib on the synthetic fixture. The decoder checks reference length and available MD5 values when requesting FASTA sequences. The family comparison reports shared autosomal alleles and an exploratory KING coefficient when at least 10,000 eligible markers span at least 20 autosomes. The two-parent comparison counts Mendelian inconsistencies and resolves individual autosomal sites when one assignment fits. Prepared rCRS mitochondrial profiles can be classified with the local Haplogrep workflow. Long-range phasing, MyHeritage-specific lineage and CRAM validation, Y-DNA calling, and relationship-degree validation remain open.
 4. **Advanced interpretation.** TAS2R38 homozygous combinations and uniquely phased AVI/PAV from two parent files, strict additive research scores, and selected gene–drug study links are available. Complex clinically validated haplotypes, copy-number analysis, broader pharmacogenetics, and calibrated disease risks are pending.
-5. **Packages.** The native macOS app and DMG were built and checked. Signed and notarized release builds remain open.
+5. **Packages.** The native macOS app and DMG were built and checked. Releases are distributed through a Homebrew cask with ad-hoc signed builds.
 
 ## Verification log
 
 **2026-11-15, commit `883d0ed`, MacBook Air M4, macOS 15.6.1.** Local checks: 5 Python tests and 18 Rust tests (4 unit, 14 integration) passed. Baseline PDFs from CI run 43673110939 passed `scripts/verify_pdf.py` with 26 pages, 17 chapters, 76 sections, and 165 links each. Windows acceptance was dropped when the project moved to Apple Silicon only.
 
 **2026-11-15, branch `redesign/native-mac`, MacBook Air M4, macOS 15.6.1.** 5 Python tests and 18 Rust tests passed, including the PDF content check across 16 language, length, and privacy combinations. It now also asserts that conclusions appear and that medical conclusions follow the clinical opt-in. Full reports in both languages passed `scripts/verify_pdf.py` with 27 pages, 17 chapters, 76 sections, and 167 links. The debug app bundle was built with an ad-hoc signature, passed `codesign --verify --deep --strict`, was installed, and started under `--verify-offline` with its main window open. The new interface was exercised in a browser against a model exported by `roots-check --model-json`: overview conclusions, the medical toggle, the inspector, the command palette, the Atlas, light and dark appearance, and the German locale with the active profile preserved. The native menu and Finder drag and drop were not exercised interactively.
+
+**2026-11-15, catalog 1.4.0 and version 0.2.0, MacBook Air M4, macOS 15.6.1.** 5 Python tests and 20 Rust tests passed. New tests cover APOE, CYP2C9, CYP2C19, and TPMT combinations including unresolved patterns, the X heterozygosity check, and reverse-strand complementing. New effect alleles were checked against the NCBI dbSNP record of each marker. The release app bundle was built, ad-hoc signed, and passed `codesign --verify --deep --strict`. Its DMG was installed through a local Homebrew 7.0.13 tap with the release cask. The installed app had no quarantine flag, kept a valid signature, and launched. `spctl` rejects the app as expected without notarization.
 
 **Blocked on external input:**
 
@@ -42,13 +44,13 @@ The PDF content checks cover 16 combinations of language, report format, clinica
 | Provider data validation | An authorized MyHeritage tabular export and a WGS CRAM with its matching indexed FASTA |
 | Native menu and drag-and-drop check | A person using the installed app on the Mac |
 | Further inference validation | Assay benchmarks, known pedigrees, validated clinical diplotype and copy-number references, and suitable risk calibration data |
-| Signed releases | A Developer ID Application identity with notarization credentials |
+| First public Homebrew release | The `gitmaximilian/homebrew-tap` repository and a `v0.2.0` tag |
 
 Tests use synthetic genotype data. The repository contains no personal DNA files.
 
 ## Release acceptance
 
-On an Apple Silicon Mac with networking disabled, mount the built DMG, copy the app into Applications, import the synthetic raw file, and preview and export the full PDF in both languages. Replace it with a newer build, repeat the export, and remove it. A signed release requires a Developer ID Application identity and Apple notarization credentials. Use Tauri's signing configuration for the app bundle and staple the notarization ticket to the distribution package. Verify the signatures and regenerate the installer checksums from the signed artifacts. [Tauri macOS signing](https://v2.tauri.app/distribute/sign/macos/)
+On an Apple Silicon Mac with networking disabled, mount the built DMG, copy the app into Applications, import the synthetic raw file, and preview and export the full PDF in both languages. Replace it with a newer build, repeat the export, and remove it. For a release, install through the Homebrew cask instead and confirm the checksum, `codesign --verify --deep --strict`, and that the app opens. [Distribution](distribution.md)
 
 For provider CRAM acceptance, use the desktop workflow or pass `--cram <CRAM> <indexed FASTA>` to `roots-check` alongside the raw DNA file and PDF destination. The tool prints aggregate coverage and exports the per-site depth from the active catalog. Add `--include-calls` to include per-base counts in that local test report. Record the reference identifier, build, and expected coverage at selected positions using an independent decoder.
 

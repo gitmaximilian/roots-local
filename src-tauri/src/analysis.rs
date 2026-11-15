@@ -45,6 +45,70 @@ pub struct Summary {
     pub duplicates: usize,
     pub conflicts: usize,
     pub chromosomes: Vec<(String, usize)>,
+    pub sex_check: SexCheck,
+}
+/// Heterozygosity outside the pseudoautosomal regions of X. Two X copies
+/// show heterozygous calls; a single X copy shows almost none.
+#[derive(Clone, Debug, Serialize, Default, PartialEq)]
+pub struct SexCheck {
+    pub x_called: usize,
+    pub x_heterozygous: usize,
+    pub y_called: usize,
+    /// "xx", "xy", or none when the data do not separate the two patterns.
+    pub pattern: Option<&'static str>,
+}
+const MIN_X_CALLS: usize = 500;
+
+fn in_par(build: Option<Build>, position: u32) -> bool {
+    let ranges: &[(u32, u32)] = match build {
+        Some(Build::Grch37) => &[(60_001, 2_699_520), (154_931_044, 155_260_560)],
+        Some(Build::Grch38) => &[(10_001, 2_781_479), (155_701_383, 156_030_895)],
+        None => &[(10_001, 2_781_479), (154_931_044, 156_030_895)],
+    };
+    ranges
+        .iter()
+        .any(|(start, end)| (*start..=*end).contains(&position))
+}
+
+pub fn sex_check(data: &Import) -> SexCheck {
+    let mut check = SexCheck::default();
+    for row in &data.rows {
+        let Some(call) = row.alleles.as_deref() else {
+            continue;
+        };
+        match row.chromosome.as_str() {
+            "X" if !in_par(data.build, row.position) && !call.contains(['I', 'D']) => {
+                check.x_called += 1;
+                let bytes = call.as_bytes();
+                if bytes.len() == 2 && bytes[0] != bytes[1] {
+                    check.x_heterozygous += 1;
+                }
+            }
+            "Y" => check.y_called += 1,
+            _ => {}
+        }
+    }
+    if check.x_called >= MIN_X_CALLS {
+        let rate = check.x_heterozygous as f64 / check.x_called as f64;
+        check.pattern = if rate < 0.02 {
+            Some("xy")
+        } else if rate > 0.1 {
+            Some("xx")
+        } else {
+            None
+        };
+    }
+    check
+}
+
+fn complement(base: u8) -> u8 {
+    match base {
+        b'A' => b'T',
+        b'T' => b'A',
+        b'C' => b'G',
+        b'G' => b'C',
+        other => other,
+    }
 }
 pub fn summary(data: &Import) -> Summary {
     summary_with_conflicts(data).0
@@ -91,6 +155,7 @@ pub fn summary_with_conflicts(data: &Import) -> (Summary, Conflicts) {
         chromosomes,
         duplicates,
         conflicts: total_conflicts,
+        sex_check: sex_check(data),
     };
     (
         summary,
@@ -126,8 +191,9 @@ fn check(
         }
         return check;
     };
-    if data.strand == "Rückwärtsstrang" {
-        check.status = "Rückwärtsstrang wird nicht interpretiert";
+    let reverse = data.strand == "Rückwärtsstrang";
+    if reverse && (allowed == "AT" || allowed == "CG") {
+        check.status = "Rückwärtsstrang bei A/T- oder C/G-Marker nicht eindeutig";
         return check;
     }
     if let Some(rows) = at_pos.get(&(chromosome, position)) {
@@ -140,8 +206,14 @@ fn check(
         } else if require_identifier && !rows.iter().any(|row| row.id == *id) {
             check.status = "Genomort ohne bestätigte rsID";
         } else if let Some(alleles) = &first.alleles {
+            let mut bytes = alleles.as_bytes().to_vec();
+            if reverse {
+                bytes.iter_mut().for_each(|b| *b = complement(*b));
+                bytes.sort_unstable();
+            }
+            let alleles = String::from_utf8(bytes).unwrap_or_default();
             if alleles.len() == 2 && alleles.bytes().all(|c| allowed.as_bytes().contains(&c)) {
-                check.call = Some(alleles.to_owned());
+                check.call = Some(alleles);
                 check.status = "Genotyp aus Rohdatei";
             } else {
                 check.status = "Allele für diese Regel nicht auswertbar";

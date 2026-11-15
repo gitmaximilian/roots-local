@@ -9,7 +9,9 @@ A rule turns genotypes into a conclusion the user can act on. Each conclusion ca
 - **Outcomes** (`method: "single"` or `"bitter"`): `outcomes` lists genotype patterns with a short `conclusion`, a longer `message`, and a `confidence`. Calls are sorted per marker (`"AG"`, not `"GA"`). For several markers, join the calls with `/` in marker order, for example `"GG/AA/CC"`.
 - **Effect allele** (`method: "research"`): `effect` names one marker, its verified plus-strand `allele`, three `conclusions` for zero, one, and two copies, and a `confidence`. Set `clinical: true` for medically relevant results. Reports omit those conclusions unless the user opts in to clinical annotations.
 
-Only add an effect allele after confirming its plus-strand orientation in a primary source such as the marker's dbSNP or ClinVar record. Catalog 1.3.0 uses this for rs671, rs7903146, rs1800562, rs6025, rs4149056, rs4244285, rs3918290, rs55886062, rs1805007, and rs4988235.
+Only add an effect allele after confirming its plus-strand orientation in a primary source such as the marker's dbSNP or ClinVar record. - **Medical flag.** Set `clinical: true` on a rule whose outcomes concern medicines or disease risk, such as APOE or metabolizer types. The app hides those conclusions until the user turns on medical findings, and reports include them only with the clinical opt-in.
+
+Catalog 1.4.0 uses effect alleles for rs671, rs1229984, rs7903146, rs1800562, rs6025, rs1799963, rs4149056, rs3918290, rs55886062, rs116855232, rs9923231, rs776746, rs1805007, and rs4988235. Two-marker outcomes define APOE, CYP2C9, CYP2C19, and TPMT types. Phase is assumed where both markers are heterozygous, and the rule says so.
 
 ## Sign a package
 

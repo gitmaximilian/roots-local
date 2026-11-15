@@ -25,6 +25,7 @@ export type Finding = {
   confidence: Confidence | null;
   dosage: number | null;
   effect?: { marker: string; allele: string; clinical: boolean };
+  clinical?: boolean;
   evidence: string;
   population: string;
   limits: string;
@@ -64,6 +65,12 @@ export type Report = {
     duplicates: number;
     strand: string;
     chromosomes: [string, number][];
+    sex_check: {
+      x_called: number;
+      x_heterozygous: number;
+      y_called: number;
+      pattern: "xx" | "xy" | null;
+    };
   };
   external: {
     origins: { label: string; percent: number | null }[];

@@ -1312,6 +1312,18 @@ function App() {
                       <strong>{number.format(model.summary.skipped)}</strong>{" "}
                       {t("übersprungen")}
                     </span>
+                    <span>
+                      <strong>
+                        {model.summary.sex_check.pattern === "xx"
+                          ? t("XX-Muster")
+                          : model.summary.sex_check.pattern === "xy"
+                            ? t("XY-Muster")
+                            : t("nicht bestimmbar")}
+                      </strong>{" "}
+                      {t("Geschlechtschromosomen")} ·{" "}
+                      {number.format(model.summary.sex_check.x_called)}{" "}
+                      {t("X-Positionen")}
+                    </span>
                   </div>
                 </>
               ) : (

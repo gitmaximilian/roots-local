@@ -14,6 +14,14 @@ Open the app and select **View example**, choose **File › Open DNA File…** (
 - [Product review and delivery plan](docs/product-plan.md)
 - [Build and import reference catalogs](docs/catalogs.md)
 
+## Install
+
+```sh
+brew install --cask gitmaximilian/tap/roots-local
+```
+
+Roots Local needs an Apple Silicon Mac with macOS 15.6 or later. Builds are signed ad hoc and not notarized, so the cask clears the download quarantine flag after installing. [Distribution and verification](docs/distribution.md)
+
 ## Build from source
 
 Roots Local runs on macOS 15.6 or later on Apple Silicon. Install the [Tauri system prerequisites](https://v2.tauri.app/start/prerequisites/), stable Rust, Node.js 22, and Python 3.13. The initial build downloads dependencies and verifies the bundled Typst compiler with SHA-256. The installed app imports files, previews reports, and exports PDFs offline.
@@ -31,7 +39,8 @@ Use `npm run tauri -- build --bundles app` for macOS. The script `scripts/packag
 - **Raw exports.** CSV, TSV, TXT, and ZIP with declared GRCh37 or GRCh38 assemblies. Unknown assemblies, missing markers, and conflicting entries remain unresolved.
 - **Variant register.** Search by marker ID, exact coordinate, or inclusive range, such as `chr2:136600000-136650000`. Filter by chromosome or genotype status. Open a marker from a finding to inspect the matching rows and return to the finding.
 - **Conclusions.** Catalog rules map genotypes to plain-language conclusions with a confidence level. Verified effect alleles turn single markers into copy-number statements, for example one copy of ALDH2*2. Medical conclusions about medicines and disease risk stay hidden until you switch on **Medical**.
-- **Starter catalog.** Rules for lactase activity, earwax type, bitter taste, ACTN3, alcohol flushing, pigmentation, and selected drug-response and clinical markers. Data quality and scientific evidence are shown separately.
+- **Starter catalog.** Rules for lactase activity, earwax type, bitter taste, ACTN3, alcohol metabolism (ALDH2, ADH1B), pigmentation, APOE type, metabolizer types for CYP2C9, CYP2C19, TPMT, and CYP3A5, warfarin (VKORC1), thiopurines (NUDT15), and thrombophilia variants (factor V Leiden, prothrombin G20210A).
+- **Data quality.** Missing, conflicting, and skipped rows, and an XX or XY pattern from X-chromosome heterozygosity. Data quality and scientific evidence are shown separately.
 - **Companion data.** Import ancestry results, matches, or shared segments. Compare autosomal calls against one family file or assign alleles at individual markers using two parent files.
 - **Maternal lineage.** Run the local Haplogrep helper from a prepared mitochondrial profile. Import its candidates, tree version, and quality checks into the ancestry chapter. [Offline lineage workflow](docs/catalogs.md#maternal-lineage)
 - **CRAM.** Measures catalog marker coverage using aligned reads and an indexed local FASTA. Checks the lengths and available MD5 values of the reference sequences used during decoding.

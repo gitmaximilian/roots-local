@@ -51,15 +51,15 @@ Use the [product review and delivery plan](product-plan.md) to prioritize work a
 2. Add signed catalog packages, search and filters, public research sources, and companion imports. Extend the catalog across the planned chapters.
 3. Validate CRAM coverage and interpretation against known reference results. Implement validated family comparisons and haplogroups as their data requirements are met.
 4. Extend validated interpretation to multi-marker rules, research scores, clinically sourced variants, and pharmacogenetics. Track every model's coverage and validation status.
-5. Build and verify native packages. Publish stable releases only after acceptance, signing, and documentation.
+5. Build and verify native packages. Publish releases through the Homebrew tap only after acceptance and documentation.
 
 Test malformed data, missing calls, strand and reference mismatches, conflicts, large inputs, Unicode paths, cancellation, repeated imports, and PDF links. Run the installed app with internet access unavailable. Import the example, inspect results, switch between both languages, and export and verify both PDFs. Record the platforms and hardware actually used. Benchmark a large synthetic file and document runtime, peak memory, and UI responsiveness.
 
-Use pinned CI dependencies, least-privilege permissions, and public synthetic fixtures. Verify the native macOS app and DMG, including the bundled binaries. Sign and notarize macOS releases when credentials are available. Verify installation, upgrade, removal, and report export on an Apple Silicon Mac. Label experimental builds explicitly and publish checksums, notices, and a changelog.
+Use pinned CI dependencies, least-privilege permissions, and public synthetic fixtures. Verify the native macOS app and DMG, including the bundled binaries. Distribute ad-hoc signed builds through a Homebrew cask with published checksums. The project does not use a Developer ID or notarization. Verify installation, upgrade, removal, and report export on an Apple Silicon Mac. Label experimental builds explicitly and publish checksums, notices, and a changelog.
 
 ## Primary references
 
-- [Tauri prerequisites](https://v2.tauri.app/start/prerequisites/) · [Capabilities](https://v2.tauri.app/security/capabilities/) · [macOS signing](https://v2.tauri.app/distribute/sign/macos/)
+- [Tauri prerequisites](https://v2.tauri.app/start/prerequisites/) · [Capabilities](https://v2.tauri.app/security/capabilities/) · [Homebrew casks](https://docs.brew.sh/Cask-Cookbook)
 - [MyHeritage raw data](https://www.myheritage.com/help/en/articles/12852246-how-should-i-interpret-my-raw-dna-data) · [CRAM downloads](https://www.myheritage.com/help/en/articles/12851869-how-do-i-download-my-raw-dna-data-file-or-cram-file-from-myheritage) · [HTSlib references](https://www.htslib.org/doc/reference_seqs.html)
 - [GWAS Catalog](https://www.ebi.ac.uk/gwas/docs/downloads/) · [PGS Catalog](https://www.pgscatalog.org/downloads/) · [ClinVar](https://www.ncbi.nlm.nih.gov/clinvar/docs/downloads/) · [ClinGen](https://www.clinicalgenome.org/docs/gene-disease-validity-standard-operating-procedure/) · [PharmCAT](https://pharmcat.clinpgx.org/methods/)
 - [Typst headings and bookmarks](https://typst.app/docs/reference/model/heading/)

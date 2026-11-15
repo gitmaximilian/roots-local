@@ -163,6 +163,9 @@
   #tr("GWAS-Katalog", "GWAS Catalog") · #report.findings.filter(f => "study" in f).len() #tr("passende Studienassoziationen von", "matching research associations out of") #report.gwas_total #tr("Katalogeinträgen.", "catalog entries.")
   #parbreak()
 ]
+#let sex = report.summary.sex_check
+#tr("Geschlechtschromosomen", "Sex chromosomes") · #(if sex.pattern == "xx" { tr("XX-Muster", "XX pattern") } else if sex.pattern == "xy" { tr("XY-Muster", "XY pattern") } else { tr("nicht bestimmbar", "undetermined") }) · #sex.x_heterozygous / #sex.x_called #tr("gemischterbige X-Positionen außerhalb der pseudoautosomalen Regionen", "heterozygous X positions outside the pseudoautosomal regions")
+#parbreak()
 #if report.summary.skipped > 0 [#report.summary.skipped #tr("ungültige Rohdatenzeilen wurden übersprungen.", "invalid rows were skipped.")]
 #if report.summary.duplicates > 0 [#report.summary.duplicates #tr("zusätzliche Zeilen lagen an bereits erfassten Positionen.", "extra rows repeated previously recorded positions.")]
 #if report.family != none [

@@ -217,5 +217,10 @@
   "Oder die Datei einfach ins Fenster ziehen.": "Or drag the file into the window.",
   "Jeder Katalogmarker an seiner Position im Genom. Wähle einen Marker, um den Befund zu öffnen.": "Every catalog marker at its position in the genome. Select a marker to open its finding.",
   "Medizinische Befunde aufnehmen": "Include medical findings",
-  "Medikamente, Erkrankungsrisiken sowie ClinVar und ClinGen. Quellenlinks können beobachtete Varianten offenlegen.": "Medicines, disease risk, ClinVar, and ClinGen. Source links can reveal observed variants."
+  "Medikamente, Erkrankungsrisiken sowie ClinVar und ClinGen. Quellenlinks können beobachtete Varianten offenlegen.": "Medicines, disease risk, ClinVar, and ClinGen. Source links can reveal observed variants.",
+  "XX-Muster": "XX pattern",
+  "XY-Muster": "XY pattern",
+  "nicht bestimmbar": "undetermined",
+  "Geschlechtschromosomen": "sex chromosomes",
+  "X-Positionen": "X positions"
 }

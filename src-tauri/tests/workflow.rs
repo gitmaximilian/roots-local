@@ -689,3 +689,104 @@ fn verify_pdf_contents(
         }
     }
 }
+
+#[test]
+fn multi_marker_types_resolve_known_combinations_only() {
+    let catalog = Catalog::starter().unwrap();
+    let evaluate = |rows: &str| {
+        let raw = format!("# reference=GRCh37\nRSID,CHROMOSOME,POSITION,RESULT\n{rows}");
+        let data = import::parse(raw.as_bytes(), &AtomicBool::new(false)).unwrap();
+        analysis::evaluate(&data, &catalog).unwrap()
+    };
+    let find = |findings: &[analysis::Finding], id: &str| {
+        findings.iter().find(|f| f.item.id == id).cloned().unwrap()
+    };
+    let apoe = |a: &str, b: &str| {
+        find(
+            &evaluate(&format!(
+                "rs429358,19,45411941,{a}\nrs7412,19,45412079,{b}\n"
+            )),
+            "apoe",
+        )
+    };
+    let e34 = apoe("CT", "CC");
+    assert_eq!(e34.status, Status::Personal);
+    assert_eq!(e34.conclusion.as_deref(), Some("APOE ε3/ε4: eine ε4-Kopie"));
+    assert!(e34.item.is_clinical());
+    assert_eq!(
+        apoe("TT", "CC").conclusion.as_deref(),
+        Some("APOE ε3/ε3, der häufigste Typ")
+    );
+    assert_eq!(apoe("CT", "CT").confidence, Some(Confidence::Moderate));
+    // ε4 homozygous plus a heterozygous ε2 site is not a supported pattern.
+    assert_eq!(apoe("CC", "CT").status, Status::Missing);
+    assert_eq!(apoe("CT", "--").status, Status::Missing);
+
+    let cyp2c9 = find(
+        &evaluate("rs1799853,10,96702047,CT\nrs1057910,10,96741053,AC\n"),
+        "cyp2c9",
+    );
+    assert_eq!(
+        cyp2c9.conclusion.as_deref(),
+        Some("CYP2C9 *2/*3: langsamer Stoffwechsel")
+    );
+    let cyp2c19 = find(
+        &evaluate("rs4244285,10,96541616,GG\nrs12248560,10,96521657,CT\n"),
+        "cyp2c19",
+    );
+    assert_eq!(
+        cyp2c19.conclusion.as_deref(),
+        Some("CYP2C19 *1/*17: schneller Stoffwechsel")
+    );
+    let tpmt = find(
+        &evaluate("rs1800460,6,18139228,CT\nrs1142345,6,18130918,CT\n"),
+        "tpmt",
+    );
+    assert!(tpmt
+        .conclusion
+        .as_deref()
+        .is_some_and(|c| c.contains("*3A")));
+    let adh1b = find(&evaluate("rs1229984,4,100239319,CT\n"), "adh1b");
+    assert_eq!(adh1b.dosage, Some(1));
+    assert!(!adh1b.item.is_clinical());
+}
+
+#[test]
+fn sex_check_and_reverse_strand() {
+    let rows = |het_every: usize| {
+        let mut raw = String::from("# reference=GRCh37\nRSID,CHROMOSOME,POSITION,RESULT\n");
+        for i in 0..600 {
+            let call = if het_every > 0 && i % het_every == 0 {
+                "AG"
+            } else {
+                "AA"
+            };
+            raw.push_str(&format!(
+                "rs{},X,{},{call}\n",
+                900_000 + i,
+                10_000_000 + i * 100
+            ));
+        }
+        // Pseudoautosomal positions never count.
+        raw.push_str("rs1,X,100000,AG\n");
+        import::parse(raw.as_bytes(), &AtomicBool::new(false)).unwrap()
+    };
+    let male = analysis::sex_check(&rows(0));
+    assert_eq!(
+        (male.x_called, male.x_heterozygous, male.pattern),
+        (600, 0, Some("xy"))
+    );
+    assert_eq!(analysis::sex_check(&rows(3)).pattern, Some("xx"));
+    assert_eq!(analysis::sex_check(&rows(20)).pattern, None);
+
+    let catalog = Catalog::starter().unwrap();
+    let reverse = "# reference=GRCh37\n# strand: reverse\nRSID,CHROMOSOME,POSITION,RESULT\nrs671,12,112241766,CT\nrs713598,7,141673345,GG\n";
+    let data = import::parse(reverse.as_bytes(), &AtomicBool::new(false)).unwrap();
+    let findings = analysis::evaluate(&data, &catalog).unwrap();
+    let alcohol = findings.iter().find(|f| f.item.id == "alcohol").unwrap();
+    // C/T on the reverse strand is G/A on the plus strand: one copy of ALDH2*2.
+    assert_eq!(alcohol.checks[0].call.as_deref(), Some("AG"));
+    assert_eq!(alcohol.dosage, Some(1));
+    let bitter = findings.iter().find(|f| f.item.id == "bitter").unwrap();
+    assert_eq!(bitter.checks[0].call, None);
+}

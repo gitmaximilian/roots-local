@@ -1,5 +1,5 @@
 {
-  "version": "1.3.0",
+  "version": "1.4.0",
   "markers": [
     [
       "rs4988235",
@@ -160,6 +160,94 @@
       152083325,
       152110849,
       "AT"
+    ],
+    [
+      "rs429358",
+      "APOE",
+      "19",
+      45411941,
+      44908684,
+      "CT"
+    ],
+    [
+      "rs7412",
+      "APOE",
+      "19",
+      45412079,
+      44908822,
+      "CT"
+    ],
+    [
+      "rs1799853",
+      "CYP2C9",
+      "10",
+      96702047,
+      94942290,
+      "CT"
+    ],
+    [
+      "rs1057910",
+      "CYP2C9",
+      "10",
+      96741053,
+      94981296,
+      "AC"
+    ],
+    [
+      "rs9923231",
+      "VKORC1",
+      "16",
+      31107689,
+      31096368,
+      "CT"
+    ],
+    [
+      "rs12248560",
+      "CYP2C19",
+      "10",
+      96521657,
+      94761900,
+      "CT"
+    ],
+    [
+      "rs1142345",
+      "TPMT",
+      "6",
+      18130918,
+      18130687,
+      "CT"
+    ],
+    [
+      "rs1800460",
+      "TPMT",
+      "6",
+      18139228,
+      18138997,
+      "CT"
+    ],
+    [
+      "rs116855232",
+      "NUDT15",
+      "13",
+      48619855,
+      48045719,
+      "CT"
+    ],
+    [
+      "rs1799963",
+      "F2",
+      "11",
+      46761055,
+      46739505,
+      "AG"
+    ],
+    [
+      "rs1229984",
+      "ADH1B",
+      "4",
+      100239319,
+      99318162,
+      "CT"
     ]
   ],
   "traits": [
@@ -584,17 +672,9 @@
           "https://files.cpicpgx.org/data/guideline/publication/clopidogrel/2022/35034351.pdf"
         ]
       ],
-      "effect": {
-        "marker": "rs4244285",
-        "allele": "A",
-        "conclusions": [
-          "Keine Kopie von CYP2C19*2. Andere CYP2C19-Varianten wurden nicht geprüft.",
-          "Eine Kopie von CYP2C19*2. Sie verringert die Aktivierung von Clopidogrel.",
-          "Zwei Kopien von CYP2C19*2. Das entspricht einer langsamen Aktivierung von Clopidogrel."
-        ],
-        "confidence": "moderate",
-        "clinical": true
-      }
+      "cross": [
+        "15.1"
+      ]
     },
     {
       "id": "dpyd-splice-fluoropyrimidines",
@@ -673,7 +753,18 @@
           "CPIC-Leitlinie",
           "https://cpicpgx.org/guidelines/guideline-for-tacrolimus-and-CYP3A5/"
         ]
-      ]
+      ],
+      "effect": {
+        "marker": "rs776746",
+        "allele": "C",
+        "conclusions": [
+          "Keine Kopie von CYP3A5*3. CYP3A5 wird gebildet; Tacrolimus wird schneller abgebaut.",
+          "Eine Kopie von CYP3A5*3. CYP3A5 wird gebildet; Tacrolimus wird schneller abgebaut.",
+          "Zwei Kopien von CYP3A5*3. Kein funktionelles CYP3A5, der häufigste Typ in Europa."
+        ],
+        "confidence": "moderate",
+        "clinical": true
+      }
     },
     {
       "id": "mc1r-red-hair",
@@ -733,6 +824,441 @@
           "https://www.ncbi.nlm.nih.gov/snp/rs11803731"
         ]
       ]
+    },
+    {
+      "id": "apoe",
+      "section": "12.1",
+      "title": "APOE-Typ",
+      "markers": [
+        "rs429358",
+        "rs7412"
+      ],
+      "method": "single",
+      "clinical": true,
+      "evidence": "Gut belegter Risikofaktor",
+      "summary": "Zwei Positionen in APOE ergeben die Typen ε2, ε3 und ε4. ε4 ist der stärkste häufige genetische Risikofaktor für die spät beginnende Alzheimer-Krankheit.",
+      "limits": "Der APOE-Typ ist kein Befund über eine Erkrankung. Viele ε4-Träger erkranken nie, viele Erkrankte tragen kein ε4. Die Phase der beiden Positionen wird angenommen.",
+      "population": "Mehrere untersuchte Populationen",
+      "sources": [
+        [
+          "dbSNP rs429358",
+          "https://www.ncbi.nlm.nih.gov/snp/rs429358"
+        ],
+        [
+          "dbSNP rs7412",
+          "https://www.ncbi.nlm.nih.gov/snp/rs7412"
+        ]
+      ],
+      "cross": [
+        "08.4"
+      ],
+      "outcomes": [
+        {
+          "calls": [
+            "TT/CC"
+          ],
+          "conclusion": "APOE ε3/ε3, der häufigste Typ",
+          "message": "Beide Kopien entsprechen ε3. Das ist der Vergleichstyp in den meisten Studien.",
+          "confidence": "high"
+        },
+        {
+          "calls": [
+            "TT/CT"
+          ],
+          "conclusion": "APOE ε2/ε3",
+          "message": "Eine Kopie ε2. ε2 ist im Mittel mit einem niedrigeren Alzheimer-Risiko verbunden.",
+          "confidence": "high"
+        },
+        {
+          "calls": [
+            "TT/TT"
+          ],
+          "conclusion": "APOE ε2/ε2",
+          "message": "Zwei Kopien ε2. Bei einem kleinen Teil der Träger tritt eine Fettstoffwechselstörung (Typ-III-Hyperlipoproteinämie) auf.",
+          "confidence": "high"
+        },
+        {
+          "calls": [
+            "CT/CC"
+          ],
+          "conclusion": "APOE ε3/ε4: eine ε4-Kopie",
+          "message": "Eine ε4-Kopie ist in Studien mit einem etwa zwei- bis dreifach erhöhten Alzheimer-Risiko verbunden.",
+          "confidence": "high"
+        },
+        {
+          "calls": [
+            "CC/CC"
+          ],
+          "conclusion": "APOE ε4/ε4: zwei ε4-Kopien",
+          "message": "Zwei ε4-Kopien sind mit einem deutlich erhöhten Alzheimer-Risiko verbunden. Eine genetische Beratung ist sinnvoll.",
+          "confidence": "high"
+        },
+        {
+          "calls": [
+            "CT/CT"
+          ],
+          "conclusion": "Wahrscheinlich APOE ε2/ε4",
+          "message": "Beide Positionen sind gemischterbig. Meist entspricht das ε2/ε4, selten ε1/ε3.",
+          "confidence": "moderate"
+        }
+      ]
+    },
+    {
+      "id": "cyp2c9",
+      "section": "15.1",
+      "title": "CYP2C9-Stoffwechseltyp",
+      "markers": [
+        "rs1799853",
+        "rs1057910"
+      ],
+      "method": "single",
+      "clinical": true,
+      "evidence": "Gen-Wirkstoff-Beziehung in Leitlinie",
+      "summary": "CYP2C9 baut unter anderem Warfarin, Phenytoin und einige Schmerzmittel ab. *2 und *3 verringern die Enzymaktivität.",
+      "limits": "Andere Varianten dieses Gens wurden nicht geprüft. Medikamente und Dosis nur nach ärztlicher Rücksprache ändern.",
+      "population": "Mehrere untersuchte Populationen",
+      "sources": [
+        [
+          "dbSNP rs1799853",
+          "https://www.ncbi.nlm.nih.gov/snp/rs1799853"
+        ],
+        [
+          "dbSNP rs1057910",
+          "https://www.ncbi.nlm.nih.gov/snp/rs1057910"
+        ],
+        [
+          "CPIC-Leitlinie: CYP2C9",
+          "https://cpicpgx.org/guidelines/"
+        ]
+      ],
+      "outcomes": [
+        {
+          "calls": [
+            "CC/AA"
+          ],
+          "conclusion": "CYP2C9 *1/*1: normaler Stoffwechsel",
+          "message": "Weder *2 noch *3 wurden gefunden.",
+          "confidence": "moderate"
+        },
+        {
+          "calls": [
+            "CT/AA"
+          ],
+          "conclusion": "CYP2C9 *1/*2: mittlerer Stoffwechsel",
+          "message": "Eine Kopie *2 verringert die Enzymaktivität leicht.",
+          "confidence": "moderate"
+        },
+        {
+          "calls": [
+            "CC/AC"
+          ],
+          "conclusion": "CYP2C9 *1/*3: mittlerer Stoffwechsel",
+          "message": "Eine Kopie *3 verringert die Enzymaktivität deutlich.",
+          "confidence": "moderate"
+        },
+        {
+          "calls": [
+            "TT/AA"
+          ],
+          "conclusion": "CYP2C9 *2/*2: mittlerer Stoffwechsel",
+          "message": "Zwei Kopien *2 verringern die Enzymaktivität.",
+          "confidence": "moderate"
+        },
+        {
+          "calls": [
+            "CT/AC"
+          ],
+          "conclusion": "CYP2C9 *2/*3: langsamer Stoffwechsel",
+          "message": "Je eine Kopie *2 und *3. Die Enzymaktivität ist stark verringert.",
+          "confidence": "moderate"
+        },
+        {
+          "calls": [
+            "CC/CC"
+          ],
+          "conclusion": "CYP2C9 *3/*3: langsamer Stoffwechsel",
+          "message": "Zwei Kopien *3. Die Enzymaktivität ist stark verringert.",
+          "confidence": "moderate"
+        }
+      ]
+    },
+    {
+      "id": "cyp2c19",
+      "section": "15.1",
+      "title": "CYP2C19-Stoffwechseltyp",
+      "markers": [
+        "rs4244285",
+        "rs12248560"
+      ],
+      "method": "single",
+      "clinical": true,
+      "evidence": "Gen-Wirkstoff-Beziehung in Leitlinie",
+      "summary": "CYP2C19 aktiviert Clopidogrel und baut unter anderem Protonenpumpenhemmer und einige Antidepressiva ab. *2 verringert, *17 erhöht die Aktivität.",
+      "limits": "Andere Varianten dieses Gens wurden nicht geprüft. Medikamente und Dosis nur nach ärztlicher Rücksprache ändern.",
+      "population": "Mehrere untersuchte Populationen",
+      "sources": [
+        [
+          "dbSNP rs4244285",
+          "https://www.ncbi.nlm.nih.gov/snp/rs4244285"
+        ],
+        [
+          "dbSNP rs12248560",
+          "https://www.ncbi.nlm.nih.gov/snp/rs12248560"
+        ],
+        [
+          "CPIC-Leitlinie: CYP2C19",
+          "https://cpicpgx.org/guidelines/"
+        ]
+      ],
+      "outcomes": [
+        {
+          "calls": [
+            "GG/CC"
+          ],
+          "conclusion": "CYP2C19 *1/*1: normaler Stoffwechsel",
+          "message": "Weder *2 noch *17 wurden gefunden.",
+          "confidence": "moderate"
+        },
+        {
+          "calls": [
+            "AG/CC"
+          ],
+          "conclusion": "CYP2C19 *1/*2: mittlerer Stoffwechsel",
+          "message": "Eine Kopie *2. Clopidogrel wird schwächer aktiviert.",
+          "confidence": "moderate"
+        },
+        {
+          "calls": [
+            "AA/CC"
+          ],
+          "conclusion": "CYP2C19 *2/*2: langsamer Stoffwechsel",
+          "message": "Zwei Kopien *2. Clopidogrel wird kaum aktiviert.",
+          "confidence": "moderate"
+        },
+        {
+          "calls": [
+            "GG/CT"
+          ],
+          "conclusion": "CYP2C19 *1/*17: schneller Stoffwechsel",
+          "message": "Eine Kopie *17 erhöht die Enzymaktivität.",
+          "confidence": "moderate"
+        },
+        {
+          "calls": [
+            "GG/TT"
+          ],
+          "conclusion": "CYP2C19 *17/*17: sehr schneller Stoffwechsel",
+          "message": "Zwei Kopien *17 erhöhen die Enzymaktivität deutlich.",
+          "confidence": "moderate"
+        },
+        {
+          "calls": [
+            "AG/CT"
+          ],
+          "conclusion": "CYP2C19 *2/*17: mittlerer Stoffwechsel",
+          "message": "Je eine Kopie *2 und *17.",
+          "confidence": "moderate"
+        }
+      ]
+    },
+    {
+      "id": "tpmt",
+      "section": "15.1",
+      "title": "TPMT-Stoffwechseltyp",
+      "markers": [
+        "rs1800460",
+        "rs1142345"
+      ],
+      "method": "single",
+      "clinical": true,
+      "evidence": "Gen-Wirkstoff-Beziehung in Leitlinie",
+      "summary": "TPMT baut Thiopurine wie Azathioprin ab. Die Varianten *3B und *3C, gemeinsam *3A, verringern die Aktivität.",
+      "limits": "Andere Varianten dieses Gens wurden nicht geprüft. Medikamente und Dosis nur nach ärztlicher Rücksprache ändern.",
+      "population": "Mehrere untersuchte Populationen",
+      "sources": [
+        [
+          "dbSNP rs1800460",
+          "https://www.ncbi.nlm.nih.gov/snp/rs1800460"
+        ],
+        [
+          "dbSNP rs1142345",
+          "https://www.ncbi.nlm.nih.gov/snp/rs1142345"
+        ],
+        [
+          "CPIC-Leitlinie: Thiopurine",
+          "https://cpicpgx.org/guidelines/"
+        ]
+      ],
+      "outcomes": [
+        {
+          "calls": [
+            "CC/TT"
+          ],
+          "conclusion": "TPMT normal",
+          "message": "Keine der geprüften TPMT-Varianten wurde gefunden.",
+          "confidence": "moderate"
+        },
+        {
+          "calls": [
+            "CT/TT"
+          ],
+          "conclusion": "TPMT *1/*3B: mittlerer Stoffwechsel",
+          "message": "Eine Kopie *3B verringert die TPMT-Aktivität.",
+          "confidence": "moderate"
+        },
+        {
+          "calls": [
+            "CC/CT"
+          ],
+          "conclusion": "TPMT *1/*3C: mittlerer Stoffwechsel",
+          "message": "Eine Kopie *3C verringert die TPMT-Aktivität.",
+          "confidence": "moderate"
+        },
+        {
+          "calls": [
+            "CT/CT"
+          ],
+          "conclusion": "Wahrscheinlich TPMT *1/*3A: mittlerer Stoffwechsel",
+          "message": "Beide Varianten liegen gemischterbig vor. Meist liegen sie gemeinsam als *3A auf einer Kopie.",
+          "confidence": "moderate"
+        },
+        {
+          "calls": [
+            "TT/CC"
+          ],
+          "conclusion": "TPMT *3A/*3A: langsamer Stoffwechsel",
+          "message": "Beide Kopien tragen beide Varianten. Die TPMT-Aktivität ist sehr gering.",
+          "confidence": "moderate"
+        }
+      ]
+    },
+    {
+      "id": "nudt15",
+      "section": "15.1",
+      "title": "NUDT15 und Thiopurine",
+      "markers": [
+        "rs116855232"
+      ],
+      "method": "research",
+      "evidence": "Gen-Wirkstoff-Beziehung in Leitlinie",
+      "summary": "NUDT15 R139C (*3) verringert die Verträglichkeit von Thiopurinen. Die Variante ist in Ostasien häufiger.",
+      "limits": "Andere Varianten dieses Gens wurden nicht geprüft. Medikamente und Dosis nur nach ärztlicher Rücksprache ändern.",
+      "population": "Mehrere untersuchte Populationen",
+      "sources": [
+        [
+          "dbSNP rs116855232",
+          "https://www.ncbi.nlm.nih.gov/snp/rs116855232"
+        ],
+        [
+          "CPIC-Leitlinie: Thiopurine",
+          "https://cpicpgx.org/guidelines/"
+        ]
+      ],
+      "effect": {
+        "marker": "rs116855232",
+        "allele": "T",
+        "conclusions": [
+          "Keine Kopie von NUDT15 R139C.",
+          "Eine Kopie von NUDT15 R139C. Thiopurine erfordern eine ärztliche Dosisprüfung.",
+          "Zwei Kopien von NUDT15 R139C. Thiopurine erfordern eine deutlich angepasste Dosis oder eine Alternative."
+        ],
+        "confidence": "high",
+        "clinical": true
+      }
+    },
+    {
+      "id": "vkorc1",
+      "section": "15.2",
+      "title": "VKORC1 und Warfarin",
+      "markers": [
+        "rs9923231"
+      ],
+      "method": "research",
+      "evidence": "Gen-Wirkstoff-Beziehung in Leitlinie",
+      "summary": "VKORC1 −1639A senkt die Bildung des Zielenzyms von Warfarin. Träger brauchen meist eine niedrigere Dosis.",
+      "limits": "Andere Varianten dieses Gens wurden nicht geprüft. Medikamente und Dosis nur nach ärztlicher Rücksprache ändern.",
+      "population": "Mehrere untersuchte Populationen",
+      "sources": [
+        [
+          "dbSNP rs9923231",
+          "https://www.ncbi.nlm.nih.gov/snp/rs9923231"
+        ],
+        [
+          "CPIC-Leitlinie: Warfarin",
+          "https://cpicpgx.org/guidelines/"
+        ]
+      ],
+      "effect": {
+        "marker": "rs9923231",
+        "allele": "T",
+        "conclusions": [
+          "Keine Kopie von VKORC1 −1639A. Typische Warfarin-Empfindlichkeit.",
+          "Eine Kopie von VKORC1 −1639A. Warfarin wirkt meist schon bei niedrigerer Dosis.",
+          "Zwei Kopien von VKORC1 −1639A. Deutlich höhere Warfarin-Empfindlichkeit."
+        ],
+        "confidence": "high",
+        "clinical": true
+      }
+    },
+    {
+      "id": "prothrombin",
+      "section": "09.3",
+      "title": "Prothrombin G20210A",
+      "markers": [
+        "rs1799963"
+      ],
+      "method": "research",
+      "evidence": "Gut untersuchte Variante",
+      "summary": "Die Variante G20210A im Prothrombin-Gen F2 erhöht die Bildung von Prothrombin.",
+      "limits": "Der Rohdateneintrag ist unbestätigt. Eine Laborbestätigung ist vor jeder Entscheidung nötig.",
+      "population": "Mehrere untersuchte Populationen",
+      "sources": [
+        [
+          "dbSNP rs1799963",
+          "https://www.ncbi.nlm.nih.gov/snp/rs1799963"
+        ]
+      ],
+      "effect": {
+        "marker": "rs1799963",
+        "allele": "A",
+        "conclusions": [
+          "Keine Kopie von Prothrombin G20210A.",
+          "Eine Kopie von Prothrombin G20210A. Sie ist mit einem erhöhten Thromboserisiko verbunden.",
+          "Zwei Kopien von Prothrombin G20210A. Sie sind mit einem deutlich erhöhten Thromboserisiko verbunden."
+        ],
+        "confidence": "high",
+        "clinical": true
+      }
+    },
+    {
+      "id": "adh1b",
+      "section": "07.2",
+      "title": "ADH1B und Alkoholabbau",
+      "markers": [
+        "rs1229984"
+      ],
+      "method": "research",
+      "evidence": "Replizierter genetischer Zusammenhang",
+      "summary": "ADH1B*2 (Arg48His) wandelt Alkohol schneller in Acetaldehyd um. Die Variante ist in Ostasien häufig.",
+      "limits": "Der Befund bestimmt keine verträgliche Alkoholmenge.",
+      "population": "Mehrere untersuchte Populationen",
+      "sources": [
+        [
+          "dbSNP rs1229984",
+          "https://www.ncbi.nlm.nih.gov/snp/rs1229984"
+        ]
+      ],
+      "effect": {
+        "marker": "rs1229984",
+        "allele": "T",
+        "conclusions": [
+          "Keine Kopie von ADH1B*2. Typischer Alkoholabbau über ADH1B.",
+          "Eine Kopie von ADH1B*2. Alkohol wird schneller zu Acetaldehyd umgewandelt. In Studien ist Alkoholabhängigkeit bei Trägern seltener.",
+          "Zwei Kopien von ADH1B*2. Alkohol wird deutlich schneller zu Acetaldehyd umgewandelt."
+        ],
+        "confidence": "moderate",
+        "clinical": false
+      }
     }
   ]
 }

@@ -69,6 +69,14 @@ pub struct Trait {
     /// A verified plus-strand effect allele for dosage-based conclusions.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub effect: Option<EffectAllele>,
+    /// Medically relevant outcomes stay hidden until the user opts in.
+    #[serde(default, skip_serializing_if = "std::ops::Not::not")]
+    pub clinical: bool,
+}
+impl Trait {
+    pub fn is_clinical(&self) -> bool {
+        self.clinical || self.effect.as_ref().is_some_and(|e| e.clinical)
+    }
 }
 #[derive(Clone, Copy, Debug, Serialize, Deserialize, PartialEq, Eq)]
 #[serde(rename_all = "snake_case")]

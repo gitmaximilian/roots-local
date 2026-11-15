@@ -1,0 +1,53 @@
+name: Release
+on:
+  push:
+    tags: ["v*"]
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: macos-15
+    env:
+      TARGET: aarch64-apple-darwin
+      MACOSX_DEPLOYMENT_TARGET: "15.6"
+      CARGO_TERM_COLOR: always
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: "22"
+          cache: npm
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: "3.13"
+      - run: rustup update stable --no-self-update
+      - name: Check that the tag matches the app version
+        run: |
+          version=$(python -c 'import json; print(json.load(open("src-tauri/tauri.conf.json"))["version"])')
+          test "v$version" = "$GITHUB_REF_NAME" || { echo "Tag $GITHUB_REF_NAME does not match version $version"; exit 1; }
+          echo "VERSION=$version" >> "$GITHUB_ENV"
+      - run: python -m unittest discover -s scripts -p "test_*.py"
+      - run: python -m pip install pypdf==7.1.0
+      - run: npm ci
+      - run: python scripts/prepare_tools.py "$TARGET"
+      - run: |
+          export ROOTS_TEST_TYPST="$PWD/src-tauri/binaries/typst-$TARGET"
+          export ROOTS_TEST_PYTHON=python
+          cargo test --locked --manifest-path src-tauri/Cargo.toml --no-default-features
+      - run: npm run tauri -- build --bundles app
+      - name: Package, sign ad hoc, and checksum
+        run: |
+          app="src-tauri/target/release/bundle/macos/Roots Local.app"
+          codesign --verify --deep --strict "$app"
+          mkdir -p dist-release
+          dmg="dist-release/Roots-Local_${VERSION}_arm64.dmg"
+          scripts/package_macos.sh "$app" "$dmg"
+          (cd dist-release && shasum -a 256 "$(basename "$dmg")" > SHA256SUMS)
+          cat dist-release/SHA256SUMS
+      - name: Publish the GitHub release
+        run: |
+          gh release create "$GITHUB_REF_NAME" dist-release/*.dmg dist-release/SHA256SUMS \
+            --title "Roots Local $VERSION" \
+            --notes "Apple Silicon build for macOS 15.6 or later. Install with Homebrew: brew install --cask gitmaximilian/tap/roots-local. See docs/distribution.md."

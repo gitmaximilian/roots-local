@@ -154,7 +154,7 @@ fn document(model: &Model, mut options: Options) -> Document {
     if !options.include_clinical {
         model.clinical = None;
         for finding in &mut model.findings {
-            if finding.item.effect.as_ref().is_some_and(|e| e.clinical) {
+            if finding.item.is_clinical() && finding.conclusion.is_some() {
                 finding.conclusion = None;
                 finding.confidence = None;
                 finding.dosage = None;

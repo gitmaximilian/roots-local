@@ -22,7 +22,7 @@ Severity: **critical** blocks the product goal, **high** is a visible defect or 
 | T10 | medium | Performance | The starter catalog is parsed and loaded into SQLite on each import and marker lookup. | `main.rs` `make_model`, `active_markers` | Cache the parsed starter catalog once per process. |
 | T11 | medium | Scores | Polygenic scores need 100% marker coverage, so array data almost never yields a value, and raw scores have no percentile. | `pgs.rs` | Allow coverage ≥ 75% with reference-frequency mean imputation; add population percentile from a reference distribution. Follow-up, needs reference data. |
 | T12 | medium | Persistence | Results vanish on quit. | `Session` | Optional encrypted local profile, opt-in. Follow-up. |
-| T13 | low | Release | No Developer ID; the Typst sidecar must be signed for notarization. | `test-status.md` | Hardened runtime and entitlements ready; sign when an identity exists. |
+| T13 | low | Release | No release channel. | `test-status.md` | Homebrew cask with ad-hoc signed DMG from a tagged GitHub release. No Developer ID or notarization. |
 
 Security posture is good: strict CSP, `core:default` capabilities only, navigation allowlist, signed catalogs, bounded parsers.
 
