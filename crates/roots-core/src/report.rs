@@ -227,14 +227,18 @@ fn document(model: &Model, mut options: Options) -> Document {
     }
 }
 
-/// Renders the report or the medicine pass as PDF bytes.
-pub fn render(model: &Model, options: Options) -> Result<Vec<u8>, String> {
-    let template = if options.pass {
-        include_str!("../../../report/pass.typ")
-    } else {
-        include_str!("../../../report/report.typ")
-    };
+/// The input for one PDF: which template to use and its `report.json` data.
+pub struct Prepared {
+    /// Render the one-page medicine pass instead of the report.
+    pub pass: bool,
+    pub data: Vec<u8>,
+}
+
+/// Applies the export options (language, privacy choices) and serializes the
+/// data that the Typst templates read.
+pub fn prepare(model: &Model, options: Options) -> Result<Prepared, String> {
+    let pass = options.pass;
     let document = document(model, options);
     let data = serde_json::to_vec(&document).map_err(|_| "Das Reportmodell ist ungültig.")?;
-    crate::pdf::compile(template, data)
+    Ok(Prepared { pass, data })
 }

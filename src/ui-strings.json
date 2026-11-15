@@ -258,5 +258,8 @@
   "Zu dieser Frage kann deine Datei noch keine Schlussfolgerung stützen.": "Your file cannot support a conclusion for this question yet.",
   "Zum Beispiel: Vertrage ich Milch?": "For example: Can I drink milk?",
   "gesperrt": "locked",
-  "Schlussfolgerung": "Conclusion"
+  "Schlussfolgerung": "Conclusion",
+  "Bitte eine CSV-, TSV-, TXT- oder ZIP-Datei verwenden.": "Please use a CSV, TSV, TXT, or ZIP file.",
+  "Bitte genau zwei Elterndateien auswählen.": "Please select exactly two parent files.",
+  "Bitte CRAM, FASTA und den .fai-Index gemeinsam auswählen.": "Please select the CRAM, the FASTA, and its .fai index together."
 }

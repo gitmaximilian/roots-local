@@ -122,7 +122,7 @@ fn run() -> Result<(), String> {
     if let Some(path) = maternal {
         model.maternal_lineage = Some(lineage::maternal_file(open(&path)?)?);
     }
-    let pdf = report::render(
+    let pdf = render(
         &model,
         report::Options {
             language,
@@ -169,4 +169,9 @@ fn main() {
         eprintln!("{error}");
         std::process::exit(1);
     }
+}
+
+fn render(model: &report::Model, options: report::Options) -> Result<Vec<u8>, String> {
+    let prepared = report::prepare(model, options)?;
+    roots_pdf::render(prepared.pass, prepared.data, roots_pdf::Fonts::bundled())
 }

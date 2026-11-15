@@ -477,8 +477,8 @@ fn pdf_full_and_short() {
             bases: [0, 1, 1, 0],
         }],
     });
-    let full = report::render(&model, report::Options::default()).unwrap();
-    let short = report::render(
+    let full = render(&model, report::Options::default()).unwrap();
+    let short = render(
         &model,
         report::Options {
             short: true,
@@ -545,7 +545,7 @@ fn additive_score_requires_full_matching_build_and_alleles() {
             .item
             .section = "14.4".into();
         for short in [false, true] {
-            let data = report::render(
+            let data = render(
                 &pdf,
                 report::Options {
                     short,
@@ -615,7 +615,7 @@ fn verify_pdf_contents(pdf: &mut report::Model, input: &import::Import, python: 
                 [(false, false), (false, true), (true, false), (true, true)]
             {
                 let path = directory.path().join("report.pdf");
-                let bytes = report::render(
+                let bytes = render(
                     pdf,
                     report::Options {
                         language,
@@ -819,7 +819,7 @@ fn medicine_pass_is_one_page_and_includes_medicines() {
     let directory = tempfile::tempdir().unwrap();
     let path = directory.path().join("pass.pdf");
     // No clinical opt-in in the options: exporting the pass is the opt-in.
-    let bytes = report::render(
+    let bytes = render(
         &model,
         report::Options {
             pass: true,
@@ -846,4 +846,10 @@ fn medicine_pass_is_one_page_and_includes_medicines() {
         assert!(text.contains(expected), "Missing {expected:?}");
     }
     assert!(!text.contains("Lactase"));
+}
+
+/// Renders through the same Typst crate and fonts the web app uses.
+fn render(model: &report::Model, options: report::Options) -> Result<Vec<u8>, String> {
+    let prepared = report::prepare(model, options)?;
+    roots_pdf::render(prepared.pass, prepared.data, roots_pdf::Fonts::bundled())
 }

@@ -1,23 +1,23 @@
 {
   "name": "roots-local",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "vite --host 127.0.0.1",
-    "build": "tsc --noEmit && vite build",
-    "tauri": "tauri",
-    "prepare:tools": "python3 scripts/prepare_tools.py"
+    "dev": "vite",
+    "build:wasm": "sh scripts/build_wasm.sh",
+    "build": "tsc --noEmit && vite build && node scripts/finalize.mjs dist",
+    "preview": "vite preview",
+    "test:e2e": "playwright test"
   },
   "dependencies": {
-    "@tauri-apps/api": "^2.0.0",
     "lucide-react": "^0.468.0",
     "pdfjs-dist": "^5.4.624",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
   },
   "devDependencies": {
-    "@tauri-apps/cli": "^2.0.0",
+    "@playwright/test": "^1.56.1",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
     "prettier": "^3.10.1",

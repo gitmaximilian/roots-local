@@ -18,9 +18,15 @@ import React, {
   useState,
 } from "react";
 import { createRoot } from "react-dom/client";
-import { invoke } from "@tauri-apps/api/core";
-import { listen } from "@tauri-apps/api/event";
-import { getCurrentWebview } from "@tauri-apps/api/webview";
+import {
+  call,
+  cancel,
+  canCancel,
+  download,
+  onProgress,
+  pickFiles,
+} from "./platform";
+import type { ExtraKind } from "./protocol";
 import { Logo, Mark } from "./brand";
 import { CommandPalette, type Command } from "./command-palette";
 import {
@@ -300,7 +306,7 @@ function VariantRegister({
     let mounted = true;
     setError(undefined);
     const timer = setTimeout(() => {
-      invoke<VariantPage>("variants", {
+      call<VariantPage>("variants", {
         query,
         offset,
         chromosome: chromosome || null,
@@ -693,6 +699,7 @@ function App() {
   const [filter, setFilter] = useState<Status | "all">("all");
   const [query, setQuery] = useState("");
   const [busy, setBusy] = useState("");
+  const [progress, setProgress] = useState<number>();
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
   const [origins, setOrigins] = useState("");
@@ -800,117 +807,148 @@ function App() {
       done(await action());
     } catch (e) {
       setError(
-        typeof e === "string"
+        typeof e === "string" && e
           ? resultText(e)
           : t("Der Vorgang konnte nicht abgeschlossen werden."),
       );
     } finally {
       setBusy("");
+      setProgress(undefined);
     }
   }
+  function imported(result: Report) {
+    setReport(result);
+    setVariantJump(undefined);
+    setInspected(undefined);
+    setOrigins("");
+    setOptions({
+      short: false,
+      name: "",
+      include_calls: false,
+      include_relatives: false,
+      include_clinical: false,
+      include_lineage: false,
+    });
+    navigate("home");
+  }
   function importData(example: boolean) {
+    if (example) {
+      void run(
+        t("DNA-Datei einlesen"),
+        () => call<Report>("importDna", { file: null }),
+        imported,
+      );
+      return;
+    }
+    void pickFiles(".csv,.tsv,.txt,.zip").then(([file]) => {
+      if (file) importFile(file);
+    });
+  }
+  function importFile(file: File) {
+    if (!/\.(csv|tsv|txt|zip)$/i.test(file.name)) {
+      setError(t("Bitte eine CSV-, TSV-, TXT- oder ZIP-Datei verwenden."));
+      return;
+    }
     void run(
       t("DNA-Datei einlesen"),
-      () => invoke<Report | null>("import_dna", { example, language }),
-      (result) => {
-        if (result) {
-          setReport(result);
-          setVariantJump(undefined);
-          setInspected(undefined);
-          setOrigins("");
-          setOptions({
-            short: false,
-            name: "",
-            include_calls: false,
-            include_relatives: false,
-            include_clinical: false,
-            include_lineage: false,
-          });
-          navigate("home");
-        }
-      },
+      () => call<Report>("importDna", { file }),
+      imported,
     );
   }
-  function importPath(path: string) {
-    void run(
-      t("DNA-Datei einlesen"),
-      () => invoke<Report>("import_path", { path, language }),
-      (result) => {
-        setReport(result);
-        setVariantJump(undefined);
-        setInspected(undefined);
-        setOrigins("");
-        setOptions({
-          short: false,
-          name: "",
-          include_calls: false,
-          include_relatives: false,
-          include_clinical: false,
-          include_lineage: false,
-        });
-        navigate("home");
-      },
-    );
+  async function extraFiles(kind: ExtraKind): Promise<File[] | string> {
+    const accept: Record<ExtraKind, string> = {
+      relatives: ".csv,.tsv,.txt",
+      family: ".csv,.tsv,.txt,.zip",
+      trio: ".csv,.tsv,.txt,.zip",
+      clinical: ".vcf,.gz",
+      gene_validity: ".csv",
+      maternal_lineage: ".json",
+      cram: ".cram,.fa,.fasta,.fna,.fai",
+    };
+    const files = await pickFiles(accept[kind], kind === "trio" || kind === "cram");
+    if (files.length === 0) return [];
+    if (kind === "trio") {
+      return files.length === 2
+        ? files
+        : t("Bitte genau zwei Elterndateien auswählen.");
+    }
+    if (kind === "cram") {
+      const find = (pattern: RegExp) => files.find((f) => pattern.test(f.name));
+      const cram = find(/\.cram$/i);
+      const fasta = find(/\.(fa|fasta|fna)$/i);
+      const index = find(/\.fai$/i);
+      return cram && fasta && index && files.length === 3
+        ? [cram, fasta, index]
+        : t("Bitte CRAM, FASTA und den .fai-Index gemeinsam auswählen.");
+    }
+    return files.slice(0, 1);
   }
-  function extra(kind: string, label: string) {
-    void run(
-      label,
-      () => invoke<Report | null>("import_extra", { kind, language }),
-      (result) => {
-        if (result) {
+  function extra(kind: ExtraKind, label: string) {
+    void extraFiles(kind).then((files) => {
+      if (typeof files === "string") {
+        setError(files);
+        return;
+      }
+      if (files.length === 0) return;
+      void run(
+        label,
+        () => call<Report>("importExtra", { kind, files }),
+        (result) => {
           setReport(result);
           setNotice(t("Begleitdaten übernommen."));
-        }
-      },
-    );
+        },
+      );
+    });
+  }
+  function pdfBytes(pass: boolean) {
+    return call<Uint8Array>("renderPdf", {
+      options: { ...options, language, pass },
+    });
   }
   function renderPdf() {
     void run(
       t("PDF-Vorschau erstellen"),
-      () =>
-        invoke<ArrayBuffer>("preview_pdf", {
-          options: { ...options, language },
-        }),
-      (bytes) => {
-        setPreview(bytes);
-      },
+      () => pdfBytes(false),
+      (bytes) => setPreview(bytes.slice().buffer),
     );
   }
   function renderPass() {
     void run(
       t("PDF-Vorschau erstellen"),
-      () =>
-        invoke<ArrayBuffer>("preview_pdf", {
-          options: { ...options, language, pass: true },
-        }),
-      (bytes) => setPassPreview(bytes),
+      () => pdfBytes(true),
+      (bytes) => setPassPreview(bytes.slice().buffer),
     );
   }
   function savePass() {
     void run(
       t("PDF exportieren"),
-      () =>
-        invoke<boolean>("export_pdf", {
-          options: { ...options, language, pass: true },
-        }),
-      (saved) => {
-        if (saved) setNotice(t("Der Medikamentenpass wurde gespeichert."));
+      () => pdfBytes(true),
+      (bytes) => {
+        download(bytes, "Roots Local Medicine Pass.pdf");
+        setNotice(t("Der Medikamentenpass wurde gespeichert."));
       },
     );
   }
   function savePdf() {
     void run(
       t("PDF exportieren"),
-      () =>
-        invoke<boolean>("export_pdf", { options: { ...options, language } }),
-      (saved) => {
-        if (saved) setNotice(t("Der PDF-Report wurde gespeichert."));
+      () => pdfBytes(false),
+      (bytes) => {
+        download(bytes, "Roots Local Report.pdf");
+        setNotice(t("Der PDF-Report wurde gespeichert."));
       },
     );
   }
 
-  const latest = React.useRef({ importData, savePdf, navigate, busy, model });
-  latest.current = { importData, savePdf, navigate, busy, model };
+  const latest = React.useRef({
+    importData,
+    importFile,
+    savePdf,
+    navigate,
+    busy,
+    model,
+  });
+  latest.current = { importData, importFile, savePdf, navigate, busy, model };
   useEffect(() => {
     function onKey(event: KeyboardEvent) {
       if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") {
@@ -922,44 +960,61 @@ function App() {
     return () => window.removeEventListener("keydown", onKey);
   }, []);
   useEffect(() => {
-    const stop = listen<string>("menu", ({ payload }) => {
+    function onKey(event: KeyboardEvent) {
+      if (!(event.metaKey || event.ctrlKey) || event.altKey) return;
+      const key = event.key.toLowerCase();
       const app = latest.current;
-      if (app.busy) return;
-      if (payload === "open") app.importData(false);
-      else if (payload === "example") app.importData(true);
-      else if (payload === "export" && app.model) app.savePdf();
-      else if (payload === "palette") setPaletteOpen(true);
-      else if (payload === "language-en") switchLanguage("en");
-      else if (payload === "language-de") switchLanguage("de");
-    });
-    stop.catch(() => undefined);
-    return () =>
-      void stop.then((unlisten) => unlisten()).catch(() => undefined);
+      if (key === "o") {
+        event.preventDefault();
+        if (!app.busy) app.importData(false);
+      } else if (key === "e" && app.model) {
+        event.preventDefault();
+        if (!app.busy) app.savePdf();
+      }
+    }
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
   }, []);
   useEffect(() => {
-    let unlisten: (() => void) | undefined;
-    let webview: ReturnType<typeof getCurrentWebview>;
-    try {
-      webview = getCurrentWebview();
-    } catch {
-      return;
+    const stop = onProgress(setProgress);
+    return () => void stop();
+  }, []);
+  useEffect(() => {
+    let depth = 0;
+    const hasFiles = (event: DragEvent) =>
+      event.dataTransfer?.types.includes("Files") ?? false;
+    function enter(event: DragEvent) {
+      if (!hasFiles(event)) return;
+      event.preventDefault();
+      depth += 1;
+      setDropping(true);
     }
-    webview
-      .onDragDropEvent((event) => {
-        if (event.payload.type === "over" || event.payload.type === "enter") {
-          setDropping(true);
-        } else if (event.payload.type === "drop") {
-          setDropping(false);
-          const [path] = event.payload.paths;
-          if (path && !latest.current.busy) importPath(path);
-        } else {
-          setDropping(false);
-        }
-      })
-      .then((stop) => (unlisten = stop))
-      .catch(() => undefined);
-    return () => unlisten?.();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    function over(event: DragEvent) {
+      if (hasFiles(event)) event.preventDefault();
+    }
+    function leave(event: DragEvent) {
+      if (!hasFiles(event)) return;
+      depth = Math.max(0, depth - 1);
+      if (depth === 0) setDropping(false);
+    }
+    function drop(event: DragEvent) {
+      if (!hasFiles(event)) return;
+      event.preventDefault();
+      depth = 0;
+      setDropping(false);
+      const file = event.dataTransfer?.files[0];
+      if (file && !latest.current.busy) latest.current.importFile(file);
+    }
+    window.addEventListener("dragenter", enter);
+    window.addEventListener("dragover", over);
+    window.addEventListener("dragleave", leave);
+    window.addEventListener("drop", drop);
+    return () => {
+      window.removeEventListener("dragenter", enter);
+      window.removeEventListener("dragover", over);
+      window.removeEventListener("dragleave", leave);
+      window.removeEventListener("drop", drop);
+    };
   }, []);
 
   const inspectedFinding = results.find((finding) => finding.id === inspected);
@@ -1188,13 +1243,15 @@ function App() {
                 className={`feedback ${error ? "error" : ""}`}
                 role={error ? "alert" : "status"}
               >
-                <span>{busy ? `${busy} …` : error || notice}</span>
+                <span>
+                  {busy
+                    ? `${busy} …${progress !== undefined ? ` ${Math.round(progress * 100)} %` : ""}`
+                    : error || notice}
+                </span>
                 {busy ? (
-                  !busy.includes("PDF") && (
-                    <button
-                      className="text-button"
-                      onClick={() => void invoke("cancel_job")}
-                    >
+                  !busy.includes("PDF") &&
+                  canCancel && (
+                    <button className="text-button" onClick={cancel}>
                       {t("Abbrechen")}
                     </button>
                   )
@@ -1989,7 +2046,7 @@ function App() {
                           onClick={() =>
                             void run(
                               t("Sitzung schließen"),
-                              () => invoke("reset"),
+                              () => call("reset", {}),
                               () => {
                                 setModel(undefined);
                                 setVariantJump(undefined);
@@ -2028,14 +2085,14 @@ function App() {
                       onClick={() =>
                         void run(
                           t("Katalog überprüfen"),
-                          () =>
-                            invoke<{
+                          async () => {
+                            const [file] = await pickFiles(".json,.rootscat");
+                            if (!file) return null;
+                            return call<{
                               version: string;
                               model: Report | null;
-                            } | null>("load_catalog", {
-                              trustedKey: key,
-                              language,
-                            }),
+                            }>("loadCatalog", { file, key });
+                          },
                           (value) => {
                             if (value) {
                               setVersion(value.version);
@@ -2083,7 +2140,7 @@ function App() {
                               void run(
                                 t("Herkunft übernehmen"),
                                 () =>
-                                  invoke<Report>("save_origins", {
+                                  call<Report>("saveOrigins", {
                                     entries: origins,
                                   }),
                                 (result) => {

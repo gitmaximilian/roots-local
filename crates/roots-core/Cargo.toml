@@ -15,10 +15,7 @@ zip = { version = "4", default-features = false, features = ["deflate"] }
 sha2 = "0.10"
 ed25519-dalek = "2"
 noodles = { version = "0.119", features = ["cram", "fasta", "sam", "core"] }
-typst = "0.15.1"
-typst-pdf = "0.15.1"
-typst-layout = "0.15.1"
-typst-assets = { version = "0.15.1", features = ["fonts"] }
 
 [dev-dependencies]
 tempfile = "3"
+roots-pdf = { path = "../roots-pdf", features = ["bundled-fonts"] }

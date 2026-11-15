@@ -37,3 +37,6 @@ tmp/
 output/
 *.pem
 *.rootscat
+src/generated/
+test-results/
+playwright-report/

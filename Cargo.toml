@@ -1,6 +1,6 @@
 [workspace]
 resolver = "2"
-members = ["crates/roots-core", "crates/roots-wasm"]
+members = ["crates/roots-core", "crates/roots-pdf", "crates/roots-wasm", "crates/roots-pdf-wasm"]
 
 [workspace.package]
 version = "0.3.0"
