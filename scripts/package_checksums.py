@@ -4,7 +4,7 @@ from pathlib import Path
 import sys
 
 bundle, output = map(Path, sys.argv[1:])
-packages = sorted(bundle.glob("dmg/*.dmg")) + sorted(bundle.glob("nsis/*.exe"))
+packages = sorted(bundle.glob("dmg/*.dmg"))
 if not packages:
     raise SystemExit("No packaged installers found")
 checksums = []

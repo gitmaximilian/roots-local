@@ -1,5 +1,3 @@
-#![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
-
 use roots_local::{
     analysis,
     catalog::{self, Catalog, Chapter},

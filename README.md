@@ -16,7 +16,7 @@ Open the app and select **View example** or import the [synthetic MyHeritage fil
 
 ## Build from source
 
-Install the [Tauri system prerequisites](https://v2.tauri.app/start/prerequisites/), stable Rust, Node.js 22, and Python 3.13. Use `python` in place of `python3` on Windows if needed. The initial build downloads dependencies and verifies the bundled Typst compiler with SHA-256. The installed app imports files, previews reports, and exports PDFs offline.
+Roots Local runs on macOS 15.6 or later on Apple Silicon. Install the [Tauri system prerequisites](https://v2.tauri.app/start/prerequisites/), stable Rust, Node.js 22, and Python 3.13. The initial build downloads dependencies and verifies the bundled Typst compiler with SHA-256. The installed app imports files, previews reports, and exports PDFs offline.
 
 ```sh
 npm ci
@@ -24,7 +24,7 @@ python3 scripts/prepare_tools.py
 npm run tauri -- dev
 ```
 
-Use `npm run tauri -- build --bundles app` for macOS. The script `scripts/package_macos.sh` creates a DMG from the app bundle. Use `npm run tauri -- build --bundles nsis` on the target Windows architecture. See the [build matrix](.github/workflows/desktop.yml) for the exact targets and available artifacts.
+Use `npm run tauri -- build --bundles app` for macOS. The script `scripts/package_macos.sh` creates a DMG from the app bundle. See the [CI workflow](.github/workflows/desktop.yml) for the build steps and artifacts.
 
 ## What the app analyzes
 

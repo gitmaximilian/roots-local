@@ -100,17 +100,12 @@ impl Model {
 }
 
 pub fn typst_binary() -> Result<PathBuf, String> {
-    let filename = if cfg!(windows) { "typst.exe" } else { "typst" };
     let native = std::env::current_exe()
         .ok()
-        .and_then(|p| p.parent().map(|p| p.join(filename)));
+        .and_then(|p| p.parent().map(|p| p.join("typst")));
     let dev = Path::new(env!("CARGO_MANIFEST_DIR"))
         .join("binaries")
-        .join(if cfg!(windows) {
-            format!("typst-{}.exe", env!("ROOTS_TARGET"))
-        } else {
-            format!("typst-{}", env!("ROOTS_TARGET"))
-        });
+        .join(format!("typst-{}", env!("ROOTS_TARGET")));
     native
         .into_iter()
         .chain(cfg!(debug_assertions).then_some(dev))
@@ -252,11 +247,6 @@ pub fn render(model: &Model, options: Options, typst: &Path) -> Result<Vec<u8>, 
         .arg("--ignore-system-fonts")
         .arg(&view)
         .arg(&output);
-    #[cfg(windows)]
-    {
-        use std::os::windows::process::CommandExt;
-        renderer.creation_flags(0x08000000);
-    }
     let result = renderer
         .output()
         .map_err(|_| "Das lokale PDF-Werkzeug konnte nicht gestartet werden.")?;

@@ -1,6 +1,6 @@
 # Roots Local implementation brief
 
-Implement and maintain a distributable open-source desktop app that analyzes MyHeritage raw DNA exports locally. Target native macOS on Apple Silicon, including M4, and Windows 11 x64. Build Windows 11 ARM64 separately. Mark a platform as supported after testing its installer and running the application on that architecture. Derive the minimum supported macOS version from the installed product and its dependencies.
+Implement and maintain a distributable open-source desktop app that analyzes MyHeritage raw DNA exports locally. Target native macOS on Apple Silicon only, including M4. Other platforms and Intel Macs are out of scope. Derive the minimum supported macOS version from the installed product and its dependencies.
 
 Use the [report outline](report-structure.md) as the product specification. Include its 17 chapters and 76 sections in the full PDF and the application. English is the default language. Provide a persistent German switch for the interface and reports, preserving the active analysis when it changes. Keep GitHub documentation in English. Use synthetic samples or licensed reference data suitable for testing and public CI.
 
@@ -8,7 +8,7 @@ Use the [product review and delivery plan](product-plan.md) to prioritize work a
 
 ## Architecture
 
-- Use Tauri 2, Rust, React, and TypeScript. Validate the native builds and packaging dependencies on macOS arm64 and Windows x64.
+- Use Tauri 2, Rust, React, and TypeScript. Validate the native build and packaging dependencies on macOS arm64.
 - Keep parsing, normalization, catalog validation, analysis, and report generation independent of the desktop host. Reuse the same typed report model for desktop and PDF. Expose a small CLI harness for end-to-end verification.
 - Use indexed SQLite for versioned reference data. Keep personal session data in memory by default. Any persistent project format requires explicit selection and documented deletion.
 - Use background workers for expensive operations. Stream large inputs, allow cancellation, paginate large result sets, and avoid sending the whole genotype file to the WebView.
@@ -55,11 +55,11 @@ Use the [product review and delivery plan](product-plan.md) to prioritize work a
 
 Test malformed data, missing calls, strand and reference mismatches, conflicts, large inputs, Unicode paths, cancellation, repeated imports, and PDF links. Run the installed app with internet access unavailable. Import the example, inspect results, switch between both languages, and export and verify both PDFs. Record the platforms and hardware actually used. Benchmark a large synthetic file and document runtime, peak memory, and UI responsiveness.
 
-Use pinned CI dependencies, least-privilege permissions, and public synthetic fixtures. Verify the native macOS app and DMG, including the bundled binaries. Sign and notarize macOS releases when credentials are available. For both Windows architectures, produce and test an NSIS installer with offline WebView2. Verify installation, upgrade, removal, and report export on the target system. Label experimental builds explicitly and publish checksums, notices, and a changelog.
+Use pinned CI dependencies, least-privilege permissions, and public synthetic fixtures. Verify the native macOS app and DMG, including the bundled binaries. Sign and notarize macOS releases when credentials are available. Verify installation, upgrade, removal, and report export on an Apple Silicon Mac. Label experimental builds explicitly and publish checksums, notices, and a changelog.
 
 ## Primary references
 
-- [Tauri prerequisites](https://v2.tauri.app/start/prerequisites/) · [Capabilities](https://v2.tauri.app/security/capabilities/) · [Windows installer](https://v2.tauri.app/distribute/windows-installer/) · [macOS signing](https://v2.tauri.app/distribute/sign/macos/)
+- [Tauri prerequisites](https://v2.tauri.app/start/prerequisites/) · [Capabilities](https://v2.tauri.app/security/capabilities/) · [macOS signing](https://v2.tauri.app/distribute/sign/macos/)
 - [MyHeritage raw data](https://www.myheritage.com/help/en/articles/12852246-how-should-i-interpret-my-raw-dna-data) · [CRAM downloads](https://www.myheritage.com/help/en/articles/12851869-how-do-i-download-my-raw-dna-data-file-or-cram-file-from-myheritage) · [HTSlib references](https://www.htslib.org/doc/reference_seqs.html)
 - [GWAS Catalog](https://www.ebi.ac.uk/gwas/docs/downloads/) · [PGS Catalog](https://www.pgscatalog.org/downloads/) · [ClinVar](https://www.ncbi.nlm.nih.gov/clinvar/docs/downloads/) · [ClinGen](https://www.clinicalgenome.org/docs/gene-disease-validity-standard-operating-procedure/) · [PharmCAT](https://pharmcat.clinpgx.org/methods/)
 - [Typst headings and bookmarks](https://typst.app/docs/reference/model/heading/)

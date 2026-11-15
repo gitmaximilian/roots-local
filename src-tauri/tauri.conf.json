@@ -27,23 +27,19 @@
   },
   "bundle": {
     "active": true,
-    "targets": "all",
+    "targets": [
+      "app",
+      "dmg"
+    ],
     "icon": [
       "icons/icon.png",
-      "icons/icon.icns",
-      "icons/icon.ico"
+      "icons/icon.icns"
     ],
     "externalBin": [
       "binaries/typst"
     ],
     "macOS": {
       "minimumSystemVersion": "15.6"
-    },
-    "windows": {
-      "webviewInstallMode": {
-        "type": "offlineInstaller",
-        "silent": true
-      }
     },
     "resources": {
       "../licenses/": "licenses/"

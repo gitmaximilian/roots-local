@@ -4,8 +4,8 @@
 |---|---|
 | **MacBook Air M4, macOS 15.6.1** | Native app built and installed. Imported a synthetic MyHeritage file with the native dialog, inspected results, previewed the full report, and exported a PDF. |
 | **M4 with network access denied** | Used the installed debug bundle with `--verify-offline` to evaluate synthetic data. Tested the native file import, preview, and export. The app process and spawned helpers were covered by the restriction. Independent macOS WebKit services were not separately instrumented. |
-| **Windows x64 and ARM64** | The [verified Windows run](https://github.com/gitmaximilian/roots-local/actions/runs/43669395976) tested native builds, bilingual PDFs, installation, same-version reinstallation, app startup, PDF generation with the installed Typst binary, and uninstall. Interactive offline Windows acceptance remains open. |
-| **Older macOS versions and Intel** | The configured macOS minimum is 15.6. Earlier releases and Intel Macs have not been tested. |
+| **CI, macOS 15 ARM64** | [CI run 43673110939](https://github.com/gitmaximilian/roots-local/actions/runs/43673110939) at `883d0ed` built and tested the macOS ARM64 app and bilingual PDFs. |
+| **Scope** | Roots Local supports macOS 15.6 or later on Apple Silicon only. Windows and Intel builds were removed on 2026-11-15. |
 
 English is the default for the app and its PDF report. The language switch was tested in the native M4 app with the same synthetic profile, and the German PDF preview rendered with network access denied. Verified exports in both languages contained 24 pages, 17 chapters, 76 sections, and 151 links. The starter reference report included embedded fonts. Representative pages were visually inspected. On the M4, the debug smoke test imported 700,015 synthetic rows and exported a PDF in 2.84 seconds, with approximately 165 MiB peak RSS. The benchmark used the command-line harness.
 
@@ -27,15 +27,25 @@ The PDF content checks cover 16 combinations of language, report format, clinica
 2. **Catalog breadth.** All chapters, search, filters, coverage, signed packages, and basic ancestry, match, and segment imports are available. The GWAS importer was verified against a full EMBL-EBI export. Its test package contained 4,153 associations across 46 topics. The installed M4 app matched 52 supplemental associations and rendered a 41-page preview. The app imports local ClinVar VCF and ClinGen gene–disease validity CSV files. Four additional marker rules link CYP2C19, DPYD, and CYP3A5 to CPIC sources. More curated coverage remains open. Companion CSV fixtures are synthetic and export schemas may vary.
 3. **Sequencing and family.** CRAM coverage agrees with HTSlib on the synthetic fixture. The decoder checks reference length and available MD5 values when requesting FASTA sequences. The family comparison reports shared autosomal alleles and an exploratory KING coefficient when at least 10,000 eligible markers span at least 20 autosomes. The two-parent comparison counts Mendelian inconsistencies and resolves individual autosomal sites when one assignment fits. Prepared rCRS mitochondrial profiles can be classified with the local Haplogrep workflow. Long-range phasing, MyHeritage-specific lineage and CRAM validation, Y-DNA calling, and relationship-degree validation remain open.
 4. **Advanced interpretation.** TAS2R38 homozygous combinations and uniquely phased AVI/PAV from two parent files, strict additive research scores, and selected gene–drug study links are available. Complex clinically validated haplotypes, copy-number analysis, broader pharmacogenetics, and calibrated disease risks are pending.
-5. **Packages.** The native macOS app and DMG were built and checked. Separate Windows installers are available as CI artifacts. The Windows workflow includes silent installation, same-version reinstallation, execution of the bundled Typst binary, and removal. The local ARM64 Windows VM reached its sign-in screen after removing one duplicate virtual display device. Interactive Windows acceptance and signed release builds remain open.
+5. **Packages.** The native macOS app and DMG were built and checked. Signed and notarized release builds remain open.
+
+## Verification log
+
+**2026-11-15, commit `883d0ed`, MacBook Air M4, macOS 15.6.1.** Local checks: 5 Python tests and 18 Rust tests (4 unit, 14 integration) passed. Baseline PDFs from CI run 43673110939 passed `scripts/verify_pdf.py` with 26 pages, 17 chapters, 76 sections, and 165 links each. Windows acceptance was dropped when the project moved to Apple Silicon only.
+
+**Blocked on external input:**
+
+| Step | Waiting for |
+|---|---|
+| Provider data validation | An authorized MyHeritage tabular export and a WGS CRAM with its matching indexed FASTA |
+| Further inference validation | Assay benchmarks, known pedigrees, validated clinical diplotype and copy-number references, and suitable risk calibration data |
+| Signed releases | A Developer ID Application identity with notarization credentials |
 
 Tests use synthetic genotype data. The repository contains no personal DNA files.
 
 ## Release acceptance
 
-On each Windows architecture, boot a Windows desktop with no internet access. Install from the NSIS artifact, then open the app, import the synthetic raw file, and preview and export the full PDF in both languages. Run a newer installer over the existing installation, repeat the PDF export, and verify removal through Windows Settings. Use a clean VM without an existing Evergreen WebView2 runtime to exercise the installer payload.
-
-On Apple Silicon, mount the built DMG and copy the app into Applications. A signed release requires a Developer ID Application identity and Apple notarization credentials. Use Tauri's signing configuration for the app bundle and staple the notarization ticket to the distribution package. Windows release signing requires a configured signing service or Authenticode identity. Verify the signatures and regenerate the installer checksums from the signed artifacts. [Tauri macOS signing](https://v2.tauri.app/distribute/sign/macos/) · [Tauri Windows signing](https://v2.tauri.app/distribute/sign/windows/)
+On an Apple Silicon Mac with networking disabled, mount the built DMG, copy the app into Applications, import the synthetic raw file, and preview and export the full PDF in both languages. Replace it with a newer build, repeat the export, and remove it. A signed release requires a Developer ID Application identity and Apple notarization credentials. Use Tauri's signing configuration for the app bundle and staple the notarization ticket to the distribution package. Verify the signatures and regenerate the installer checksums from the signed artifacts. [Tauri macOS signing](https://v2.tauri.app/distribute/sign/macos/)
 
 For provider CRAM acceptance, use the desktop workflow or pass `--cram <CRAM> <indexed FASTA>` to `roots-check` alongside the raw DNA file and PDF destination. The tool prints aggregate coverage and exports the per-site depth from the active catalog. Add `--include-calls` to include per-base counts in that local test report. Record the reference identifier, build, and expected coverage at selected positions using an independent decoder.
 
