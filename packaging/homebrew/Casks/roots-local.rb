@@ -1,6 +1,6 @@
 cask "roots-local" do
   version "0.2.0"
-  sha256 "0000000000000000000000000000000000000000000000000000000000000000"
+  sha256 "1e047d320d3902d0c784b174fd9f2ece27198f384f74626bbb08f5263bccfbe5"
 
   url "https://github.com/gitmaximilian/roots-local/releases/download/v#{version}/Roots-Local_#{version}_arm64.dmg"
   name "Roots Local"
