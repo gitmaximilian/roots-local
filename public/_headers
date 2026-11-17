@@ -24,3 +24,6 @@
 
 /index.html
   Cache-Control: no-cache, no-transform
+
+/SHA256SUMS
+  Content-Type: text/plain; charset=utf-8
