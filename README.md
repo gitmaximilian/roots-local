@@ -13,12 +13,12 @@ After the first visit the app also works offline, and you can add it to your hom
 ### Your data stays on your device
 
 - Files are read by a background worker in your browser tab. There is no server, API, or upload.
-- A strict Content Security Policy blocks requests to any other address. No CDNs, web fonts, analytics, or error tracking.
-- Nothing is stored in the browser except your language choice. Closing the tab ends the session.
+- The page's Content Security Policy blocks direct network connections. Workers load the app's WebAssembly and fonts from the same host.
+- The browser stores your language choice and caches the app's program files for offline use. Closing the tab clears the in-memory analysis.
 - PDF reports and the medicine pass are created in your browser and saved as normal downloads.
 - Automated tests fail on any request after start-up, on any request to another origin, and on stored data, and repeat the workflow offline. [Web app plan and enforcement](docs/web-plan.md)
 
-**Check it yourself:** open the developer tools, select the Network tab, reload Roots Local, wait until it has started, and clear the list. Open your file and export a PDF: the list stays empty. Or switch to airplane mode after the first visit. Every build publishes [`SHA256SUMS`](https://rootslocal.maximilianauer.at/SHA256SUMS) for each shipped file. The in-app **Privacy** page explains the same steps.
+**Check it yourself:** open the developer tools, select the Network tab, reload Roots Local, wait for the app and its offline cache to finish loading, and clear the list. Open your file and export a PDF. Or switch to airplane mode once the app has been cached. Every build includes [`SHA256SUMS`](https://rootslocal.maximilianauer.at/SHA256SUMS) for its output files. The in-app **Privacy** page explains the same steps and describes the technical connection data Cloudflare Pages processes when serving the files.
 
 Roots Local does not replace a diagnosis. Medically relevant findings from consumer data need confirmation in a certified laboratory.
 

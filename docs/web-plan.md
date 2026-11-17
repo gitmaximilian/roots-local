@@ -1,6 +1,6 @@
 # Web app plan
 
-Roots Local runs as a static web app at `https://rootslocal.maximilianauer.at`. The macOS desktop app was retired on 2026-11-15; the web app is the only product. This document records the architecture, the privacy guarantees and how they are enforced, the feature scope, and the milestones with their acceptance criteria.
+Roots Local is a static web app. The existing deployment is at `https://rootslocal.pages.dev`. The production domain is planned as `https://rootslocal.maximilianauer.at`. The web app replaces the macOS desktop app, retired on 2026-11-15.
 
 ## Rule zero: data stays on the device
 
@@ -9,15 +9,15 @@ DNA files, companion files, results, names, and exports never leave the user's d
 | Guarantee | Enforcement |
 |---|---|
 | No upload | Files are read in a Web Worker with `FileReaderSync` from the `File` objects the user picked or dropped. There is no server endpoint, API, backend, or form with a target. |
-| Network blocked | Content Security Policy as an HTTP header (`public/_headers`) and as a `<meta>` tag: `default-src 'none'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self'; img-src 'self' blob: data:; font-src 'self'; worker-src 'self' blob:; manifest-src 'self'; connect-src 'self'; form-action 'none'; frame-ancestors 'none'; base-uri 'none'; object-src 'none'`. No `unsafe-inline`, no `unsafe-eval`. |
+| Network restricted | The document's CSP meta tag sets `connect-src 'none'`. The HTTP CSP in `public/_headers` allows the workers to fetch same-origin assets and sets `frame-ancestors 'none'`. Both policies permit same-origin scripts and styles plus WebAssembly. |
 | No third parties | No CDN, web fonts, analytics, error tracking, or external images. Fonts, catalog, Typst compiler, and templates ship with the app. |
-| No traces | Nothing is stored except the language choice in `localStorage`. No cookies, no IndexedDB, no data in `localStorage` or `sessionStorage`. The service worker caches only the build's own static files. |
+| Local storage | The app stores the language choice in `localStorage` and caches its own static files. Analysis and personal inputs remain in memory. Exports persist as user-controlled downloads. |
 | Local exports | PDF report and medicine pass are compiled in the worker and saved through a `blob:` download. |
-| Minimal server | Static files on Cloudflare Pages. No functions, no server logic. Access logs contain what any web server records. |
-| Verifiable | Apache-2.0 source, reproducible build script, Subresource Integrity on the page's scripts and stylesheet, `SHA256SUMS` for every shipped file, and an in-app privacy page explaining how to check it. |
+| Minimal server | Cloudflare Pages delivers static files and processes technical connection data. Its network error reporting settings are verified separately from the app's own request behavior. |
+| Verifiable | Apache-2.0 source, a locked build, Subresource Integrity on the page's scripts and stylesheet, integrity checks on each precached asset, and `SHA256SUMS` for every build file. The in-app privacy page explains how to check it. |
 | Proven | `e2e/privacy.spec.ts` fails on any request to another origin, on any request after start-up, on any stored data, and runs the full workflow offline. |
 
-**Why `connect-src 'self'` and not `'none'`.** The worker fetches the two WebAssembly modules and the report fonts from its own origin, and the service worker precaches them. `'none'` would block these loads. Both engines are loaded at start-up, so after the page signals ready (`data-analysis="ready"`, `data-pdf="ready"` on `<html>`) the app makes no requests at all. The test asserts exactly that.
+The workers need `connect-src 'self'` while fetching the WebAssembly modules, report fonts, and precache files. The tests wait for both engines to load and the service worker to take control before importing any data. The tests then check requests during analysis and export. The browser can check for a service worker update when navigating to the app.
 
 **Opt-in profile storage** ("save profile on this device", encrypted with a passphrase-derived Web Crypto key, with a visible delete action) is not implemented. If it is added, it must be off by default and covered by the storage test.
 
@@ -45,7 +45,7 @@ At widths up to 760 px the sidebar becomes a sheet opened from a menu button, th
 
 ## PWA
 
-`manifest.webmanifest`, icons from the app logo (192, 512, maskable 512, Apple touch 180, SVG). `scripts/finalize.mjs` writes `sw.js` with this build's exact file list and a content-hash version. The service worker precaches those files, serves only same-origin GET requests, and deletes old caches on activation. A new version waits; the app shows "A new version of Roots Local is ready" and reloads only after the user selects **Reload**.
+`manifest.webmanifest`, icons from the app logo (192, 512, maskable 512, Apple touch 180, SVG). `scripts/finalize.mjs` writes `sw.js` with each static URL and its SHA-256 integrity value. The worker downloads files in batches, retries a failed download once, and removes a partial cache if installation fails. It serves same-origin GET requests and deletes old caches on activation. A new version waits for the user to choose **Reload**.
 
 ## Feature scope
 
@@ -75,6 +75,8 @@ npm run test:e2e       # Playwright privacy suite against the production build
 ```
 
 The [web workflow](../.github/workflows/web.yml) runs the Rust and Python tests, builds the web app, runs the privacy suite, and uploads `dist/` with `SHA256SUMS` as an artifact. Deployment to Cloudflare Pages is a separate manual step after approval.
+
+The existing Pages project `rootslocal` can receive a Direct Upload on `main`. Associate `rootslocal.maximilianauer.at` through the Pages custom-domain settings and wait for DNS and TLS activation. Verify the live response headers, checksums, and complete privacy suite against the custom domain before publishing the portfolio links. Check for `NEL`, `Report-To`, and `Reporting-Endpoints` on both the document and its workers. Cloudflare can add those headers outside the application. If they persist on the custom host, inspect the Cloudflare zone's Network Error Logging setting before any zone-wide change.
 
 ## Milestones
 

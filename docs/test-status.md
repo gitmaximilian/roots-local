@@ -13,6 +13,14 @@ Roots Local is a web app. The macOS desktop app (v0.2.0) was retired on 2026-11-
 
 ## Verification log
 
+**2026-11-17, inherited deployment.** The Pages project `rootslocal` already serves build `6b1a0dd0be00d2c1` at [rootslocal.pages.dev](https://rootslocal.pages.dev/), deployment `a2cab228`. The planned custom domain has no DNS response. On the existing deployment, 10 of 12 browser checks passed. The offline cases in Desktop Chromium and Pixel emulation failed while waiting for the service worker to take control. Chromium reported a network failure during `Cache.addAll()`. The Pages endpoint also sends Cloudflare's `NEL` and `Report-To` headers.
+
+**2026-11-17, local release candidate.** Rebuilt both WebAssembly modules. Their SHA-256 hashes matched the previous deployment. Repeated the frontend build with the same toolchain and got matching output checksums. Rust 1.99.1, wasm-bindgen 0.2.100, Binaryen 133 and Node.js 23.11.0 were used for the local build. Rust tests (21), Python tests (5) and parity checks (5) passed. The Chromium and Pixel regression injects a connection reset during precaching and verifies that the failed asset is requested again and the offline cache then activates. The release candidate remains local pending approval of the production destination.
+
+- Build `9697c896d2e990f2` passed all 12 browser checks against local Cloudflare Pages emulation with the production `_headers`. In first-visit testing, WebKit sometimes activates the worker without attaching it to the initial page. The suite waits for activation and reloads while online if a controller is missing. The WebKit offline tests still use the built-in synthetic profile because Playwright's offline emulation blocks file selection and reloads.
+- The portfolio preview includes the fourth card, the bilingual detail page and the Roots Local privacy section. The English and German links and images were checked at 390 and 1280 pixels. All three prior project cards matched production.
+- Still open for release: verify the custom domain and its Cloudflare response headers, test with physical iPhone and Android devices, and confirm the regulatory status of the medicine-pass feature for its intended use.
+
 **2026-11-15, branch `web/local-only`, MacBook Air M4, macOS 15.6.1.**
 
 - `cargo test -p roots-core -p roots-pdf` with `ROOTS_TEST_PYTHON`: 21 passed.
