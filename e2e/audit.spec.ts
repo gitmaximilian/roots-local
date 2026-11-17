@@ -125,3 +125,15 @@ test("phone dock, first-use guide, and first-tap controls", async ({ page }, inf
   await expect(page.locator("html")).toHaveAttribute("lang", "de");
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(320);
 });
+
+test("stacked chapter navigation scrolls above the chapter text", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 720 });
+  await started(page);
+  const dock = page.getByRole("navigation", { name: "Quick navigation" });
+  await dock.getByRole("button", { name: "Chapters", exact: true }).click();
+  const list = page.locator(".chapter-list");
+  await expect(list).toHaveCSS("position", "static");
+  const endBefore = (await list.boundingBox())!.y;
+  await page.locator(".content").evaluate((element) => element.scrollTop = 400);
+  await expect.poll(async () => (await list.boundingBox())!.y).toBeLessThan(endBefore);
+});

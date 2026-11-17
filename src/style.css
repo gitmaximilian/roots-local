@@ -1199,6 +1199,9 @@ main {
   .browse {
     grid-template-columns: minmax(0, 1fr);
   }
+  .chapter-list {
+    position: static;
+  }
   .stats {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
