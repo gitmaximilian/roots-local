@@ -11,11 +11,7 @@ function stored(): string | null {
     return null;
   }
 }
-let language: Language =
-  stored() === "de" ||
-  (stored() === null && navigator.language.toLowerCase().startsWith("de"))
-    ? "de"
-    : "en";
+let language: Language = stored() === "de" ? "de" : "en";
 
 export function getLanguage() {
   return language;

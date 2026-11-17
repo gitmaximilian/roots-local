@@ -26,8 +26,12 @@ test("finding can be closed by its button and by Escape without losing focus", a
   await expect(details).toBeFocused();
 });
 
-test("language switch keeps the profile and search restores focus", async ({ page }) => {
+test.describe("first visit with German browser preferences", () => {
+  test.use({ locale: "de-DE" });
+
+test("starts in English, preserves the profile on language switch, and restores focus", async ({ page }) => {
   await started(page);
+  await expect(page.locator("html")).toHaveAttribute("lang", "en");
   const search = page.getByRole("button", { name: "Search", exact: true });
   await search.focus();
   await search.press("Enter");
@@ -57,6 +61,9 @@ test("language switch keeps the profile and search restores focus", async ({ pag
     await page.getByRole("navigation").getByRole("button", { name: /^Kapitel/ }).first().click();
     expect(await page.locator(".content").evaluate((content) => content.scrollWidth - content.clientWidth)).toBeLessThanOrEqual(1);
   }
+  await page.reload();
+  await expect(page.locator("html")).toHaveAttribute("lang", "de");
+});
 });
 
 test("catalog questions abstain on misleading wording and PDF medical content is opt-in", async ({ page }) => {
