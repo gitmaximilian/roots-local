@@ -337,6 +337,7 @@ pub fn evaluate_with_coverage(
                     &ids,
                     item.require_identifier
                         || item.method == Method::Gwas
+                        || item.is_clinical()
                         || item.section.starts_with("15."),
                 ))
             })

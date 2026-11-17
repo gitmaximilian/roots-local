@@ -725,7 +725,8 @@ fn multi_marker_types_resolve_known_combinations_only() {
         apoe("TT", "CC").conclusion.as_deref(),
         Some("APOE ε3/ε3, der häufigste Typ")
     );
-    assert_eq!(apoe("CT", "CT").confidence, Some(Confidence::Moderate));
+    assert_eq!(apoe("CT", "CT").status, Status::Missing);
+    assert!(apoe("CT", "CT").conclusion.is_none());
     // ε4 homozygous plus a heterozygous ε2 site is not a supported pattern.
     assert_eq!(apoe("CC", "CT").status, Status::Missing);
     assert_eq!(apoe("CT", "--").status, Status::Missing);
@@ -736,24 +737,44 @@ fn multi_marker_types_resolve_known_combinations_only() {
     );
     assert_eq!(
         cyp2c9.conclusion.as_deref(),
-        Some("CYP2C9 *2/*3: langsamer Stoffwechsel")
+        Some("CYP2C9: *2-Marker ×1, *3-Marker ×1")
     );
+    assert!(cyp2c9.message.contains("derselben Genkopie"));
     let cyp2c19 = find(
         &evaluate("rs4244285,10,96541616,GG\nrs12248560,10,96521657,CT\n"),
         "cyp2c19",
     );
     assert_eq!(
         cyp2c19.conclusion.as_deref(),
-        Some("CYP2C19 *1/*17: schneller Stoffwechsel")
+        Some("CYP2C19: *2-Marker ×0, *17-Marker ×1")
     );
     let tpmt = find(
         &evaluate("rs1800460,6,18139228,CT\nrs1142345,6,18130918,CT\n"),
         "tpmt",
     );
-    assert!(tpmt
-        .conclusion
-        .as_deref()
-        .is_some_and(|c| c.contains("*3A")));
+    assert_eq!(
+        tpmt.conclusion.as_deref(),
+        Some("TPMT: *3B-Marker ×1, *3C-Marker ×1")
+    );
+    assert!(tpmt.message.contains("derselben Genkopie"));
+    let anonymous_apoe = find(
+        &evaluate("local,19,45411941,CT\nrs7412,19,45412079,CC\n"),
+        "apoe",
+    );
+    assert_eq!(anonymous_apoe.status, Status::Missing);
+    assert_eq!(
+        anonymous_apoe.checks[0].status,
+        "Genomort ohne bestätigte rsID"
+    );
+    let reference_only = find(
+        &evaluate("rs4244285,10,96541616,GG\nrs12248560,10,96521657,CC\n"),
+        "cyp2c19",
+    );
+    assert_eq!(
+        reference_only.conclusion.as_deref(),
+        Some("CYP2C19: *2-Marker ×0, *17-Marker ×0")
+    );
+    assert!(reference_only.item.limits.contains("keinen vollständigen"));
     let adh1b = find(&evaluate("rs1229984,4,100239319,CT\n"), "adh1b");
     assert_eq!(adh1b.dosage, Some(1));
     assert!(!adh1b.item.is_clinical());
@@ -839,7 +860,7 @@ fn medicine_pass_is_one_page_and_includes_medicines() {
     assert!(text.starts_with("1\n"), "{text}");
     for expected in [
         "Medicine pass",
-        "*1/*3: intermediate metabolizer",
+        "*2 marker ×0, *3 marker ×1",
         "VKORC1",
         "SLCO1B1",
     ] {
