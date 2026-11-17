@@ -7,7 +7,7 @@ Roots Local v0.3.0 is a static web app. The browser reads local inputs and runs 
 | Component | State |
 | --- | --- |
 | App | Build `9697c896d2e990f2` is live on [rootslocal.pages.dev](https://rootslocal.pages.dev/) via [Pages deployment a5538be3](https://a5538be3.rootslocal.pages.dev/). Deployment source is commit `66c8fde`. |
-| Custom domain | `rootslocal.maximilianauer.at` is attached to the Pages project. The DNS record and managed certificate await validation. |
+| Custom domain | `rootslocal.maximilianauer.at` is attached to the Pages project. The authoritative DNS server still returns NXDOMAIN. The Wrangler OAuth session can deploy Pages but cannot write DNS, so the CNAME needs to be added through the zone dashboard. |
 | Portfolio | [Project index](https://maximilianauer.at/projects/), planned detail page `/projects/rootslocal/` and privacy section `/legal/#rootslocal` are staged. |
 
 ### Code and privacy
@@ -16,6 +16,7 @@ Roots Local v0.3.0 is a static web app. The browser reads local inputs and runs 
 - The document CSP meta tag uses `connect-src 'none'`. The HTTP policy in `public/_headers` allows workers to fetch the app's own static assets. The app has no receiving endpoint. The only browser storage managed by the app is the language setting and the cache of program files. Exports use local downloads. Users' device settings control synchronization of their downloads folder.
 - `66c8fde` preserves the synthetic screenshot script and updates the browser tests. The tests wait for service worker activation and handle WebKit's first-page controller behavior before starting the measured workflow. Chromium request recording includes service worker requests. A separate test injects a failed static download during cache setup.
 - Cloudflare processes connection metadata when serving files. The public Pages host still adds `NEL` and `Report-To` at the edge even though the app's `_headers` asks to remove them. The legal notice describes what Cloudflare may receive. Check these separately on the custom host.
+- All 28 public app files on `rootslocal.pages.dev` matched the local build's SHA-256 manifest. The 12 live tests passed in desktop Chromium, desktop WebKit, iPhone emulation and Pixel emulation. They include file import, local CRAM coverage, PDF exports with report structure checks, browser storage inspection and offline operation. Cloudflare parses `_headers` as configuration and does not publish it as an asset.
 
 ### Portfolio changes
 
