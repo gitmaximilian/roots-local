@@ -11,6 +11,7 @@
 #let confidence(value) = (high: tr("hoch", "high"), moderate: tr("mittel", "moderate"), low: tr("gering", "low")).at(value)
 #let first-sentence(text) = text.split(". ").at(0).trim(".") + "."
 #let medicines = report.findings.filter(f => f.section.starts-with("15.") and f.conclusion != none)
+#let dense = medicines.len() > 6
 #let gene(f) = f.checks.at(0).gene
 
 #text(size: 9pt, weight: "bold", fill: theme, tracking: 0.1em)[ROOTS LOCAL]
@@ -38,11 +39,14 @@
       #place(bottom + left, text(size: 5.4pt)[#tr("Unbestätigte Verbraucherdaten · nicht für Dosisentscheidungen ohne Arzt", "Unconfirmed consumer data · not for dosing decisions without a physician")])
     ]
   ]
-  #v(7mm)
-  #table(columns: (22%, 1fr, 13%), stroke: (x, y) => if y > 0 { (top: 0.5pt + rgb("#dbe4df")) }, inset: (x: 0pt, y: 5pt), column-gutter: 4mm,
-    text(size: 8.5pt, fill: secondary)[#tr("Gen", "Gene")],
-    text(size: 8.5pt, fill: secondary)[#tr("Ergebnis und Bedeutung", "Result and meaning")],
-    text(size: 8.5pt, fill: secondary)[#tr("Sicherheit", "Confidence")],
+  #v(if dense { 4mm } else { 7mm })
+  #set text(size: if dense { 9pt } else { 10.5pt })
+  #table(columns: (22%, 1fr, 13%), stroke: (x, y) => if y > 0 { (top: 0.5pt + rgb("#dbe4df")) }, inset: (x: 0pt, y: if dense { 3pt } else { 5pt }), column-gutter: 4mm,
+    table.header(
+      text(size: 8.5pt, fill: secondary)[#tr("Gen", "Gene")],
+      text(size: 8.5pt, fill: secondary)[#tr("Ergebnis und Bedeutung", "Result and meaning")],
+      text(size: 8.5pt, fill: secondary)[#tr("Sicherheit", "Confidence")],
+    ),
     ..medicines.map(f => (
       [#text(weight: "bold", fill: theme, gene(f)) \ #text(size: 8pt, fill: secondary, f.checks.map(c => c.id).join(", "))],
       [#f.conclusion \ #text(size: 8.5pt, fill: secondary, f.summary)],

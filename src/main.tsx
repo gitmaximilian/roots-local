@@ -1594,7 +1594,7 @@ function App() {
                 <Heading
                   title={t("Medikamentenpass")}
                   description={t(
-                    "Alle Hinweise zu Medikamenten auf einer Seite, für Ärztin, Arzt oder Apotheke.",
+                    "Hinweise zu geprüften Medikamentenmarkern für das ärztliche Gespräch.",
                   )}
                 />
                 {!model ? (

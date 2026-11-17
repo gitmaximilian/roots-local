@@ -869,6 +869,68 @@ fn medicine_pass_is_one_page_and_includes_medicines() {
     assert!(!text.contains("Lactase"));
 }
 
+#[test]
+fn medicine_pass_fits_full_starter_coverage_in_both_languages() {
+    let Some(python) = std::env::var_os("ROOTS_TEST_PYTHON") else {
+        return;
+    };
+    let catalog = Catalog::starter().unwrap();
+    let mut raw = COLUMNS.to_owned();
+    for marker in catalog.markers().unwrap() {
+        let [allele, ..] = marker.5.as_bytes() else {
+            continue;
+        };
+        if marker.3 > 0 {
+            let allele = char::from(*allele);
+            raw.push_str(&format!(
+                "{},{},{},{allele}{allele}\n",
+                marker.0, marker.2, marker.3
+            ));
+        }
+    }
+    let data = import::parse(raw.as_bytes(), &AtomicBool::new(false)).unwrap();
+    let model = report::Model::new(
+        analysis::summary(&data),
+        catalog.version.clone(),
+        analysis::evaluate(&data, &catalog).unwrap(),
+        true,
+    );
+    let directory = tempfile::tempdir().unwrap();
+    let path = directory.path().join("pass.pdf");
+    for language in [
+        roots_core::locale::Language::En,
+        roots_core::locale::Language::De,
+    ] {
+        fs::write(
+            &path,
+            render(
+                &model,
+                report::Options {
+                    language,
+                    pass: true,
+                    ..Default::default()
+                },
+            )
+            .unwrap(),
+        )
+        .unwrap();
+        let report = std::process::Command::new(&python)
+            .args([
+                "-c",
+                "from pypdf import PdfReader; import sys; print(len(PdfReader(sys.argv[1]).pages))",
+            ])
+            .arg(&path)
+            .output()
+            .unwrap();
+        assert!(report.status.success(), "{:?}", report.stderr);
+        assert_eq!(
+            String::from_utf8_lossy(&report.stdout).trim(),
+            "1",
+            "{language:?}"
+        );
+    }
+}
+
 /// Renders through the same Typst crate and fonts the web app uses.
 fn render(model: &report::Model, options: report::Options) -> Result<Vec<u8>, String> {
     let prepared = report::prepare(model, options)?;

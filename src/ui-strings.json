@@ -224,7 +224,6 @@
   "Geschlechtschromosomen": "sex chromosomes",
   "X-Positionen": "X positions",
   "Alkohol & Kaffee": "Alcohol & coffee",
-  "Alle Hinweise zu Medikamenten auf einer Seite, für Ärztin, Arzt oder Apotheke.": "All medicine notes on one page, for your physician or pharmacist.",
   "Alle Schlussfolgerungen": "All conclusions",
   "Alle anzeigen": "Show all",
   "Aussehen": "Appearance",
@@ -277,5 +276,6 @@
   "Einstufung der Katalogregel, keine persönliche Wahrscheinlichkeit.": "Catalog rule grade. Personal probability is not estimated.",
   "Je näher am Zentrum, desto höher die Einstufung der Katalogregel.": "Closer to the center means a higher catalog rule grade.",
   "Beim Neuladen endet deine aktuelle Sitzung.": "Reloading ends your current session.",
-  "Schließe die anderen Roots-Local-Tabs und versuche es erneut.": "Close your other Roots Local tabs and try again."
+  "Schließe die anderen Roots-Local-Tabs und versuche es erneut.": "Close your other Roots Local tabs and try again.",
+  "Hinweise zu geprüften Medikamentenmarkern für das ärztliche Gespräch.": "Notes on tested medication markers for a conversation with a clinician."
 }
