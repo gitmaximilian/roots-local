@@ -53,4 +53,4 @@ Run the deterministic cases with `node scripts/interpretation-benchmark.mjs`. To
 
 ## Release
 
-The prior live app is [c95d1886](https://c95d1886.rootslocal.pages.dev/) and the prior portfolio is [7e29e27d](https://7e29e27d.maximilianauer.pages.dev/). See [deployment notes](../deployment.md) for the final production record.
+App build `5f542a72add2736f` is live on the [custom app domain](https://rootslocal.maximilianauer.at/) via [047b2778](https://047b2778.rootslocal.pages.dev/). The [portfolio detail](https://maximilianauer.at/projects/rootslocal/) is live via [15276057](https://15276057.maximilianauer.pages.dev/). See [deployment notes](../deployment.md) for the source revision, asset and HTTP checks, Cloudflare rule and rollback targets.

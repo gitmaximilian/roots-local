@@ -13,6 +13,18 @@ Roots Local is a web app. The macOS desktop app (v0.2.0) was retired on 2026-11-
 
 ## Verification log
 
+### November 17 audit release
+
+The final app build `5f542a72add2736f` passed 28 browser checks on the custom domain after the Cloudflare response-header fix. Desktop Chromium, desktop WebKit, iPhone 15 emulation and Pixel 7 emulation each passed the checked online and offline workflows with synthetic data. The local suite passed 31 cases and had five intentional browser-specific skips. It also exercised retry during offline cache setup and a waiting update that preserves a second active tab. Native Rust (22), Python (5) and WebAssembly/native parity comparisons (5) passed. The dense one-page medicine pass was inspected visually in both languages.
+
+```sh
+ROOTS_BASE_URL=https://rootslocal.maximilianauer.at \
+ROOTS_TEST_PYTHON=/path/to/python-with-pypdf \
+npm run test:e2e -- --grep-invert 'retries a failed|a waiting update'
+```
+
+The online workflows recorded zero cross-origin requests from startup and zero requests after startup was ready. Browser storage held the language choice and static program files. Chromium and Pixel reloaded offline before importing the synthetic file. WebKit remained in its open tab and used the built-in synthetic profile offline because its Playwright emulation does not support offline reload and file selection. PDF preview, pagination and export worked in each environment. Physical device testing, a manual screen reader test and independent clinical validation remain open. See [the audit verification record](audit/verification.md) for the comparison against a local language model and the accessibility and performance checks.
+
 **2026-11-17, inherited deployment.** The Pages project `rootslocal` already serves build `6b1a0dd0be00d2c1` at [rootslocal.pages.dev](https://rootslocal.pages.dev/), deployment `a2cab228`. The planned custom domain has no DNS response. On the existing deployment, 10 of 12 browser checks passed. The offline cases in Desktop Chromium and Pixel emulation failed while waiting for the service worker to take control. Chromium reported a network failure during `Cache.addAll()`. The Pages endpoint also sends Cloudflare's `NEL` and `Report-To` headers.
 
 **2026-11-17, local release candidate.** Rebuilt both WebAssembly modules. Their SHA-256 hashes matched the previous deployment. Repeated the frontend build with the same toolchain and got matching output checksums. Rust 1.99.1, wasm-bindgen 0.2.100, Binaryen 133 and Node.js 23.11.0 were used for the local build. Rust tests (21), Python tests (5) and parity checks (5) passed. The Chromium and Pixel regression injects a connection reset during precaching and verifies that the failed asset is requested again and the offline cache then activates. The release candidate remains local pending approval of the production destination.

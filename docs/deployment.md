@@ -2,13 +2,30 @@
 
 Roots Local v0.3.0 is a static web app. The browser reads local inputs and runs the Rust analysis and Typst PDF engines in WebAssembly. The repository retains desktop history through the v0.2.0 release.
 
-## November 17, 2026 rollout
+## November 17, 2026 audit release
+
+| Component | Production | Pages deployment | Rollback |
+| --- | --- | --- | --- |
+| App | [rootslocal.maximilianauer.at](https://rootslocal.maximilianauer.at/) · build `5f542a72add2736f` · source [`2b9e3fc`](https://github.com/gitmaximilian/roots-local/commit/2b9e3fc) | [047b2778](https://047b2778.rootslocal.pages.dev/) | [c95d1886](https://c95d1886.rootslocal.pages.dev/) |
+| Portfolio | [Project index](https://maximilianauer.at/projects/) · [Roots Local detail](https://maximilianauer.at/projects/rootslocal/) · [Privacy section](https://maximilianauer.at/legal/#rootslocal) | [15276057](https://15276057.maximilianauer.pages.dev/) | [7e29e27d](https://7e29e27d.maximilianauer.pages.dev/) |
+
+- The production app served the generated manifest as `text/plain` after the `2b9e3fc` header correction. All 27 public files matched its SHA-256 digests on the custom domain. `_headers` is checked locally and consumed by Pages. HTTPS responses for all 27 carried CSP, HSTS, COOP, COEP, CORP and the referrer policy. No `Content-Security-Policy-Report-Only`, `NEL`, `Report-To`, `Reporting-Endpoints`, `Speculation-Rules` or `Set-Cookie` appeared in those responses.
+- A WebKit offline run detected Cloudflare's script-monitoring requests during online startup, before loading a DNA profile. The **Roots Local privacy headers** rule now also removes `content-security-policy-report-only` on `rootslocal.maximilianauer.at`. The enforcing CSP was verified after the change. Cloudflare documents the reporting mechanism under [client-side security](https://developers.cloudflare.com/client-side-security/reference/settings/#reporting-endpoint).
+- Cloudflare separately serves the Pages aliases and can add its own reporting headers there. The production privacy checks use the custom app domain. Connection metadata is processed when Cloudflare serves the static application.
+- The final production suite passed 28 browser checks after the rule change. It covered four browser profiles, including import, CRAM, finding close, first-visit language, PDF preview and export, network and storage checks, and offline operation. The failure injection and two-tab update checks ran against the local release build. See [test status](test-status.md#november-17-audit-release) for commands and scope.
+- Portfolio release files include `projects/index.html`, `projects/rootslocal/index.html`, the Roots Local entries in `projects/projects.js`, and six refreshed synthetic screenshots. The Roots Local script and image references use `20261117-audit`. The CTA reads **Open Roots Local** / **Roots Local öffnen**. The project index, detail and legal route were checked on the apex, WWW, Pages alias and deployment host. The three previous project cards matched the rollback site byte for byte. The seven Roots Local image assets and translation script matched the staged files. The legacy TranslateOCR redirect returned 301. Window widths of 390 and 1280 px passed the visual layout and image checks in English and German. The legal page displays both languages on one page.
+- The staged portfolio archive `output/ux-audit/portfolio-release.zip` has SHA-256 `e72a5908a8256deab844300f8ac6fd8db0fda94bb393b99c7adb225327c1ae3f`. The portfolio workspace records the release in `PUBLISHING.md` and `deployment.json` with a source backup in `before-rootslocal-audit-2026-11-17/`.
+- Roll app and portfolio back separately in Pages if needed. The Cloudflare response-header transform applies independently of the app build. After rollback, check `/version.txt`, all public checksums, the privacy workflow and the offline cache on the custom app domain.
+
+See [the audit](audit/2026-11-17.md), [the verification record](audit/verification.md) and [PR #3](https://github.com/gitmaximilian/roots-local/pull/3).
+
+## November 17, 2026 initial rollout
 
 | Component | State |
 | --- | --- |
-| App | Build `9697c896d2e990f2` is live on [rootslocal.maximilianauer.at](https://rootslocal.maximilianauer.at/) and [rootslocal.pages.dev](https://rootslocal.pages.dev/) via [Pages deployment c95d1886](https://c95d1886.rootslocal.pages.dev/). Deployment source is commit `84d462d`. |
+| App | Build `9697c896d2e990f2` was published via [Pages deployment c95d1886](https://c95d1886.rootslocal.pages.dev/). The release documentation recorded commit `84d462d`; the audit branch started at `6aa29eb` and verified the same live build. |
 | Custom domain | The Pages project uses the proxied `rootslocal` CNAME pointing to `rootslocal.pages.dev`. Public HTTP redirects to HTTPS and the certificate is accepted by the browser and curl. |
-| Portfolio | [Project index](https://maximilianauer.at/projects/), [Roots Local detail](https://maximilianauer.at/projects/rootslocal/) and [privacy section](https://maximilianauer.at/legal/#rootslocal) are live via [Pages deployment 7e29e27d](https://7e29e27d.maximilianauer.pages.dev/). |
+| Portfolio | The project index, Roots Local detail and privacy section were published via [Pages deployment 7e29e27d](https://7e29e27d.maximilianauer.pages.dev/). |
 
 ### Code and privacy
 
@@ -37,6 +54,6 @@ Roots Local v0.3.0 is a static web app. The browser reads local inputs and runs 
 4. Run `curl -I https://rootslocal.maximilianauer.at/` and check the worker and WebAssembly headers too. Compare the live assets against the build's `SHA256SUMS`. Run the browser suite with `ROOTS_BASE_URL=https://rootslocal.maximilianauer.at npm run test:e2e`. Set `ROOTS_TEST_PYTHON` to an interpreter with `pypdf` to enable PDF text and structure checks.
 5. Publish the portfolio to the separate Cloudflare Pages project `maximilianauer`, branch `main`. Check the project index, detail page and legal anchor on the apex, WWW and Pages domains. Update the deployment record with the exact Pages deployment URL.
 
-Cloudflare Pages supports rolling back each project independently. The portfolio rollback target is [e03a1226](https://e03a1226.maximilianauer.pages.dev/). App deployment [a5538be3](https://a5538be3.rootslocal.pages.dev/) predates the HTML integrity fix. Keep the `no-transform` header in any replacement build on the custom domain.
+Use the rollback targets in the current release record. App deployment [a5538be3](https://a5538be3.rootslocal.pages.dev/) predates the HTML integrity fix. Keep the `no-transform` header in any replacement build on the custom domain.
 
 See [test status](test-status.md) for the exact coverage and remaining physical device and regulatory checks.
