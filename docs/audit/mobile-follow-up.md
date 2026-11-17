@@ -14,3 +14,9 @@ The new Playwright case uses touch events at 320 px to verify language switching
 ## Verification
 
 The production build passed 33 local Playwright tests with seven intentional profile skips. All 16 live iPhone and Pixel browser checks passed, including first-tap controls, local file input, no network traffic during the measured processing workflow, and offline PDF preview and export. See the [deployment record](../deployment.md#november-17-2026-mobile-follow-up).
+
+## Header-free mobile layout
+
+The mobile shell now omits the top bar. The dock contains Overview, Chapters, Search, and Menu. The menu includes Atlas, PDF, and the other secondary destinations. Its Settings section contains the language picker and the medical visibility toggle. The intro also offers language selection before data import. The dock opens the search input directly on the first tap.
+
+Build `a3f4b42fd3cd1876` from `d63345e` shipped via [419e7e63](https://419e7e63.rootslocal.pages.dev/). The mobile rollback target is [b53b2dd1](https://b53b2dd1.rootslocal.pages.dev/).
