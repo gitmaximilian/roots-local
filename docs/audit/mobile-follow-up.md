@@ -20,3 +20,11 @@ The production build passed 33 local Playwright tests with seven intentional pro
 The mobile shell now omits the top bar. The dock contains Overview, Chapters, Search, and Menu. The menu includes Atlas, PDF, and the other secondary destinations. Its Settings section contains the language picker and the medical visibility toggle. The intro also offers language selection before data import. The dock opens the search input directly on the first tap.
 
 Build `a3f4b42fd3cd1876` from `d63345e` shipped via [419e7e63](https://419e7e63.rootslocal.pages.dev/). The mobile rollback target is [b53b2dd1](https://b53b2dd1.rootslocal.pages.dev/).
+
+## MyHeritage copy and chapter scrolling
+
+At the breakpoint where Chapters becomes one column, the index now scrolls normally with the chapter text. Sticky positioning previously let the vertically stacked index cover the text. The browser regression checks this on both mobile profiles.
+
+The repository description, [README](../../README.md#which-myheritage-download-to-use), portfolio card, and project detail now focus on the standard MyHeritage **DNA data file**. The README distinguishes the separately available WGS CRAM file and links the provider's source documentation.
+
+App build `00d4ea5941d7502e` from `b3b66a1` went live via [4ecc0b2d](https://4ecc0b2d.rootslocal.pages.dev/) with [419e7e63](https://419e7e63.rootslocal.pages.dev/) as rollback. The portfolio went live via [137c6ace](https://137c6ace.maximilianauer.pages.dev/) with [15276057](https://15276057.maximilianauer.pages.dev/) as rollback.
