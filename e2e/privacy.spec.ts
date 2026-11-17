@@ -81,6 +81,10 @@ async function workflow(page: Page, source: "file" | "example" = "file") {
   await page.getByRole("button", { name: /^(Ask|Fragen)$/ }).click();
 
   await go(page, /PDF report|PDF-Report/);
+  await page.getByRole("button", { name: "Preview", exact: true }).click();
+  await expect(page.locator("canvas[aria-label^='PDF preview, page']")).toBeVisible();
+  await page.getByRole("button", { name: "Next PDF page", exact: true }).click();
+  await expect(page.locator("canvas[aria-label='PDF preview, page 2']")).toBeVisible();
   const english = await save(page, /^(Export PDF|PDF exportieren)/);
   verifyPdf(english.path, "en", source);
   await page.getByRole("radio", { name: /Summary report/ }).check();
@@ -91,7 +95,7 @@ async function workflow(page: Page, source: "file" | "example" = "file") {
   const pass = await save(page, /Export pass as PDF|Pass als PDF exportieren/);
   expect(pass.name).toContain("Medicine Pass");
 
-  await page.getByRole("combobox", { name: "Language" }).selectOption("de");
+  await page.getByRole("button", { name: "Deutsch", exact: true }).click();
   await go(page, /PDF-Report/);
   await page.getByRole("radio", { name: /Vollreport/ }).check();
   const german = await save(page, /^PDF exportieren/);

@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useRef, useState } from "react";
-import { Search } from "lucide-react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { Search, X } from "lucide-react";
 import { t } from "./locale";
 
 export type Command = {
@@ -20,6 +20,7 @@ export function CommandPalette({
   const [query, setQuery] = useState("");
   const [active, setActive] = useState(0);
   const input = useRef<HTMLInputElement>(null);
+  const dialog = useRef<HTMLDialogElement>(null);
   const list = useRef<HTMLUListElement>(null);
   const results = useMemo(() => {
     const words = query.toLowerCase().split(/\s+/).filter(Boolean);
@@ -31,7 +32,12 @@ export function CommandPalette({
       })
       .slice(0, 40);
   }, [commands, query]);
-  useEffect(() => input.current?.focus(), []);
+  useLayoutEffect(() => {
+    const popup = dialog.current!;
+    popup.showModal();
+    input.current?.focus();
+    return () => popup.close();
+  }, []);
   useEffect(() => setActive(0), [query]);
   useEffect(() => {
     list.current
@@ -45,22 +51,20 @@ export function CommandPalette({
     command.run();
   }
   return (
-    <div
+    <dialog
+      ref={dialog}
       className="palette-backdrop"
+      aria-label={t("Befehle und Suche")}
+      onCancel={(event) => { event.preventDefault(); onClose(); }}
       onMouseDown={(event) => {
         if (event.target === event.currentTarget) onClose();
       }}
     >
       <div
         className="palette"
-        role="dialog"
-        aria-modal="true"
-        aria-label={t("Befehle und Suche")}
         onKeyDown={(event) => {
-          if (event.key === "Escape") {
-            event.preventDefault();
-            onClose();
-          } else if (event.key === "ArrowDown") {
+          if (event.target !== input.current || !results.length) return;
+          if (event.key === "ArrowDown") {
             event.preventDefault();
             setActive((i) => Math.min(i + 1, results.length - 1));
           } else if (event.key === "ArrowUp") {
@@ -72,19 +76,22 @@ export function CommandPalette({
           }
         }}
       >
-        <label>
+        <div className="palette-field">
           <Search size={17} />
           <input
             ref={input}
             value={query}
             onChange={(event) => setQuery(event.target.value)}
             placeholder={t("Befund, Gen, rsID oder Befehl")}
+            aria-label={t("Befund, Gen, rsID oder Befehl")}
             role="combobox"
-            aria-expanded="true"
-            aria-controls="palette-results"
-            aria-activedescendant={`palette-${active}`}
+            aria-expanded={results.length > 0}
+            aria-controls={results.length ? "palette-results" : undefined}
+            aria-activedescendant={results.length ? `palette-${active}` : undefined}
           />
-        </label>
+          <button type="button" className="palette-close" onClick={onClose}
+            aria-label={t("Suche schließen")}><X size={18} aria-hidden="true" /></button>
+        </div>
         {results.length ? (
           <ul ref={list} id="palette-results" role="listbox">
             {results.map((command, index) => (
@@ -92,7 +99,7 @@ export function CommandPalette({
                 <button
                   id={`palette-${index}`}
                   data-index={index}
-                  role="option"
+                  role="option" tabIndex={-1}
                   aria-selected={index === active}
                   onMouseMove={() => setActive(index)}
                   onClick={() => choose(index)}
@@ -107,6 +114,6 @@ export function CommandPalette({
           <p className="none">{t("Keine Treffer.")}</p>
         )}
       </div>
-    </div>
+    </dialog>
   );
 }

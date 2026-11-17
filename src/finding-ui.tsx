@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { ArrowRight, X } from "lucide-react";
 import { resultText, t } from "./locale";
 import type { Confidence, Finding, MarkerCheck, Status } from "./types";
+import { usePanelFocus } from "./panel-focus";
 
 export const statusLabels = () => ({
   personal: t("Auswertbar"),
@@ -31,7 +32,7 @@ export function ConfidenceMeter({ value }: { value: Confidence }) {
     low: t("Geringe Sicherheit"),
   }[value];
   return (
-    <span className="confidence" title={label}>
+    <span className="confidence" title={t("Einstufung der Katalogregel, keine persönliche Wahrscheinlichkeit.")}>
       <b aria-hidden="true">
         {[1, 2, 3].map((n) => (
           <i key={n} className={n <= confidenceLevel[value] ? "on" : ""} />
@@ -60,22 +61,27 @@ export function Inspector({
   onShowMedical,
   onClose,
   openVariant,
+  modal,
 }: {
   finding: Finding;
   showMedical: boolean;
   onShowMedical: () => void;
   onClose: () => void;
   openVariant: OpenVariant;
+  modal: boolean;
 }) {
+  const panel = useRef<HTMLElement>(null);
+  usePanelFocus(panel, true, modal, onClose);
   const [copied, setCopied] = useState<string>();
   const conclusion = visibleConclusion(finding, showMedical);
   const hidden = isMedical(finding) && !showMedical;
   return (
-    <aside className="inspector" aria-label={t("Befunddetails")}>
+    <aside ref={panel} className="inspector" role={modal ? "dialog" : undefined}
+      aria-modal={modal || undefined} aria-label={t("Befunddetails")} tabIndex={-1}>
       <header>
         <span>{t("Befund")}</span>
-        <button onClick={onClose} aria-label={t("Details schließen")}>
-          <X size={16} />
+        <button type="button" data-initial-focus onClick={onClose} aria-label={t("Details schließen")}>
+          <X size={20} aria-hidden="true" />
         </button>
       </header>
       <div className="body">

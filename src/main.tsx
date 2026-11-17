@@ -10,7 +10,6 @@ import englishChapters from "../catalog/report-structure.en.json";
 import germanChapters from "../catalog/report-structure.de.json";
 import React, {
   createContext,
-  lazy,
   Suspense,
   useContext,
   useEffect,
@@ -29,6 +28,8 @@ import {
   registerOffline,
 } from "./platform";
 import { LEGAL_URL, Privacy } from "./privacy";
+import { PdfPreview, preparePdfPreview } from "./pdf-preview";
+import { usePanelFocus } from "./panel-focus";
 import type { ExtraKind } from "./protocol";
 import { Logo, Mark } from "./brand";
 import { CommandPalette, type Command } from "./command-palette";
@@ -72,9 +73,11 @@ import {
   X,
   type LucideIcon,
 } from "lucide-react";
-const PdfPreview = lazy(() =>
-  import("./pdf-preview").then((module) => ({ default: module.PdfPreview })),
-);
+// WebKit needs the renderer initialized while online to display a preview
+// after a connection loss. The document itself is generated only on demand.
+void preparePdfPreview().then(() => {
+  document.documentElement.dataset.preview = "ready";
+}).catch(() => undefined);
 import "./style.css";
 
 import type {
@@ -100,6 +103,14 @@ const number = {
   },
 };
 const MedicalContext = createContext(false);
+const defaultOptions: Options = {
+  short: false,
+  name: "",
+  include_calls: false,
+  include_relatives: false,
+  include_clinical: false,
+  include_lineage: false,
+};
 const navigation = (): { id: Page; label: string; Icon: LucideIcon }[] => [
   { id: "home", label: t("Übersicht"), Icon: Layers },
   { id: "chapters", label: t("Kapitel"), Icon: BookOpen },
@@ -691,10 +702,19 @@ function App() {
   const chapters: Chapter[] =
     language === "de" ? germanChapters : englishChapters;
   const [model, setModel] = useState<Report>();
+  const [phone, setPhone] = useState(() => matchMedia("(max-width: 760px)").matches);
+  useEffect(() => {
+    const media = matchMedia("(max-width: 760px)");
+    const resize = () => setPhone(media.matches);
+    media.addEventListener("change", resize);
+    return () => media.removeEventListener("change", resize);
+  }, []);
   function switchLanguage(value: Language) {
+    if (running.current || value === language) return;
     setLanguage(value);
     setUiLanguage(value);
     setPreview(undefined);
+    setPassPreview(undefined);
     setError("");
     setNotice("");
   }
@@ -702,22 +722,18 @@ function App() {
   const [filter, setFilter] = useState<Status | "all">("all");
   const [query, setQuery] = useState("");
   const [busy, setBusy] = useState("");
+  const running = React.useRef(false);
   const [progress, setProgress] = useState<number>();
-  const [update, setUpdate] = useState<() => void>();
+  const [update, setUpdate] = useState<(onBlocked: () => void) => void>();
   const [navOpen, setNavOpen] = useState(false);
+  const sidebar = React.useRef<HTMLElement>(null);
+  usePanelFocus(sidebar, phone && navOpen, true, () => setNavOpen(false));
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
   const [origins, setOrigins] = useState("");
   const [key, setKey] = useState("");
   const [version, setVersion] = useState(starterCatalog.version);
-  const [options, setOptions] = useState<Options>({
-    short: false,
-    name: "",
-    include_calls: false,
-    include_relatives: false,
-    include_clinical: false,
-    include_lineage: false,
-  });
+  const [options, setOptions] = useState<Options>(defaultOptions);
   const [preview, setPreview] = useState<ArrayBuffer>();
   const [anchor, setAnchor] = useState("");
   const [variantJump, setVariantJump] = useState<{
@@ -729,11 +745,13 @@ function App() {
   const [passPreview, setPassPreview] = useState<ArrayBuffer>();
   const [paletteOpen, setPaletteOpen] = useState(false);
   const [dropping, setDropping] = useState(false);
-  const showMedical = options.include_clinical;
+  const [showMedical, setMedicalVisible] = useState(false);
   function setShowMedical(value: boolean) {
-    setOptions((current) => ({ ...current, include_clinical: value }));
-    setPreview(undefined);
+    if (running.current) return;
+    setMedicalVisible(value);
+    setPassPreview(undefined);
   }
+  useEffect(() => setPassPreview(undefined), [options]);
   useEffect(() => {
     if (!anchor || page !== "chapters") return;
     const element = document.getElementById(`finding-${anchor}`);
@@ -777,10 +795,12 @@ function App() {
     setModel(result);
     setVersion(result.catalog_version);
     setPreview(undefined);
+    setPassPreview(undefined);
   };
   function navigate(page: Page) {
     setPage(page);
     setNavOpen(false);
+    setInspected(undefined);
     document.querySelector(".content")?.scrollTo(0, 0);
   }
   function selectChapter(id: string) {
@@ -806,6 +826,8 @@ function App() {
     action: () => Promise<T>,
     done: (value: T) => void,
   ) {
+    if (running.current) return;
+    running.current = true;
     setBusy(label);
     setError("");
     setNotice("");
@@ -818,23 +840,27 @@ function App() {
           : t("Der Vorgang konnte nicht abgeschlossen werden."),
       );
     } finally {
+      running.current = false;
       setBusy("");
       setProgress(undefined);
     }
   }
-  function imported(result: Report) {
-    setReport(result);
+  function clearProfileControls() {
     setVariantJump(undefined);
     setInspected(undefined);
+    setAnchor("");
+    setArea(undefined);
+    setQuery("");
+    setFilter("all");
     setOrigins("");
-    setOptions({
-      short: false,
-      name: "",
-      include_calls: false,
-      include_relatives: false,
-      include_clinical: false,
-      include_lineage: false,
-    });
+    setMedicalVisible(false);
+    setOptions(defaultOptions);
+    setPreview(undefined);
+    setPassPreview(undefined);
+  }
+  function imported(result: Report) {
+    clearProfileControls();
+    setReport(result);
     navigate("home");
   }
   function importData(example: boolean) {
@@ -1025,6 +1051,7 @@ function App() {
   }, []);
 
   const inspectedFinding = results.find((finding) => finding.id === inspected);
+  const mobileInspector = phone && Boolean(inspectedFinding);
   const counts = useMemo(() => {
     const map = new Map<string, number>();
     for (const finding of results) {
@@ -1130,7 +1157,16 @@ function App() {
             onClick={() => setNavOpen(false)}
           />
         )}
-        <aside className="sidebar">
+        <aside ref={sidebar} className="sidebar" id="app-sidebar" tabIndex={-1}
+          inert={mobileInspector} role={phone && navOpen ? "dialog" : undefined}
+          aria-modal={phone && navOpen ? true : undefined}
+          aria-label={phone && navOpen ? t("Hauptnavigation") : undefined}>
+          {phone && navOpen && (
+            <button type="button" className="close-menu" data-initial-focus
+              onClick={() => setNavOpen(false)} aria-label={t("Menü schließen")}>
+              <X size={20} aria-hidden="true" />
+            </button>
+          )}
           <button className="brand" onClick={() => navigate("home")}>
             <Logo size={24} />
             <span>Roots Local</span>
@@ -1212,12 +1248,13 @@ function App() {
             </a>
           </div>
         </aside>
-        <main>
+        <main inert={(phone && navOpen) || mobileInspector}>
           <div className="topbar">
             <button
               className="menu-button"
               aria-label={t("Menü")}
               aria-expanded={navOpen}
+              aria-controls="app-sidebar"
               onClick={() => setNavOpen(true)}
             >
               <List size={20} />
@@ -1236,6 +1273,7 @@ function App() {
                   <input
                     type="checkbox"
                     checked={showMedical}
+                    disabled={!!busy}
                     onChange={(event) => setShowMedical(event.target.checked)}
                   />
                   <span className="track" aria-hidden="true" />
@@ -1251,30 +1289,25 @@ function App() {
                 <span>{t("Suchen")}</span>
                 <kbd>{isApple ? "⌘K" : "Ctrl K"}</kbd>
               </button>
-              <label className="language-control">
-                <select
-                  aria-label={language === "de" ? "Sprache" : "Language"}
-                  value={language}
-                  disabled={!!busy}
-                  onChange={(event) =>
-                    switchLanguage(event.target.value as Language)
-                  }
-                >
-                  <option value="en" lang="en">
-                    English
-                  </option>
-                  <option value="de" lang="de">
-                    Deutsch
-                  </option>
-                </select>
-              </label>
+              <div className="language-control" role="group" aria-label={t("Sprache")}>
+                {([["en", "English"], ["de", "Deutsch"]] as const).map(([code, label]) => (
+                  <button key={code} type="button" lang={code} aria-label={label}
+                    aria-pressed={language === code} disabled={!!busy}
+                    onClick={() => switchLanguage(code)}>
+                    <span className="language-full">{label}</span>
+                    <span className="language-short" aria-hidden="true">{code.toUpperCase()}</span>
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
           <div className="content">
             {update && (
               <div className="feedback" role="status">
-                <span>{t("Eine neue Version von Roots Local ist bereit.")}</span>
-                <button className="text-button" onClick={update}>
+                <span>{t("Eine neue Version von Roots Local ist bereit.")}{" "}
+                  {model && t("Beim Neuladen endet deine aktuelle Sitzung.")}</span>
+                <button className="text-button" disabled={!!busy}
+                  onClick={() => update(() => setNotice(t("Schließe die anderen Roots-Local-Tabs und versuche es erneut.")))}>
                   {t("Neu laden")}
                 </button>
               </div>
@@ -1317,6 +1350,7 @@ function App() {
                     title={t("Was deine DNA sagt")}
                     description={`${t("MyHeritage-Format")} · ${model.summary.format} · ${model.summary.build || t("Referenzgenom unbekannt")} · ${t("Katalog")} ${model.catalog_version}`}
                   />
+                  {model.example && <p className="example example-mobile">{t("Synthetisches Beispielprofil")}</p>}
                   <div className="stats">
                     <div>
                       <small>{t("Schlussfolgerungen")}</small>
@@ -1361,6 +1395,7 @@ function App() {
                       onShowMedical={() => setShowMedical(true)}
                       onOpen={(finding) => setInspected(finding.id)}
                     />
+                    <div>
                     <NucleusRadar
                       findings={results}
                       showMedical={showMedical}
@@ -1370,6 +1405,8 @@ function App() {
                         id === "medicines" ? navigate("pass") : setArea(id)
                       }
                     />
+                    <p className="radar-key">{t("Je näher am Zentrum, desto höher die Einstufung der Katalogregel.")}</p>
+                    </div>
                   </div>
                   <header className="section-heading">
                     <h2>{t("Deine Lebensbereiche")}</h2>
@@ -1541,6 +1578,7 @@ function App() {
                         {t("Beispiel ansehen")}
                       </button>
                     </div>
+                    <p className="local-note">{t("Die Analyse läuft im Browser auf diesem Gerät.")}</p>
                     <p className="formats">
                       {t("CSV, TSV, TXT oder ZIP")} ·{" "}
                       {t("Oder die Datei einfach ins Fenster ziehen.")}
@@ -2091,9 +2129,7 @@ function App() {
                               () => call("reset", {}),
                               () => {
                                 setModel(undefined);
-                                setVariantJump(undefined);
-                                setOrigins("");
-                                setPreview(undefined);
+                                clearProfileControls();
                                 navigate("home");
                               },
                             )
@@ -2346,6 +2382,7 @@ function App() {
             onShowMedical={() => setShowMedical(true)}
             onClose={() => setInspected(undefined)}
             openVariant={openVariant}
+            modal={mobileInspector}
           />
         )}
         {paletteOpen && (

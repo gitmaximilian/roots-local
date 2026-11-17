@@ -15,4 +15,5 @@ export async function started(page: Page) {
   expect(await page.evaluate(() => navigator.serviceWorker.controller?.state)).toBe("activated");
   await expect(page.locator("html")).toHaveAttribute("data-analysis", "ready", { timeout: 60_000 });
   await expect(page.locator("html")).toHaveAttribute("data-pdf", "ready", { timeout: 90_000 });
+  await expect(page.locator("html")).toHaveAttribute("data-preview", "ready", { timeout: 30_000 });
 }

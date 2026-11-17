@@ -253,45 +253,21 @@ const normalize = (value: string) =>
     .replace(/[̀-ͯ]/g, "")
     .replace(/[^a-z0-9*]+/g, " ")
     .trim();
-const STOP = new Set(
-  "ich mich mir mein meine habe hab bin der die das ein eine und oder von mit fur nach wie was welche welchen welcher ist sind bei ob zu do does i my me am is a an the of to how what which can for are".split(
-    " ",
-  ),
-);
-const words = (value: string) =>
-  normalize(value)
-    .split(" ")
-    .filter((w) => w.length > 1 && !STOP.has(w));
-
-/** Matches a question against each rule's questions, title, and genes. Fully offline. */
+/** An answer requires an exact documented question or an unambiguous catalog topic. */
 export function answer(query: string, findings: Finding[]) {
-  const asked = words(query);
-  if (!asked.length) return undefined;
-  let best: { finding: Finding; score: number } | undefined;
-  for (const finding of findings) {
-    const texts = [
-      ...(finding.questions ?? []).map(resultText),
-      resultText(finding.title),
-      ...finding.checks.flatMap((c) => [c.gene, c.id]),
-    ];
-    for (const text of texts) {
-      const known = new Set(words(text));
-      if (!known.size) continue;
-      const hits = asked.filter(
-        (w) =>
-          known.has(w) ||
-          [...known].some(
-            (k) =>
-              k.length > 4 &&
-              w.length > 4 &&
-              (k.startsWith(w) || w.startsWith(k)),
-          ),
-      ).length;
-      const score = hits / Math.max(asked.length, 1) + hits / known.size / 2;
-      if (hits && (!best || score > best.score)) best = { finding, score };
-    }
-  }
-  return best && best.score >= 0.5 ? best.finding : undefined;
+  const asked = normalize(query);
+  if (!asked) return undefined;
+  const matches = (terms: string[]) => terms.some((term) =>
+    normalize(term) === asked || normalize(resultText(term)) === asked,
+  );
+  const topics = findings.filter((finding) =>
+    matches([finding.title, ...(finding.questions ?? [])]),
+  );
+  if (topics.length) return topics.length === 1 ? topics[0] : undefined;
+  const markers = findings.filter((finding) =>
+    matches(finding.checks.flatMap((check) => [check.id, ...check.gene.split(" / ")])),
+  );
+  return markers.length === 1 ? markers[0] : undefined;
 }
 
 export function AskDna({
@@ -306,7 +282,7 @@ export function AskDna({
   onOpen: (finding: Finding) => void;
 }) {
   const [query, setQuery] = useState("");
-  const [asked, setAsked] = useState<{ query: string; finding?: Finding }>();
+  const [asked, setAsked] = useState<{ findingId?: string }>();
   const suggestions = useMemo(
     () =>
       findings
@@ -324,14 +300,15 @@ export function AskDna({
   );
   function ask(value: string, finding?: Finding) {
     setQuery(value);
-    setAsked({ query: value, finding: finding ?? answer(value, findings) });
+    setAsked({ findingId: (finding ?? answer(value, findings))?.id });
   }
-  const found = asked?.finding;
+  const found = findings.find((finding) => finding.id === asked?.findingId);
   const hidden = found && isMedical(found) && !showMedical;
   const conclusion = found && visibleConclusion(found, showMedical);
   return (
     <section className="ask" aria-label={t("Frag deine DNA")}>
       <h2>{t("Frag deine DNA")}</h2>
+      <p className="ask-help">{t("Die Suche gleicht deine Frage mit lokalen Katalogregeln ab.")}</p>
       <form
         className="ask-field"
         onSubmit={(event) => {
@@ -375,6 +352,7 @@ export function AskDna({
             <>
               <span className="ask-topic">{resultText(found.title)}</span>
               {conclusion && <strong>{conclusion}</strong>}
+              {conclusion && <p>{resultText(found.limits)}</p>}
               {hidden && (
                 <p>
                   {t(
@@ -391,6 +369,8 @@ export function AskDna({
                     "Zu dieser Frage kann deine Datei noch keine Schlussfolgerung stützen.",
                   )}{" "}
                   {resultText(found.message)}
+                  {" "}{found.checks.filter((check) => !check.call)
+                    .map((check) => `${check.id} (${resultText(check.status)})`).join(" · ")}
                 </p>
               )}
               <span className="ask-foot">

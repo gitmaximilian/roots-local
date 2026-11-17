@@ -52,14 +52,22 @@ self.addEventListener("activate", (event) => {
 
 // A new version waits until the page asks it to take over.
 self.addEventListener("message", (event) => {
-  if (event.data === "activate-update") self.skipWaiting();
+  if (event.data !== "activate-update") return;
+  event.waitUntil((async () => {
+    const windows = await self.clients.matchAll({ type: "window", includeUncontrolled: true });
+    if (windows.some((client) => client.id !== event.source?.id)) {
+      event.ports[0]?.postMessage("other-tabs");
+      return;
+    }
+    await self.skipWaiting();
+  })());
 });
 
 self.addEventListener("fetch", (event) => {
   const request = event.request;
   const url = new URL(request.url);
   if (request.method !== "GET" || url.origin !== self.location.origin) return;
-  const key = request.mode === "navigate" ? "/" : url.pathname;
+  const key = url.pathname === "/index.html" ? "/" : url.pathname;
   event.respondWith(
     caches
       .open(CACHE)

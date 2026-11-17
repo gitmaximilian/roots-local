@@ -3,12 +3,30 @@ import { useEffect, useRef, useState } from "react";
 import {
   getDocument,
   GlobalWorkerOptions,
+  PDFWorker,
+  type PDFDocumentLoadingTask,
   type PDFDocumentProxy,
 } from "pdfjs-dist";
 import worker from "pdfjs-dist/build/pdf.worker.min.mjs?url";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 
 GlobalWorkerOptions.workerSrc = worker;
+
+let renderer: Promise<PDFWorker> | undefined;
+export function preparePdfPreview() {
+  renderer ??= (async () => {
+    const pdf = new PDFWorker();
+    try {
+      await pdf.promise;
+      return pdf;
+    } catch (error) {
+      pdf.destroy();
+      renderer = undefined;
+      throw error;
+    }
+  })();
+  return renderer;
+}
 
 export function PdfPreview({ bytes }: { bytes: ArrayBuffer }) {
   const canvas = useRef<HTMLCanvasElement>(null);
@@ -21,13 +39,19 @@ export function PdfPreview({ bytes }: { bytes: ArrayBuffer }) {
     setPage(1);
     setDocument(undefined);
     setError(false);
-    const load = getDocument({
-      data: new Uint8Array(bytes.slice(0)),
-      isEvalSupported: false,
-      useSystemFonts: false,
-      useWasm: false,
-    });
-    load.promise
+    let load: PDFDocumentLoadingTask | undefined;
+    preparePdfPreview()
+      .then((worker) => {
+        if (!active) return;
+        load = getDocument({
+          worker,
+          data: new Uint8Array(bytes.slice(0)),
+          isEvalSupported: false,
+          useSystemFonts: false,
+          useWasm: false,
+        });
+        return load.promise;
+      })
       .then((result) => {
         if (active) setDocument(result);
       })
@@ -36,7 +60,7 @@ export function PdfPreview({ bytes }: { bytes: ArrayBuffer }) {
       });
     return () => {
       active = false;
-      void load.destroy();
+      void load?.destroy().catch(() => undefined);
     };
   }, [bytes]);
 

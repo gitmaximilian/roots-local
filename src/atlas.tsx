@@ -231,6 +231,12 @@ export function Atlas({
         </div>
       </div>
       <aside className="atlas-side" aria-live="polite">
+        <label className="field">
+          {t("Chromosom auswählen")}
+          <select value={chromosome} onChange={(event) => setChromosome(event.target.value)}>
+            {ORDER.map((name) => <option key={name} value={name}>{name}</option>)}
+          </select>
+        </label>
         <h2>
           {t("Chromosom")} {chromosome}
         </h2>

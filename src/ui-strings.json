@@ -266,5 +266,16 @@
   "Datenschutz": "Privacy",
   "Eine neue Version von Roots Local ist bereit.": "A new version of Roots Local is ready.",
   "Neu laden": "Reload",
-  "Menü": "Menu"
+  "Menü": "Menu",
+  "Sprache": "Language",
+  "Menü schließen": "Close menu",
+  "Suche schließen": "Close search",
+  "Chromosom auswählen": "Choose chromosome",
+  "Die Suche gleicht deine Frage mit lokalen Katalogregeln ab.": "Search matches your question to local catalog rules.",
+  "Die Analyse läuft im Browser auf diesem Gerät.": "Analysis runs in your browser on this device.",
+  "Synthetisches Beispielprofil": "Synthetic example profile",
+  "Einstufung der Katalogregel, keine persönliche Wahrscheinlichkeit.": "Catalog rule grade. Personal probability is not estimated.",
+  "Je näher am Zentrum, desto höher die Einstufung der Katalogregel.": "Closer to the center means a higher catalog rule grade.",
+  "Beim Neuladen endet deine aktuelle Sitzung.": "Reloading ends your current session.",
+  "Schließe die anderen Roots-Local-Tabs und versuche es erneut.": "Close your other Roots Local tabs and try again."
 }

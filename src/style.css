@@ -284,12 +284,34 @@ main {
   font-family: var(--mono);
   font-size: 11px;
 }
-.language-control select {
-  padding: 4px 6px;
+.language-control {
+  display: inline-flex;
+  flex: none;
+  gap: 2px;
+  padding: 2px;
   border: 1px solid var(--line);
-  border-radius: 7px;
+  border-radius: 9px;
   background: var(--surface);
 }
+.language-control button {
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  min-height: 29px;
+  padding: 3px 8px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 650;
+}
+.language-control button[aria-pressed="true"] {
+  background: var(--accent-soft);
+  color: var(--ink);
+}
+.language-short,
+.example-mobile { display: none; }
+.local-note,
+.ask-help,
+.radar-key { color: var(--muted); }
 .example {
   font-size: 11px;
   font-weight: 600;
@@ -968,11 +990,23 @@ main {
   color: var(--muted);
   font-size: 12px;
 }
-.inspector header button {
+.inspector header button,
+.close-menu,
+.palette-close {
   border: 0;
-  background: none;
+  border-radius: 8px;
+  background: var(--surface);
   color: var(--muted);
-  display: flex;
+  display: inline-grid;
+  place-items: center;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0;
+}
+.inspector header button:hover,
+.close-menu:hover,
+.palette-close:hover {
+  background: var(--accent-soft);
 }
 .inspector .body {
   overflow-y: auto;
@@ -1008,6 +1042,12 @@ main {
 
 /* ---------- command palette ---------- */
 .palette-backdrop {
+  margin: 0;
+  border: 0;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  max-height: none;
   position: fixed;
   inset: 0;
   background: var(--overlay);
@@ -1024,7 +1064,7 @@ main {
   box-shadow: 0 24px 60px -12px rgba(0, 0, 0, 0.45);
   overflow: hidden;
 }
-.palette label {
+.palette-field {
   display: flex;
   align-items: center;
   gap: 10px;
@@ -1033,6 +1073,7 @@ main {
 }
 .palette input {
   flex: 1;
+  min-width: 0;
   border: 0;
   background: none;
   font-size: 16px;
@@ -1582,9 +1623,11 @@ tr.clickable:hover td {
     font-size: 0;
     gap: 0;
   }
-  .language-control select {
-    width: 104px;
-  }
+  .language-full { display: none; }
+  .language-short { display: inline; }
+  .language-control button { min-width: 44px; min-height: 44px; }
+  .example-mobile { display: inline-block; align-self: flex-start; }
+  .close-menu { align-self: end; margin: 0 4px 4px 0; }
   .content {
     padding: 16px calc(16px + env(safe-area-inset-right))
       calc(40px + env(safe-area-inset-bottom))
@@ -1625,6 +1668,12 @@ tr.clickable:hover td {
   .variant-table {
     overflow-x: auto;
   }
+  .welcome { padding: 20px; }
+  .welcome-copy h1 { font-size: 28px; }
+  .finding summary { flex-wrap: wrap; }
+  .finding summary > span:first-child { flex: 1 0 100%; }
+  .finding-content { min-width: 0; overflow-wrap: anywhere; }
+  .finding-content table { display: block; overflow-x: auto; }
 }
 .file-input {
   position: fixed;

@@ -121,35 +121,65 @@ export const isApple = /Mac|iPhone|iPad|iPod/.test(navigator.platform || navigat
  * Registers the service worker that keeps this build's static files for
  * offline use. A new version waits until the user agrees to reload.
  */
-export function registerOffline(onUpdate: (apply: () => void) => void) {
+export function registerOffline(onUpdate: (apply: (onBlocked: () => void) => void) => void) {
   if (!("serviceWorker" in navigator) || import.meta.env.DEV) return;
   // Reload only after the user accepted an update. On the first visit the new
   // service worker also takes control, and that must not interrupt the user.
   let accepted = false;
-  navigator.serviceWorker.addEventListener("controllerchange", () => {
+  let disposed = false;
+  let stopWatching: (() => void) | undefined;
+  let replies: MessagePort | undefined;
+  const controllerChanged = () => {
     if (!accepted) return;
     accepted = false;
+    replies?.close();
     location.reload();
-  });
+  };
+  navigator.serviceWorker.addEventListener("controllerchange", controllerChanged);
   void navigator.serviceWorker
     .register("/sw.js", { scope: "/", updateViaCache: "none" })
     .then((registration) => {
+      if (disposed) return;
       const offer = (waiting: ServiceWorker) =>
-        onUpdate(() => {
+        onUpdate((onBlocked) => {
+          if (accepted) return;
+          const channel = new MessageChannel();
+          replies = channel.port1;
+          channel.port1.onmessage = () => {
+            accepted = false;
+            channel.port1.close();
+            onBlocked();
+          };
           accepted = true;
-          waiting.postMessage("activate-update");
+          waiting.postMessage("activate-update", [channel.port2]);
         });
       if (registration.waiting && navigator.serviceWorker.controller) {
         offer(registration.waiting);
       }
-      registration.addEventListener("updatefound", () => {
+      let stopInstallation: (() => void) | undefined;
+      const watchInstallation = () => {
+        stopInstallation?.();
         const installing = registration.installing;
-        installing?.addEventListener("statechange", () => {
-          if (installing.state === "installed" && navigator.serviceWorker.controller) {
+        const stateChanged = () => {
+          if (installing?.state === "installed" && navigator.serviceWorker.controller) {
             offer(installing);
           }
-        });
-      });
+        };
+        installing?.addEventListener("statechange", stateChanged);
+        stopInstallation = () => installing?.removeEventListener("statechange", stateChanged);
+      };
+      watchInstallation();
+      registration.addEventListener("updatefound", watchInstallation);
+      stopWatching = () => {
+        stopInstallation?.();
+        registration.removeEventListener("updatefound", watchInstallation);
+      };
     })
     .catch(() => undefined);
+  return () => {
+    disposed = true;
+    stopWatching?.();
+    replies?.close();
+    navigator.serviceWorker.removeEventListener("controllerchange", controllerChanged);
+  };
 }
