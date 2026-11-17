@@ -10,3 +10,7 @@ The reported iPhone icon had a visible inset tile. The mobile toolbar also misse
 [First entry on iPhone emulation](assets/mobile-intro.jpg) · [Mobile dock with synthetic data](assets/mobile-dock.jpg)
 
 The new Playwright case uses touch events at 320 px to verify language switching before and after loading data, first-tap search focus and selection, and dock navigation. Physical iOS Home Screen masking and keyboard appearance need a device check.
+
+## Verification
+
+The production build passed 33 local Playwright tests with seven intentional profile skips. All 16 live iPhone and Pixel browser checks passed, including first-tap controls, local file input, no network traffic during the measured processing workflow, and offline PDF preview and export. See the [deployment record](../deployment.md#november-17-2026-mobile-follow-up).

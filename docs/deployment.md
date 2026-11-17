@@ -2,6 +2,10 @@
 
 Roots Local v0.3.0 is a static web app. The browser reads local inputs and runs the Rust analysis and Typst PDF engines in WebAssembly. The repository retains desktop history through the v0.2.0 release.
 
+## November 17, 2026 mobile follow-up
+
+[Production](https://rootslocal.maximilianauer.at/) serves build `9429d0e3901f1f7b` from source [`0ffe2a8`](https://github.com/gitmaximilian/roots-local/commit/0ffe2a8) via [Pages deployment b53b2dd1](https://b53b2dd1.rootslocal.pages.dev/). The app rollback target for this update is [047b2778](https://047b2778.rootslocal.pages.dev/). All 27 public assets matched the build manifest and `/icons/touch-180.png` was served as `image/png`. See the [mobile audit notes](audit/mobile-follow-up.md) for the changes and device evidence.
+
 ## November 17, 2026 audit release
 
 | Component | Production | Pages deployment | Rollback |
@@ -54,6 +58,6 @@ See [the audit](audit/2026-11-17.md), [the verification record](audit/verificati
 4. Run `curl -I https://rootslocal.maximilianauer.at/` and check the worker and WebAssembly headers too. Compare the live assets against the build's `SHA256SUMS`. Run the browser suite with `ROOTS_BASE_URL=https://rootslocal.maximilianauer.at npm run test:e2e`. Set `ROOTS_TEST_PYTHON` to an interpreter with `pypdf` to enable PDF text and structure checks.
 5. Publish the portfolio to the separate Cloudflare Pages project `maximilianauer`, branch `main`. Check the project index, detail page and legal anchor on the apex, WWW and Pages domains. Update the deployment record with the exact Pages deployment URL.
 
-Use the rollback targets in the current release record. App deployment [a5538be3](https://a5538be3.rootslocal.pages.dev/) predates the HTML integrity fix. Keep the `no-transform` header in any replacement build on the custom domain.
+Use the rollback target for the component and release being rolled back. App deployment [a5538be3](https://a5538be3.rootslocal.pages.dev/) predates the HTML integrity fix. Keep the `no-transform` header in any replacement build on the custom domain.
 
 See [test status](test-status.md) for the exact coverage and remaining physical device and regulatory checks.
