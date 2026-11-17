@@ -150,10 +150,6 @@ export function registerOffline(onUpdate: (apply: () => void) => void) {
           }
         });
       });
-      // Check for a new version when the app returns to the foreground.
-      document.addEventListener("visibilitychange", () => {
-        if (document.visibilityState === "visible") void registration.update().catch(() => undefined);
-      });
     })
     .catch(() => undefined);
 }

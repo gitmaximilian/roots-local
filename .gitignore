@@ -40,3 +40,4 @@ output/
 src/generated/
 test-results/
 playwright-report/
+.wrangler/

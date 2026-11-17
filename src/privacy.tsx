@@ -1,6 +1,6 @@
 import { getLanguage } from "./locale";
 
-export const LEGAL_URL = "https://maximilianauer.at/legal/";
+export const LEGAL_URL = "https://maximilianauer.at/legal/#rootslocal";
 export const SOURCE_URL = "https://github.com/gitmaximilian/roots-local";
 
 type Copy = {
@@ -15,34 +15,34 @@ type Copy = {
 
 const en: Copy = {
   title: "Privacy",
-  lead: "Roots Local runs entirely in your browser. Your DNA file is read and analyzed on this device. Nothing is uploaded, and nothing is sent to anyone.",
+  lead: "Roots Local reads and analyzes your DNA file on this device. Your files, names and results stay in your browser session.",
   sections: [
     {
       heading: "What happens to your files",
       body: [
         "When you open a file, your browser hands it to Roots Local directly. A background worker in this tab reads it piece by piece and analyzes it in memory. There is no server that could receive it: the app is a set of static files without any backend, API, or form.",
         "PDF reports and the medicine pass are created in your browser and saved with your browser's normal download. They are not sent anywhere either.",
-        "When you close the tab or select Close session, the data is gone. Roots Local does not store DNA data, results, names, or exports in the browser: no cookies, no local storage of data, no database.",
+        "Closing the tab or selecting Close session clears the analysis from the app. Downloaded exports remain on your device until you delete them. Your device settings determine whether your downloads folder is synced.",
       ],
     },
     {
       heading: "What the app remembers",
       body: [
-        "Only your language choice is kept in this browser. After your first visit, your browser keeps the app's own program files so that it also works offline. These files contain no personal data.",
+        "Your browser stores your language choice and caches the app's program files for offline use. You can clear both in your browser's site settings.",
       ],
     },
     {
       heading: "How this is enforced",
       body: [
-        "A strict Content Security Policy only allows the page to load its own files. Requests to any other address are blocked by your browser. Roots Local uses no external fonts, no analytics, no error tracking, and no content from other services.",
-        "Automated tests load the app, import a synthetic DNA file, create both PDFs and the medicine pass, and fail if any network request happens after start-up. They also run the same steps offline.",
-        "The hosting provider (Cloudflare Pages) records the usual access data that every web server logs when the app's files are downloaded, such as IP address, time, and browser. It never sees your DNA file.",
+        "The Content Security Policy allows workers to load program files from this site. The page itself cannot open network connections to send data. Roots Local has no account, cookies, analytics, or advertising.",
+        "Browser tests import a synthetic DNA file, open the results, and export both reports and the medicine pass. They check for network requests after start-up and repeat the workflow offline.",
+        "Cloudflare Pages processes technical connection data when it serves the app files, such as IP address, time, browser and requested path. Depending on the host, your browser may send Cloudflare reports about failed connections. See the legal notice for details.",
       ],
     },
     {
       heading: "Medical limits",
       body: [
-        "Roots Local is not a diagnosis. Consumer DNA tests can be wrong. Medically relevant findings need confirmation in a certified laboratory and should be discussed with a physician.",
+        "Roots Local does not replace a diagnosis or guide medication choices or doses. Medically relevant results from consumer DNA tests require laboratory confirmation and medical interpretation.",
       ],
     },
   ],
@@ -51,7 +51,7 @@ const en: Copy = {
     "Open your browser's developer tools and select the Network tab.",
     "Reload Roots Local and wait until it has started. Then clear the list.",
     "Open your DNA file, browse the results, and export a PDF. The list stays empty.",
-    "Or switch your device to airplane mode after the first visit. Roots Local keeps working, including PDF export.",
+    "Once your browser has cached the app, switch your device to airplane mode and try importing a file and exporting a PDF.",
     "Each release lists the checksum of every file in SHA256SUMS, so you can compare the live app with a build of the public source code.",
   ],
   legal: "Legal notice and privacy policy",
@@ -60,34 +60,34 @@ const en: Copy = {
 
 const de: Copy = {
   title: "Datenschutz",
-  lead: "Roots Local läuft vollständig in deinem Browser. Deine DNA-Datei wird auf diesem Gerät gelesen und ausgewertet. Nichts wird hochgeladen und nichts wird an irgendwen gesendet.",
+  lead: "Roots Local liest und analysiert deine DNA-Datei auf diesem Gerät. Deine Dateien, Namen und Ergebnisse bleiben in deiner Browser-Sitzung.",
   sections: [
     {
       heading: "Was mit deinen Dateien passiert",
       body: [
         "Wenn du eine Datei öffnest, übergibt dein Browser sie direkt an Roots Local. Ein Hintergrundprozess in diesem Tab liest sie stückweise und wertet sie im Arbeitsspeicher aus. Es gibt keinen Server, der sie empfangen könnte: Die App besteht aus statischen Dateien ohne Backend, API oder Formular.",
         "PDF-Reports und der Medikamentenpass entstehen in deinem Browser und werden über den normalen Download gespeichert. Auch sie werden nirgendwohin gesendet.",
-        "Wenn du den Tab schließt oder „Sitzung schließen“ wählst, sind die Daten weg. Roots Local speichert keine DNA-Daten, Ergebnisse, Namen oder Exporte im Browser: keine Cookies, kein lokaler Datenspeicher, keine Datenbank.",
+        "Wenn du den Tab schließt oder „Sitzung schließen“ wählst, wird die Analyse aus der App entfernt. Heruntergeladene Exporte bleiben auf deinem Gerät, bis du sie löschst. Deine Geräteeinstellungen bestimmen, ob der Download-Ordner synchronisiert wird.",
       ],
     },
     {
       heading: "Was sich die App merkt",
       body: [
-        "Nur deine Sprachwahl bleibt in diesem Browser gespeichert. Nach dem ersten Besuch behält dein Browser die Programmdateien der App, damit sie auch offline funktioniert. Diese Dateien enthalten keine persönlichen Daten.",
+        "Dein Browser speichert deine Sprachwahl und hält die Programmdateien der App für die Offline-Nutzung im Cache bereit. Beides kannst du in den Website-Daten deines Browsers löschen.",
       ],
     },
     {
       heading: "Wie das erzwungen wird",
       body: [
-        "Eine strenge Content Security Policy erlaubt der Seite nur, ihre eigenen Dateien zu laden. Anfragen an andere Adressen blockiert dein Browser. Roots Local verwendet keine externen Schriften, keine Statistik, kein Fehler-Tracking und keine Inhalte anderer Dienste.",
-        "Automatische Tests laden die App, importieren eine synthetische DNA-Datei, erstellen beide PDFs und den Medikamentenpass und schlagen fehl, sobald nach dem Start irgendeine Netzwerkanfrage entsteht. Dieselben Schritte laufen auch offline.",
-        "Der Hosting-Anbieter (Cloudflare Pages) protokolliert beim Abruf der Programmdateien die üblichen Zugriffsdaten, die jeder Webserver erfasst, etwa IP-Adresse, Zeitpunkt und Browser. Deine DNA-Datei sieht er nie.",
+        "Die Content Security Policy erlaubt Hintergrundprozessen, Programmdateien von dieser Website zu laden. Die Seite selbst kann keine Netzwerkverbindung zum Senden von Daten öffnen. Roots Local hat kein Konto und verwendet keine Cookies, Analyse- oder Werbedienste.",
+        "Browsertests importieren eine synthetische DNA-Datei, öffnen die Ergebnisse und exportieren beide Reports und den Medikamentenpass. Sie prüfen Netzwerkanfragen nach dem Start und wiederholen den Ablauf offline.",
+        "Cloudflare Pages verarbeitet beim Abruf der Programmdateien technische Verbindungsdaten, etwa IP-Adresse, Zeitpunkt, Browser und angefragten Pfad. Je nach Host kann dein Browser Cloudflare technische Fehlermeldungen senden. Details stehen in der Datenschutzerklärung.",
       ],
     },
     {
       heading: "Medizinische Grenzen",
       body: [
-        "Roots Local ersetzt keine Diagnose. Verbraucher-DNA-Tests können sich irren. Medizinisch relevante Befunde müssen in einem zertifizierten Labor bestätigt und mit einer Ärztin oder einem Arzt besprochen werden.",
+        "Roots Local ersetzt keine Diagnose und dient nicht als Grundlage für die Auswahl oder Dosierung eines Arzneimittels. Medizinisch relevante Ergebnisse aus Verbraucher-DNA-Tests müssen durch eine Laboruntersuchung bestätigt und ärztlich eingeordnet werden.",
       ],
     },
   ],
@@ -96,7 +96,7 @@ const de: Copy = {
     "Öffne die Entwicklerwerkzeuge deines Browsers und wähle den Tab „Netzwerk“.",
     "Lade Roots Local neu und warte, bis die App gestartet ist. Leere dann die Liste.",
     "Öffne deine DNA-Datei, sieh dir die Ergebnisse an und exportiere ein PDF. Die Liste bleibt leer.",
-    "Oder schalte dein Gerät nach dem ersten Besuch in den Flugmodus. Roots Local funktioniert weiter, auch der PDF-Export.",
+    "Sobald dein Browser die App im Cache hat, schalte in den Flugmodus und versuche, eine Datei zu öffnen und ein PDF zu exportieren.",
     "Jede Version listet in SHA256SUMS die Prüfsumme jeder Datei. So kannst du die Live-App mit einem Build des öffentlichen Quellcodes vergleichen.",
   ],
   legal: "Impressum und Datenschutzerklärung",

@@ -11,10 +11,11 @@ import { expect, test, type BrowserContext, type Page } from "@playwright/test";
 import { execFileSync } from "node:child_process";
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
+import { started } from "./startup";
 
 const SAMPLE = fileURLToPath(new URL("../fixtures/synthetic-myheritage.txt", import.meta.url));
 const PYTHON = process.env.ROOTS_TEST_PYTHON;
-const ORIGIN = "http://127.0.0.1:4173";
+const ORIGIN = new URL(process.env.ROOTS_BASE_URL ?? "http://127.0.0.1:4173").origin;
 
 type Recorded = { url: string; phase: string };
 
@@ -27,15 +28,8 @@ function record(context: BrowserContext) {
     }
   };
   context.on("request", (request) => add(request.url()));
-  // Requests made from the service worker itself are reported separately.
-  context.on("serviceworker", (worker) => worker.on("request" as never, (r: { url(): string }) => add(r.url())));
+  // Chromium also reports service-worker-owned requests on the context.
   return { requests, state };
-}
-
-async function started(page: Page) {
-  await page.goto("/");
-  await expect(page.locator("html")).toHaveAttribute("data-analysis", "ready", { timeout: 60_000 });
-  await expect(page.locator("html")).toHaveAttribute("data-pdf", "ready", { timeout: 90_000 });
 }
 
 async function openFile(page: Page) {
@@ -128,7 +122,7 @@ test("no request after start-up and none to another origin", async ({ page, cont
   for (const engine of ["roots_wasm_bg", "roots_pdf_wasm_bg"]) {
     expect(requests.some((r) => r.phase === "start-up" && r.url.includes(engine)), engine).toBe(true);
   }
-  const foreign = requests.filter((r) => !r.url.startsWith(ORIGIN));
+  const foreign = requests.filter((r) => new URL(r.url).origin !== ORIGIN);
   expect(foreign, "requests to other origins").toEqual([]);
   const late = requests.filter((r) => r.phase === "after start-up");
   expect(late, "requests after start-up").toEqual([]);
@@ -149,11 +143,6 @@ test("no request after start-up and none to another origin", async ({ page, cont
 test("works offline after the first visit", async ({ page, context, browserName }) => {
   const { requests } = record(context);
   await started(page);
-  await page.evaluate(() => navigator.serviceWorker.ready);
-  // Wait until the service worker controls the page, then go offline.
-  await page.reload();
-  await expect(page.locator("html")).toHaveAttribute("data-pdf", "ready", { timeout: 90_000 });
-  expect(await page.evaluate(() => !!navigator.serviceWorker.controller)).toBe(true);
   await context.setOffline(true);
   if (browserName === "webkit") {
     // Playwright's WebKit offline emulation cannot reload a page ("internal
@@ -166,5 +155,22 @@ test("works offline after the first visit", async ({ page, context, browserName 
     await expect(page.locator("html")).toHaveAttribute("data-pdf", "ready", { timeout: 90_000 });
     await workflow(page);
   }
-  expect(requests.filter((r) => !r.url.startsWith(ORIGIN))).toEqual([]);
+  expect(requests.filter((r) => new URL(r.url).origin !== ORIGIN)).toEqual([]);
+});
+
+test("retries a failed static file download during offline setup", async ({ page, context, browserName }) => {
+  test.skip(
+    browserName !== "chromium" || Boolean(process.env.ROOTS_BASE_URL),
+    "requires interception of service worker downloads on the local build",
+  );
+  let attempts = 0;
+  await context.route("**/icons/maskable-512.png", async (route) => {
+    if (route.request().serviceWorker() && ++attempts === 1) {
+      await route.abort("connectionreset");
+    } else {
+      await route.continue();
+    }
+  });
+  await started(page);
+  expect(attempts).toBe(2);
 });

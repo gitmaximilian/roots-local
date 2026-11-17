@@ -6,8 +6,34 @@ const FILES = __FILES__;
 const CACHE = `roots-local-${VERSION}`;
 
 self.addEventListener("install", (event) => {
-  event.waitUntil(caches.open(CACHE).then((cache) => cache.addAll(FILES)));
+  event.waitUntil(precache());
 });
+
+async function precache() {
+  const cache = await caches.open(CACHE);
+  try {
+    for (let start = 0; start < FILES.length; start += 4) {
+      const batch = FILES.slice(start, start + 4);
+      const results = await Promise.allSettled(batch.map(async ([path, integrity]) => {
+        const response = await staticFile(path, integrity, "default").catch(() =>
+          staticFile(path, integrity, "reload"),
+        );
+        await cache.put(path, response);
+      }));
+      const failed = batch.filter((_, index) => results[index].status === "rejected");
+      if (failed.length) throw new Error(`Could not cache ${failed.map(([path]) => path).join(", ")}`);
+    }
+  } catch (error) {
+    await caches.delete(CACHE);
+    throw error;
+  }
+}
+
+async function staticFile(path, integrity, cache) {
+  const response = await fetch(path, { integrity, cache, redirect: "error" });
+  if (response.status !== 200) throw new Error(`HTTP ${response.status} for ${path}`);
+  return response;
+}
 
 self.addEventListener("activate", (event) => {
   event.waitUntil(

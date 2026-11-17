@@ -4,14 +4,14 @@
 import { expect, test } from "@playwright/test";
 import { existsSync } from "node:fs";
 import { fileURLToPath } from "node:url";
+import { started } from "./startup";
 
 const directory = fileURLToPath(new URL("../fixtures/cram/", import.meta.url));
 const files = ["synthetic.cram", "reference.fa", "reference.fa.fai"].map((name) => directory + name);
 
 test("decodes a local CRAM with its FASTA without any request", async ({ page, context }) => {
   test.skip(!files.every(existsSync), "run the roots-core tests with ROOTS_KEEP_CRAM=fixtures/cram first");
-  await page.goto("/");
-  await expect(page.locator("html")).toHaveAttribute("data-pdf", "ready", { timeout: 90_000 });
+  await started(page);
   const requests: string[] = [];
   // WebKit reports reading slices of the picked files as blob: loads; those
   // are local reads, not network requests.

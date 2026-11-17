@@ -1,5 +1,5 @@
-// Injects the Content Security Policy as a <meta> tag. The same policy, plus
-// frame-ancestors, is sent as an HTTP header through public/_headers.
+// The document needs no direct connections. The HTTP policy in public/_headers
+// allows same-origin connections for the workers that load static assets.
 // Subresource Integrity and the service worker are added after the build by
 // scripts/finalize.mjs, from the files as they were written.
 import type { Plugin } from "vite";
@@ -22,6 +22,7 @@ export const CSP = [
 // frame-ancestors is ignored in <meta>.
 const META_CSP = CSP.split("; ")
   .filter((rule) => !rule.startsWith("frame-ancestors"))
+  .map((rule) => rule.startsWith("connect-src") ? "connect-src 'none'" : rule)
   .join("; ");
 
 export function localOnly(): Plugin {
