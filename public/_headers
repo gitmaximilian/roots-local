@@ -20,7 +20,7 @@
   Cache-Control: no-cache
 
 /
-  Cache-Control: no-cache
+  Cache-Control: no-cache, no-transform
 
 /index.html
-  Cache-Control: no-cache
+  Cache-Control: no-cache, no-transform
