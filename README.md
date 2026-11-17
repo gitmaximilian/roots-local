@@ -23,6 +23,7 @@ After the first visit the app also works offline, and you can add it to your hom
 Roots Local does not replace a diagnosis. Medically relevant findings from consumer data need confirmation in a certified laboratory.
 
 - [Web app plan](docs/web-plan.md)
+- [Deployment and portfolio handover](docs/deployment.md)
 - [Platform verification and remaining milestones](docs/test-status.md)
 - [Report outline](docs/report-structure.md)
 - [Implementation brief](docs/implementation-brief.md)
