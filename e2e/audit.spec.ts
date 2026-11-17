@@ -42,11 +42,15 @@ test("starts in English, preserves the profile on language switch, and restores 
   await expect(search).toBeFocused();
   await page.getByRole("button", { name: "View example", exact: true }).click();
   await expect(page.getByRole("heading", { name: "What your DNA says" })).toBeVisible();
+  const mobileMenu = page.getByRole("button", { name: "Menu", exact: true });
+  if (await mobileMenu.isVisible()) await mobileMenu.click();
   const german = page.getByRole("button", { name: "Deutsch", exact: true });
   await german.focus();
   await german.press("Enter");
   await expect(german).toHaveAttribute("aria-pressed", "true");
   await expect(page.locator("html")).toHaveAttribute("lang", "de");
+  const closeMenu = page.getByRole("button", { name: "Menü schließen" });
+  if (await closeMenu.isVisible()) await closeMenu.click();
   await expect(page.getByRole("heading", { name: "Was deine DNA sagt" })).toBeVisible();
   const menu = page.getByRole("button", { name: "Menü", exact: true });
   if (await menu.isVisible()) {
@@ -113,8 +117,10 @@ test("phone dock, first-use guide, and first-tap controls", async ({ page }, inf
   await dock.getByRole("button", { name: "Overview", exact: true }).tap();
   await page.getByRole("button", { name: "View example", exact: true }).tap();
   await expect(page.getByRole("heading", { name: "What your DNA says" })).toBeVisible();
-  await dock.getByRole("button", { name: "Atlas", exact: true }).tap();
-  await expect(dock.getByRole("button", { name: "Atlas", exact: true })).toHaveAttribute("aria-current", "page");
+  await expect(page.locator(".topbar")).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "Deutsch", exact: true })).toHaveCount(0);
+  await dock.getByRole("button", { name: "Menu", exact: true }).tap();
+  await expect(page.getByRole("region", { name: "Settings" })).toBeVisible();
   await page.getByRole("button", { name: "Deutsch", exact: true }).tap();
   await expect(page.locator("html")).toHaveAttribute("lang", "de");
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(320);

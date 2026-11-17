@@ -95,7 +95,11 @@ async function workflow(page: Page, source: "file" | "example" = "file") {
   const pass = await save(page, /Export pass as PDF|Pass als PDF exportieren/);
   expect(pass.name).toContain("Medicine Pass");
 
+  const menu = page.getByRole("button", { name: "Menu", exact: true });
+  if (await menu.isVisible()) await menu.click();
   await page.getByRole("button", { name: "Deutsch", exact: true }).click();
+  const closeMenu = page.getByRole("button", { name: "Menü schließen" });
+  if (await closeMenu.isVisible()) await closeMenu.click();
   await go(page, /PDF-Report/);
   await page.getByRole("radio", { name: /Vollreport/ }).check();
   const german = await save(page, /^PDF exportieren/);

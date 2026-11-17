@@ -1109,12 +1109,12 @@ function App() {
           },
         ]
       : []),
-    {
+    ...(!phone ? [{
       id: "language",
       label: language === "de" ? "Switch to English" : "Auf Deutsch wechseln",
       hint: t("Befehl"),
       run: () => switchLanguage(language === "de" ? "en" : "de"),
-    },
+    }] : []),
     ...results.flatMap((finding) =>
       (finding.questions ?? []).map((question, index) => ({
         id: `question-${finding.id}-${index}`,
@@ -1145,6 +1145,25 @@ function App() {
         },
       })),
   ];
+
+  const languageControl = (
+    <div className="language-control" role="group" aria-label={t("Sprache")}>
+      {([["en", "English"], ["de", "Deutsch"]] as const).map(([code, label]) => (
+        <button key={code} type="button" lang={code} aria-pressed={language === code}
+          disabled={!!busy} onClick={() => switchLanguage(code)}>
+          {label}
+        </button>
+      ))}
+    </div>
+  );
+  const medicalControl = model && (
+    <label className="switch">
+      <input type="checkbox" checked={showMedical} disabled={!!busy}
+        onChange={(event) => setShowMedical(event.target.checked)} />
+      <span className="track" aria-hidden="true" />
+      {t("Medizinisch")}
+    </label>
+  );
 
   return (
     <MedicalContext.Provider value={showMedical}>
@@ -1196,7 +1215,7 @@ function App() {
                   )}
                 </button>
               ))}
-            {model && (
+            {model && !phone && (
               <>
                 <div className="group">{t("Kapitel")}</div>
                 {chapters
@@ -1235,6 +1254,11 @@ function App() {
                 </button>
               ))}
           </nav>
+          {phone && <section className="mobile-settings" aria-label={t("Einstellungen")}>
+            <h2>{t("Einstellungen")}</h2>
+            {languageControl}
+            {medicalControl}
+          </section>}
           <div className="sidebar-bottom">
             <button
               className={page === "privacy" ? "selected" : ""}
@@ -1250,10 +1274,9 @@ function App() {
           </div>
         </aside>
         <main inert={(phone && navOpen) || mobileInspector}>
-          <div className="topbar">
+          {!phone && <div className="topbar">
             <span className="title">
-              <span className="mobile-brand"><Logo size={26} />{page === "home" && !model ? "Roots Local" : null}</span>
-              <span className={!model && page === "home" ? "welcome-title" : undefined}>
+              <span>
                 {page === "privacy" ? t("Datenschutz") : navigation().find((n) => n.id === page)?.label}
               </span>
               {model?.example && (
@@ -1261,18 +1284,7 @@ function App() {
               )}
             </span>
             <div className="toolbar-actions">
-              {model && (
-                <label className="switch">
-                  <input
-                    type="checkbox"
-                    checked={showMedical}
-                    disabled={!!busy}
-                    onChange={(event) => setShowMedical(event.target.checked)}
-                  />
-                  <span className="track" aria-hidden="true" />
-                  {t("Medizinisch")}
-                </label>
-              )}
+              {medicalControl}
               <button
                 className="palette-trigger"
                 aria-label={t("Suchen")}
@@ -1282,18 +1294,9 @@ function App() {
                 <span>{t("Suchen")}</span>
                 <kbd>{isApple ? "⌘K" : "Ctrl K"}</kbd>
               </button>
-              <div className="language-control" role="group" aria-label={t("Sprache")}>
-                {([["en", "English"], ["de", "Deutsch"]] as const).map(([code, label]) => (
-                  <button key={code} type="button" lang={code} aria-label={label}
-                    aria-pressed={language === code} disabled={!!busy}
-                    onClick={() => switchLanguage(code)}>
-                    <span className="language-full">{label}</span>
-                    <span className="language-short" aria-hidden="true">{code.toUpperCase()}</span>
-                  </button>
-                ))}
-              </div>
+              {languageControl}
             </div>
-          </div>
+          </div>}
           <div className="content">
             {update && (
               <div className="feedback" role="status">
@@ -1548,6 +1551,7 @@ function App() {
               ) : (
                 <section className="welcome">
                   <div className="welcome-copy">
+                    {phone && languageControl}
                     <Heading
                       title={t("Deine DNA. Dein Gerät.")}
                       description={t(
@@ -2370,14 +2374,17 @@ function App() {
             )}
           </div>
           <nav className="mobile-dock" aria-label={t("Schnellnavigation")}>
-            {navigation().filter(({ id }) => id === "home" || id === "chapters" || id === "atlas" || id === "report")
+            {navigation().filter(({ id }) => id === "home" || id === "chapters")
               .map(({ id, label, Icon }) => (
                 <button key={id} type="button" aria-current={page === id ? "page" : undefined}
                   onClick={() => navigate(id)} disabled={id === "atlas" && !dataReady}>
                   <Icon size={21} aria-hidden="true" />
-                  <span>{id === "report" ? "PDF" : label}</span>
+                  <span>{label}</span>
                 </button>
               ))}
+            <button type="button" onClick={() => flushSync(() => setPaletteOpen(true))}>
+              <Search size={21} aria-hidden="true" /><span>{t("Suchen")}</span>
+            </button>
             <button type="button" className="menu-button" aria-expanded={navOpen}
               aria-controls="app-sidebar" onClick={(event) => {
                 event.currentTarget.focus({ preventScroll: true });
