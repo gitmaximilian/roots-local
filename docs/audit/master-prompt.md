@@ -2,6 +2,8 @@
 
 ## Aktuelle Schwerpunkte und Abnahme
 
+Beginne jede Nachricht an mich mit dem aktuellen Kapitel dieses Masterprompts und dem konkreten Arbeitsschritt. Zeige bei einem Phasenwechsel, was geprüft ist und was als Nächstes ansteht.
+
 1. **Befund schließen.** Reproduziere den gemeldeten X-Fehler nach „Frag deine DNA“, im Kern-Radar und im Atlas. Prüfe Desktop und Handy, Klick, Touch, Tastatur und Escape. Das X muss gut erreichbar und mit „Details schließen“ beschriftet sein. Nach dem Schließen soll der Fokus zur auslösenden Aktion zurückkehren. Prüfe auch den direkten Wechsel vom Befund in die Rohdaten und zurück.
 2. **Sprachauswahl.** Englisch ist beim ersten Besuch die feste Standardsprache von Roots Local, auch bei deutsch eingestelltem Browser oder Betriebssystem. App und neu erzeugte PDFs verwenden Englisch, bis man ausdrücklich Deutsch wählt. Überarbeite die sichtbare Sprachauswahl im Toolbar-Design. Sie soll Englisch und Deutsch verständlich benennen, die aktive Sprache zeigen und auf kleinen Geräten Platz für die übrigen Aktionen lassen. Prüfe hell/dunkel, Tastatur und Touch, lange deutsche Titel sowie den Sprachwechsel während eines importierten Profils. Kontrolliere die Sprache von Oberfläche, Befund und PDF. Die Browser-Speicherung bleibt auf die Sprachwahl begrenzt.
 3. **Interpretationsqualität.** Überprüfe die Befundkette mit synthetischen Referenzfällen und Primärquellen. Ein fairer Vergleich verwendet dieselben Eingaben und dieselbe vorab definierte Bewertung für Roots Local und ein namentlich benanntes LLM. Bewerte richtige Genotypzuordnung, begründete Enthaltung bei unbekannter Phase oder unzureichenden Markern sowie Nachvollziehbarkeit der Aussage. Halte Katalogabdeckung, klinische Validierung und LLM-Vergleich getrennt fest.
