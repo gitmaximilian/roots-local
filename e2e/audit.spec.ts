@@ -52,6 +52,10 @@ test("language switch keeps the profile and search restores focus", async ({ pag
     await page.keyboard.press("Escape");
     await expect(menu).toHaveAttribute("aria-expanded", "false");
     await expect(menu).toBeFocused();
+    await page.setViewportSize({ width: 320, height: 630 });
+    await menu.click();
+    await page.getByRole("navigation").getByRole("button", { name: /^Kapitel/ }).first().click();
+    expect(await page.locator(".content").evaluate((content) => content.scrollWidth - content.clientWidth)).toBeLessThanOrEqual(1);
   }
 });
 
