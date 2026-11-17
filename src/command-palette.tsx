@@ -35,7 +35,7 @@ export function CommandPalette({
   useLayoutEffect(() => {
     const popup = dialog.current!;
     popup.showModal();
-    input.current?.focus();
+    input.current?.focus({ preventScroll: true });
     return () => popup.close();
   }, []);
   useEffect(() => setActive(0), [query]);
@@ -56,7 +56,7 @@ export function CommandPalette({
       className="palette-backdrop"
       aria-label={t("Befehle und Suche")}
       onCancel={(event) => { event.preventDefault(); onClose(); }}
-      onMouseDown={(event) => {
+      onClick={(event) => {
         if (event.target === event.currentTarget) onClose();
       }}
     >

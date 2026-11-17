@@ -92,3 +92,30 @@ test("checksum navigation returns the manifest after the worker takes control", 
   expect(response?.ok()).toBe(true);
   expect(await response?.text()).toMatch(/^[0-9a-f]{64} {2}_headers/m);
 });
+
+test("phone dock, first-use guide, and first-tap controls", async ({ page }, info) => {
+  test.skip(!info.project.use.hasTouch, "requires a touch browser profile");
+  await started(page);
+  await page.setViewportSize({ width: 320, height: 650 });
+  const dock = page.getByRole("navigation", { name: "Quick navigation" });
+  await expect(dock).toBeInViewport();
+  await expect(page.getByRole("heading", { name: "Choose your data" })).toBeVisible();
+  await page.getByRole("button", { name: "Deutsch", exact: true }).tap();
+  await expect(page.getByRole("heading", { name: "Wähle deine Daten" })).toBeVisible();
+  await page.getByRole("button", { name: "English", exact: true }).tap();
+  const search = page.getByRole("button", { name: "Search", exact: true });
+  await search.tap();
+  const input = page.getByRole("dialog").getByRole("combobox");
+  await expect(input).toBeFocused();
+  await input.fill("chapters");
+  await page.getByRole("option", { name: /^Chapters/ }).first().tap();
+  await expect(input).toBeHidden();
+  await dock.getByRole("button", { name: "Overview", exact: true }).tap();
+  await page.getByRole("button", { name: "View example", exact: true }).tap();
+  await expect(page.getByRole("heading", { name: "What your DNA says" })).toBeVisible();
+  await dock.getByRole("button", { name: "Atlas", exact: true }).tap();
+  await expect(dock.getByRole("button", { name: "Atlas", exact: true })).toHaveAttribute("aria-current", "page");
+  await page.getByRole("button", { name: "Deutsch", exact: true }).tap();
+  await expect(page.locator("html")).toHaveAttribute("lang", "de");
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(320);
+});

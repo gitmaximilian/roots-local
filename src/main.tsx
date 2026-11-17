@@ -16,6 +16,7 @@ import React, {
   useMemo,
   useState,
 } from "react";
+import { flushSync } from "react-dom";
 import { createRoot } from "react-dom/client";
 import {
   call,
@@ -1250,19 +1251,11 @@ function App() {
         </aside>
         <main inert={(phone && navOpen) || mobileInspector}>
           <div className="topbar">
-            <button
-              className="menu-button"
-              aria-label={t("Menü")}
-              aria-expanded={navOpen}
-              aria-controls="app-sidebar"
-              onClick={() => setNavOpen(true)}
-            >
-              <List size={20} />
-            </button>
             <span className="title">
-              {page === "privacy"
-                ? t("Datenschutz")
-                : navigation().find((n) => n.id === page)?.label}
+              <span className="mobile-brand"><Logo size={26} />{page === "home" && !model ? "Roots Local" : null}</span>
+              <span className={!model && page === "home" ? "welcome-title" : undefined}>
+                {page === "privacy" ? t("Datenschutz") : navigation().find((n) => n.id === page)?.label}
+              </span>
               {model?.example && (
                 <span className="example">{t("Beispielprofil")}</span>
               )}
@@ -1283,7 +1276,7 @@ function App() {
               <button
                 className="palette-trigger"
                 aria-label={t("Suchen")}
-                onClick={() => setPaletteOpen(true)}
+                onClick={() => flushSync(() => setPaletteOpen(true))}
               >
                 <Search size={14} />
                 <span>{t("Suchen")}</span>
@@ -1558,31 +1551,34 @@ function App() {
                     <Heading
                       title={t("Deine DNA. Dein Gerät.")}
                       description={t(
-                        "Öffne deinen MyHeritage-Rohdatenexport. Roots Local zieht Schlüsse aus deinen Genotypen und zeigt, wie sicher sie sind.",
+                        "Öffne deinen MyHeritage-Rohdatenexport und erkunde Herkunft, Merkmale und Forschungsbefunde.",
                       )}
                     />
-                    <div className="actions">
-                      <button
-                        className="button"
-                        disabled={!!busy}
-                        onClick={() => importData(false)}
-                      >
-                        {t("DNA-Datei öffnen")}
-                        <ArrowRight size={16} />
-                      </button>
-                      <button
-                        className="button secondary"
-                        disabled={!!busy}
-                        onClick={() => importData(true)}
-                      >
-                        {t("Beispiel ansehen")}
-                      </button>
+                    <ul className="intro-promises">
+                      <li><LockKeyhole size={18} aria-hidden="true" />{t("Die Analyse läuft im Browser auf diesem Gerät.")}</li>
+                      <li><FileText size={18} aria-hidden="true" />{t("Ergebnisse mit Quellen, Grenzen und PDF-Export.")}</li>
+                    </ul>
+                    <div className="intro-import">
+                      <h2>{t("Wähle deine Daten")}</h2>
+                      <p className="formats">{t("MyHeritage-Rohdaten")} · {t("CSV, TSV, TXT oder ZIP")}</p>
+                      <div className="actions">
+                        <button
+                          className="button"
+                          disabled={!!busy}
+                          onClick={() => importData(false)}
+                        >
+                          {t("DNA-Datei öffnen")}
+                          <ArrowRight size={16} />
+                        </button>
+                        <button
+                          className="button secondary"
+                          disabled={!!busy}
+                          onClick={() => importData(true)}
+                        >
+                          {t("Beispiel ansehen")}
+                        </button>
+                      </div>
                     </div>
-                    <p className="local-note">{t("Die Analyse läuft im Browser auf diesem Gerät.")}</p>
-                    <p className="formats">
-                      {t("CSV, TSV, TXT oder ZIP")} ·{" "}
-                      {t("Oder die Datei einfach ins Fenster ziehen.")}
-                    </p>
                   </div>
                   <div className="helix" aria-hidden="true">
                     <Mark size={200} />
@@ -2373,6 +2369,23 @@ function App() {
               </>
             )}
           </div>
+          <nav className="mobile-dock" aria-label={t("Schnellnavigation")}>
+            {navigation().filter(({ id }) => id === "home" || id === "chapters" || id === "atlas" || id === "report")
+              .map(({ id, label, Icon }) => (
+                <button key={id} type="button" aria-current={page === id ? "page" : undefined}
+                  onClick={() => navigate(id)} disabled={id === "atlas" && !dataReady}>
+                  <Icon size={21} aria-hidden="true" />
+                  <span>{id === "report" ? "PDF" : label}</span>
+                </button>
+              ))}
+            <button type="button" className="menu-button" aria-expanded={navOpen}
+              aria-controls="app-sidebar" onClick={(event) => {
+                event.currentTarget.focus({ preventScroll: true });
+                setNavOpen(true);
+              }}>
+              <List size={21} aria-hidden="true" /><span>{t("Menü")}</span>
+            </button>
+          </nav>
         </main>
         {inspectedFinding && (
           <Inspector
