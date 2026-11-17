@@ -280,8 +280,6 @@
   "TCHH und Haarform": "TCHH and hair shape",
   "Die Studie von Medland und Kollegen fand einen Zusammenhang zwischen rs11803731 und der Form des Kopfhaars.": "Medland and colleagues found an association between rs11803731 and scalp hair shape.",
   "Australische Studienkohorten europäischer Abstammung": "Australian study cohorts of European ancestry",
-  "Wahrscheinlich laktosetolerant im Erwachsenenalter": "Likely lactose tolerant as an adult",
-  "Laktaseaktivität nimmt im Erwachsenenalter wahrscheinlich ab": "Lactase activity likely declines in adulthood",
   "Trockenes Ohrenschmalz": "Dry earwax",
   "Feuchtes Ohrenschmalz": "Wet earwax",
   "Kein Alpha-Actinin-3 in schnellen Muskelfasern": "No alpha-actinin-3 in fast-twitch muscle fibers",
@@ -480,5 +478,7 @@
   "TPMT: *3B-Marker ×2, *3C-Marker ×1": "TPMT: *3B marker ×2, *3C marker ×1",
   "TPMT: *3B-Marker ×2, *3C-Marker ×2": "TPMT: *3B marker ×2, *3C marker ×2",
   "Zwei Kopien des geprüften NUDT15-R139C-Allels. Das Ergebnis aus Verbraucherdaten braucht eine Laborbestätigung.": "Two copies of the tested NUDT15 R139C allele. This consumer result needs laboratory confirmation.",
-  "Keine Kopie des geprüften VKORC1 −1639A-Allels. Die Warfarin-Empfindlichkeit lässt sich daraus allein nicht bestimmen.": "No copy of the tested VKORC1 −1639A allele. This alone does not determine warfarin sensitivity."
+  "Keine Kopie des geprüften VKORC1 −1639A-Allels. Die Warfarin-Empfindlichkeit lässt sich daraus allein nicht bestimmen.": "No copy of the tested VKORC1 −1639A allele. This alone does not determine warfarin sensitivity.",
+  "Der Marker spricht für Laktasepersistenz im Erwachsenenalter": "The marker supports lactase persistence in adulthood",
+  "Geprüfte Laktasepersistenz-Variante nicht beobachtet": "Tested lactase persistence variant not observed"
 }

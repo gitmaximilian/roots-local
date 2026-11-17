@@ -20,7 +20,7 @@
   --accent: #1f7a66;
   --accent-ink: #ffffff;
   --accent-soft: #e2f1ec;
-  --warn: #a35f00;
+  --warn: #865000;
   --warn-soft: #fbf0dd;
   --danger: #b3261e;
   --danger-soft: #fbe9e7;
@@ -229,6 +229,8 @@ td small {
 .sidebar nav button.selected {
   background: color-mix(in srgb, var(--accent) 20%, transparent);
 }
+.sidebar nav button.selected .count,
+.chapter-list button.selected .mono { color: var(--ink); }
 .sidebar-bottom {
   margin-top: auto;
   display: flex;
@@ -1082,14 +1084,12 @@ main {
   font-size: 16px;
   outline: none;
 }
-.palette ul {
-  list-style: none;
-  margin: 0;
+#palette-results {
   padding: 6px;
   max-height: 360px;
   overflow-y: auto;
 }
-.palette li button {
+#palette-results button {
   width: 100%;
   display: flex;
   align-items: center;
@@ -1100,18 +1100,17 @@ main {
   background: none;
   text-align: left;
 }
-.palette li button span:last-child {
+#palette-results button span:last-child {
   margin-left: auto;
   font-size: 11px;
   color: var(--muted);
 }
-.palette li button[aria-selected="true"] {
+#palette-results button[aria-selected="true"] {
   background: var(--accent);
   color: var(--accent-ink);
 }
-.palette li button[aria-selected="true"] span:last-child {
+#palette-results button[aria-selected="true"] span:last-child {
   color: inherit;
-  opacity: 0.8;
 }
 .palette .none {
   padding: 14px;

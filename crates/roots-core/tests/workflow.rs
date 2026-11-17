@@ -156,7 +156,7 @@ fn full_taxonomy_and_four_reviewed_interpretations() {
     let by_id = |id: &str| findings.iter().find(|f| f.item.id == id).unwrap();
     assert_eq!(
         by_id("lactase").conclusion.as_deref(),
-        Some("Wahrscheinlich laktosetolerant im Erwachsenenalter")
+        Some("Der Marker spricht für Laktasepersistenz im Erwachsenenalter")
     );
     assert_eq!(by_id("lactase").confidence, Some(Confidence::Moderate));
     assert_eq!(
@@ -675,11 +675,11 @@ fn verify_pdf_contents(pdf: &mut report::Model, input: &import::Import, python: 
                 if !short {
                     let (conclusion, medical) = language.select2(
                         (
-                            "Likely lactose tolerant as an adult",
+                            "The marker supports lactase persistence in adulthood",
                             "TCF7L2 risk allele T",
                         ),
                         (
-                            "Wahrscheinlich laktosetolerant im Erwachsenenalter",
+                            "Der Marker spricht für Laktasepersistenz im Erwachsenenalter",
                             "TCF7L2-Risikoallels T",
                         ),
                     );

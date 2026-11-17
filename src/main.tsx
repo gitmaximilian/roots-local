@@ -2057,7 +2057,7 @@ function App() {
                         </button>
                       </div>
                     </div>
-                    <div className="preview">
+                    <div className="preview" role="region" aria-label={t("Vorschau")} tabIndex={0}>
                       {preview ? (
                         <Suspense
                           fallback={

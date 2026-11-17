@@ -279,7 +279,7 @@
             "AA",
             "AG"
           ],
-          "conclusion": "Wahrscheinlich laktosetolerant im Erwachsenenalter",
+          "conclusion": "Der Marker spricht für Laktasepersistenz im Erwachsenenalter",
           "message": "Der Genotyp enthält die hier untersuchte Variante, die mit erhaltener Laktaseaktivität im Erwachsenenalter verbunden ist.",
           "confidence": "moderate"
         },
@@ -287,7 +287,7 @@
           "calls": [
             "GG"
           ],
-          "conclusion": "Laktaseaktivität nimmt im Erwachsenenalter wahrscheinlich ab",
+          "conclusion": "Geprüfte Laktasepersistenz-Variante nicht beobachtet",
           "message": "Die hier untersuchte Variante für erhaltene Laktaseaktivität liegt an dieser Position nicht vor. Andere Varianten können ebenfalls eine Rolle spielen.",
           "confidence": "moderate"
         }

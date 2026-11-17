@@ -21,7 +21,7 @@ export function CommandPalette({
   const [active, setActive] = useState(0);
   const input = useRef<HTMLInputElement>(null);
   const dialog = useRef<HTMLDialogElement>(null);
-  const list = useRef<HTMLUListElement>(null);
+  const list = useRef<HTMLDivElement>(null);
   const results = useMemo(() => {
     const words = query.toLowerCase().split(/\s+/).filter(Boolean);
     return commands
@@ -93,10 +93,10 @@ export function CommandPalette({
             aria-label={t("Suche schließen")}><X size={18} aria-hidden="true" /></button>
         </div>
         {results.length ? (
-          <ul ref={list} id="palette-results" role="listbox">
+          <div ref={list} id="palette-results" role="listbox" aria-label={t("Suchergebnisse")}>
             {results.map((command, index) => (
-              <li key={command.id}>
                 <button
+                  key={command.id}
                   id={`palette-${index}`}
                   data-index={index}
                   role="option" tabIndex={-1}
@@ -107,9 +107,8 @@ export function CommandPalette({
                   <span>{command.label}</span>
                   <span>{command.hint}</span>
                 </button>
-              </li>
             ))}
-          </ul>
+          </div>
         ) : (
           <p className="none">{t("Keine Treffer.")}</p>
         )}
