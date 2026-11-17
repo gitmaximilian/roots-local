@@ -23,6 +23,8 @@ Roots Local is a web app. The macOS desktop app (v0.2.0) was retired on 2026-11-
 
 **2026-11-17, live Pages host.** Deployment [a5538be3](https://a5538be3.rootslocal.pages.dev/) serves build `9697c896d2e990f2` on `rootslocal.pages.dev`. All 12 live browser tests passed, and the 28 public assets matched the build checksums. The response includes CSP, HSTS, COOP, COEP and CORP. Cloudflare continues to send `NEL` and `Report-To` on this hostname. The custom domain is attached in Pages and still needs its CNAME in the DNS zone.
 
+**2026-11-17, production domain and portfolio.** The custom domain redirects HTTP to HTTPS and serves app deployment [c95d1886](https://c95d1886.rootslocal.pages.dev/). All 12 live browser checks passed again after the Cloudflare response fixes. The 28 public app files match the build checksums, and the [deployment notes](deployment.md) list the verified security headers. The portfolio deployment [7e29e27d](https://7e29e27d.maximilianauer.pages.dev/) was verified on its production aliases. Physical device and regulatory checks remain open.
+
 **2026-11-15, branch `web/local-only`, MacBook Air M4, macOS 15.6.1.**
 
 - `cargo test -p roots-core -p roots-pdf` with `ROOTS_TEST_PYTHON`: 21 passed.

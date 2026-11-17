@@ -1,6 +1,6 @@
 # Web app plan
 
-Roots Local is a static web app. The existing deployment is at `https://rootslocal.pages.dev`. The production domain is planned as `https://rootslocal.maximilianauer.at`. The web app replaces the macOS desktop app, retired on 2026-11-15.
+Roots Local is a static web app at [rootslocal.maximilianauer.at](https://rootslocal.maximilianauer.at/). It replaces the macOS desktop app, retired on 2026-11-15. See [deployment and maintenance](deployment.md) for live checks, the Cloudflare configuration and rollout history.
 
 ## Rule zero: data stays on the device
 
