@@ -91,6 +91,8 @@ async function handle(request: Request): Promise<unknown> {
       );
     case "importExtra":
       return JSON.parse(session.import_extra(request.kind, request.files));
+    case "assumeBuild":
+      return JSON.parse(session.assume_build(request.build));
     case "saveOrigins":
       return JSON.parse(session.save_origins(request.entries));
     case "loadCatalog":

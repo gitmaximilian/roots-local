@@ -41,3 +41,4 @@ src/generated/
 test-results/
 playwright-report/
 .wrangler/
+!fixtures/formats/*.csv

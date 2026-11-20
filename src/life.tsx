@@ -13,6 +13,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { getLanguage, resultText, t } from "./locale";
+import { clearWinner, prepare, search } from "./search";
 import { ConfidenceMeter, isMedical, visibleConclusion } from "./finding-ui";
 import type { Confidence, Finding } from "./types";
 
@@ -246,28 +247,40 @@ export function NucleusRadar({
   );
 }
 
-const normalize = (value: string) =>
-  value
-    .toLowerCase()
-    .normalize("NFD")
-    .replace(/[̀-ͯ]/g, "")
-    .replace(/[^a-z0-9*]+/g, " ")
-    .trim();
-/** An answer requires an exact documented question or an unambiguous catalog topic. */
+/** Search documents for findings: both languages, questions, genes, and markers. */
+function findingIndex(findings: Finding[]) {
+  return prepare(
+    findings.map((finding) => ({
+      id: finding.id,
+      group: "finding" as const,
+      value: finding,
+      genes: finding.checks.map((check) => check.gene),
+      markers: finding.checks.map((check) => check.id),
+      fields: [
+        { text: `${finding.title} ${resultText(finding.title)}`, weight: 3 },
+        {
+          text: (finding.questions ?? []).flatMap((q) => [q, resultText(q)]).join(" "),
+          weight: 2.5,
+        },
+        { text: `${finding.summary} ${resultText(finding.summary)}`, weight: 0.8 },
+      ],
+    })),
+  );
+}
+
+/**
+ * Finds the catalog rule a question is about. Returns an answer only when one
+ * finding clearly ranks first; otherwise up to three candidates to choose from.
+ * Every meaningful word of the question has to match the finding, so a
+ * question about something the catalog does not cover gets no answer.
+ */
 export function answer(query: string, findings: Finding[]) {
-  const asked = normalize(query);
-  if (!asked) return undefined;
-  const matches = (terms: string[]) => terms.some((term) =>
-    normalize(term) === asked || normalize(resultText(term)) === asked,
-  );
-  const topics = findings.filter((finding) =>
-    matches([finding.title, ...(finding.questions ?? [])]),
-  );
-  if (topics.length) return topics.length === 1 ? topics[0] : undefined;
-  const markers = findings.filter((finding) =>
-    matches(finding.checks.flatMap((check) => [check.id, ...check.gene.split(" / ")])),
-  );
-  return markers.length === 1 ? markers[0] : undefined;
+  const hits = search(query, findingIndex(findings), 8);
+  const winner = clearWinner(hits);
+  return {
+    finding: winner?.doc.value,
+    options: winner ? [] : hits.slice(0, 3).map((hit) => hit.doc.value),
+  };
 }
 
 export function AskDna({
@@ -282,7 +295,7 @@ export function AskDna({
   onOpen: (finding: Finding) => void;
 }) {
   const [query, setQuery] = useState("");
-  const [asked, setAsked] = useState<{ findingId?: string }>();
+  const [asked, setAsked] = useState<{ findingId?: string; options: string[] }>();
   const suggestions = useMemo(
     () =>
       findings
@@ -300,7 +313,8 @@ export function AskDna({
   );
   function ask(value: string, finding?: Finding) {
     setQuery(value);
-    setAsked({ findingId: (finding ?? answer(value, findings))?.id });
+    const result = finding ? { finding, options: [] } : answer(value, findings);
+    setAsked({ findingId: result.finding?.id, options: result.options.map((f) => f.id) });
   }
   const found = findings.find((finding) => finding.id === asked?.findingId);
   const hidden = found && isMedical(found) && !showMedical;
@@ -341,7 +355,22 @@ export function AskDna({
       </div>
       {asked && (
         <div className="ask-answer" role="status">
-          {!found && (
+          {!found && asked.options.length > 0 && (
+            <>
+              <p>{t("Meintest du eines dieser Themen?")}</p>
+              <div className="chips">
+                {asked.options
+                  .map((id) => findings.find((finding) => finding.id === id))
+                  .filter((finding): finding is Finding => !!finding)
+                  .map((finding) => (
+                    <button key={finding.id} onClick={() => ask(query, finding)}>
+                      {resultText(finding.title)}
+                    </button>
+                  ))}
+              </div>
+            </>
+          )}
+          {!found && asked.options.length === 0 && (
             <p>
               {t(
                 "Dazu gibt es noch keine Regel im Katalog. Versuche es mit einem Merkmal, einem Gen oder einer der Fragen oben.",

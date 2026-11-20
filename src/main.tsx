@@ -28,7 +28,7 @@ import {
   isApple,
   registerOffline,
 } from "./platform";
-import { LEGAL_URL, Privacy } from "./privacy";
+import { LEGAL_URL, MedicalNotice, Privacy } from "./privacy";
 import { PdfPreview, preparePdfPreview } from "./pdf-preview";
 import { usePanelFocus } from "./panel-focus";
 import type { ExtraKind } from "./protocol";
@@ -118,7 +118,7 @@ const navigation = (): { id: Page; label: string; Icon: LucideIcon }[] => [
   { id: "atlas", label: t("Atlas"), Icon: MapIcon },
   { id: "variants", label: t("Varianten"), Icon: ScanLine },
   { id: "report", label: t("PDF-Report"), Icon: FileText },
-  { id: "pass", label: t("Medikamentenpass"), Icon: Pill },
+  { id: "pass", label: t("Medikamenten-Notizen"), Icon: Pill },
   { id: "data", label: t("Datenquellen"), Icon: Database },
 ];
 
@@ -698,7 +698,10 @@ function SequenceCoverage({ data }: { data: NonNullable<Report["sequence"]> }) {
 }
 
 function App() {
-  const [page, setPage] = useState<Page>("home");
+  // Direct links /privacy and /terms open the privacy and terms page.
+  const [page, setPage] = useState<Page>(() =>
+    ["/privacy", "/terms"].includes(location.pathname) ? "privacy" : "home",
+  );
   const [language, setUiLanguage] = useState<Language>(getLanguage);
   const chapters: Chapter[] =
     language === "de" ? germanChapters : englishChapters;
@@ -747,8 +750,16 @@ function App() {
   const [paletteOpen, setPaletteOpen] = useState(false);
   const [dropping, setDropping] = useState(false);
   const [showMedical, setMedicalVisible] = useState(false);
+  // Medical results are shown only after an explanation of their limits,
+  // once per session. The acknowledgement is not stored.
+  const [medicalAcknowledged, setMedicalAcknowledged] = useState(false);
+  const [medicalNotice, setMedicalNotice] = useState(false);
   function setShowMedical(value: boolean) {
     if (running.current) return;
+    if (value && !medicalAcknowledged) {
+      setMedicalNotice(true);
+      return;
+    }
     setMedicalVisible(value);
     setPassPreview(undefined);
   }
@@ -957,8 +968,8 @@ function App() {
       t("PDF exportieren"),
       () => pdfBytes(true),
       (bytes) => {
-        download(bytes, "Roots Local Medicine Pass.pdf");
-        setNotice(t("Der Medikamentenpass wurde gespeichert."));
+        download(bytes, "Roots Local Medicine Notes.pdf");
+        setNotice(t("Die Medikamenten-Notizen wurden gespeichert."));
       },
     );
   }
@@ -1119,7 +1130,12 @@ function App() {
       (finding.questions ?? []).map((question, index) => ({
         id: `question-${finding.id}-${index}`,
         label: resultText(question),
-        hint: t("Frage"),
+        hint: resultText(finding.title),
+        group: "question" as const,
+        // Both languages, so a German question also finds the English text.
+        keywords: `${question} ${finding.title}`,
+        detail: visibleConclusion(finding, showMedical) ?? undefined,
+        genes: finding.checks.map((check) => check.gene),
         run: () => {
           if (page !== "home" && page !== "atlas") navigate("home");
           setInspected(finding.id);
@@ -1130,6 +1146,7 @@ function App() {
       id: `chapter-${chapter.id}`,
       label: `${chapter.id} ${chapter.title}`,
       hint: t("Kapitel"),
+      group: "chapter" as const,
       run: () => selectChapter(chapter.id),
     })),
     ...results
@@ -1137,13 +1154,35 @@ function App() {
       .map((finding) => ({
         id: `finding-${finding.id}`,
         label: resultText(finding.title),
-        hint: finding.checks.map((check) => check.id).join(", "),
-        keywords: `${finding.checks.map((check) => check.gene).join(" ")} ${finding.section}`,
+        hint: finding.checks.map((check) => check.gene).filter((g, i, all) => all.indexOf(g) === i).join(", "),
+        group: "finding" as const,
+        keywords: `${finding.title} ${finding.section} ${(finding.questions ?? []).join(" ")}`,
+        detail:
+          visibleConclusion(finding, showMedical) ??
+          (isMedical(finding) && !showMedical
+            ? t("Medizinischer Befund, ausgeblendet")
+            : resultText(finding.summary)),
+        genes: finding.checks.map((check) => check.gene),
+        markers: finding.checks.map((check) => check.id),
         run: () => {
           if (page !== "home" && page !== "atlas") navigate("home");
           setInspected(finding.id);
         },
       })),
+    ...(dataReady
+      ? results.flatMap((finding) =>
+          finding.checks.map((check) => ({
+            id: `marker-${finding.id}-${check.id}`,
+            label: `${check.id} · ${check.gene}`,
+            hint: t("Variante"),
+            group: "marker" as const,
+            detail: resultText(finding.title),
+            genes: [check.gene],
+            markers: [check.id],
+            run: () => openVariant(finding, check),
+          })),
+        )
+      : []),
   ];
 
   const languageControl = (
@@ -1277,7 +1316,7 @@ function App() {
           {!phone && <div className="topbar">
             <span className="title">
               <span>
-                {page === "privacy" ? t("Datenschutz") : navigation().find((n) => n.id === page)?.label}
+                {page === "privacy" ? t("Datenschutz & Hinweise") : navigation().find((n) => n.id === page)?.label}
               </span>
               {model?.example && (
                 <span className="example">{t("Beispielprofil")}</span>
@@ -1344,7 +1383,17 @@ function App() {
                 <>
                   <Heading
                     title={t("Was deine DNA sagt")}
-                    description={`${t("MyHeritage-Format")} · ${model.summary.format} · ${model.summary.build || t("Referenzgenom unbekannt")} · ${t("Katalog")} ${model.catalog_version}`}
+                    description={[
+                      t("Genotyp-Rohdaten"),
+                      model.summary.source,
+                      model.summary.format,
+                      model.summary.build
+                        ? `${model.summary.build}${model.summary.assumed_build ? ` (${t("von dir bestätigt")})` : ""}`
+                        : t("Referenzgenom unbekannt"),
+                      `${t("Katalog")} ${model.catalog_version}`,
+                    ]
+                      .filter(Boolean)
+                      .join(" · ")}
                   />
                   {model.example && <p className="example example-mobile">{t("Synthetisches Beispielprofil")}</p>}
                   <div className="stats">
@@ -1488,9 +1537,38 @@ function App() {
                         ? t(
                             "Die Datenbasis für die vorhandenen Merkmalsregeln ist nicht ausreichend.",
                           )
-                        : t(
-                            "Der Dateikopf nennt kein unterstütztes Referenzgenom. Die Rohdaten bleiben im Variantenregister sichtbar.",
-                          )}
+                        : (
+                          <div className="assume-build">
+                            <p>
+                              {t(
+                                "Der Dateikopf nennt kein unterstütztes Referenzgenom. Die Rohdaten bleiben im Variantenregister sichtbar.",
+                              )}
+                            </p>
+                            <p>
+                              {t(
+                                "Die meisten Rohdaten von Verbrauchertests verwenden GRCh37 (Build 37). Bestätige ein Referenzgenom nur, wenn dein Anbieter es so angibt.",
+                              )}
+                            </p>
+                            <div className="actions">
+                              {(["GRCh37", "GRCh38"] as const).map((build) => (
+                                <button
+                                  key={build}
+                                  className="button secondary"
+                                  disabled={!!busy}
+                                  onClick={() =>
+                                    void run(
+                                      t("DNA-Datei einlesen"),
+                                      () => call<Report>("assumeBuild", { build }),
+                                      (result) => setReport(result),
+                                    )
+                                  }
+                                >
+                                  {t("Als")} {build} {t("auswerten")}
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+                        )}
                     </div>
                   )}
                   {totals.research > 0 && (
@@ -1555,16 +1633,21 @@ function App() {
                     <Heading
                       title={t("Deine DNA. Dein Gerät.")}
                       description={t(
-                        "Öffne deinen MyHeritage-Rohdatenexport und erkunde Herkunft, Merkmale und Forschungsbefunde.",
+                        "Öffne die Rohdaten deines DNA-Tests und erkunde Herkunft, Merkmale und Forschungsbefunde.",
                       )}
                     />
                     <ul className="intro-promises">
                       <li><LockKeyhole size={18} aria-hidden="true" />{t("Die Analyse läuft im Browser auf diesem Gerät.")}</li>
                       <li><FileText size={18} aria-hidden="true" />{t("Ergebnisse mit Quellen, Grenzen und PDF-Export.")}</li>
+                      <li><CircleHelp size={18} aria-hidden="true" />{t("Zur Information und zum Lernen. Kein Medizinprodukt, keine Diagnose.")}{" "}<button type="button" className="text-button" onClick={() => navigate("privacy")}>{t("Mehr dazu")}</button></li>
                     </ul>
                     <div className="intro-import">
                       <h2>{t("Wähle deine Daten")}</h2>
-                      <p className="formats">{t("MyHeritage-Rohdaten")} · {t("CSV, TSV, TXT oder ZIP")}</p>
+                      <p className="formats">
+                        {t("Genotyp-Rohdaten: rsID, Chromosom, Position und Genotyp")}
+                        <br />
+                        {t("Exporte von 23andMe, AncestryDNA, MyHeritage, FamilyTreeDNA oder Living DNA")} · {t("CSV, TSV, TXT oder ZIP")}
+                      </p>
                       <div className="actions">
                         <button
                           className="button"
@@ -1592,9 +1675,9 @@ function App() {
             {page === "pass" && (
               <>
                 <Heading
-                  title={t("Medikamentenpass")}
+                  title={t("Medikamenten-Notizen")}
                   description={t(
-                    "Hinweise zu geprüften Medikamentenmarkern für das ärztliche Gespräch.",
+                    "Was Studien über Genvarianten berichten, die beeinflussen können, wie Medikamente wirken. Nur zur Information.",
                   )}
                 />
                 {!model ? (
@@ -1605,7 +1688,7 @@ function App() {
                   <div className="notice-card">
                     <p>
                       <strong>
-                        {t("Der Pass zeigt medizinische Befunde.")}
+                        {t("Die Notizen zeigen medizinische Studienergebnisse.")}
                       </strong>{" "}
                       {t(
                         "Sie stammen aus Verbraucherdaten und brauchen eine Laborbestätigung.",
@@ -1622,7 +1705,7 @@ function App() {
                   <div className="pass-layout">
                     <div className="pass-card">
                       <div className="pass-head">
-                        <strong>{t("Medikamentenpass")}</strong>
+                        <strong>{t("Medikamenten-Notizen")}</strong>
                         <span>Roots Local</span>
                       </div>
                       {medicines.length ? (
@@ -1649,7 +1732,7 @@ function App() {
                       )}
                       <small>
                         {t(
-                          "Unbestätigte Verbraucherdaten · nicht für Dosisentscheidungen ohne Arzt",
+                          "Nur zur Information · kein Medizinprodukt · nicht für Entscheidungen über Medikamente",
                         )}
                       </small>
                     </div>
@@ -1659,7 +1742,7 @@ function App() {
                         disabled={!!busy}
                         onClick={savePass}
                       >
-                        {t("Pass als PDF exportieren")}
+                        {t("Notizen als PDF exportieren")}
                         <ArrowDownToLine size={16} />
                       </button>
                       <button
@@ -2403,6 +2486,17 @@ function App() {
             onClose={() => setInspected(undefined)}
             openVariant={openVariant}
             modal={mobileInspector}
+          />
+        )}
+        {medicalNotice && (
+          <MedicalNotice
+            onAccept={() => {
+              setMedicalNotice(false);
+              setMedicalAcknowledged(true);
+              setMedicalVisible(true);
+              setPassPreview(undefined);
+            }}
+            onCancel={() => setMedicalNotice(false)}
           />
         )}
         {paletteOpen && (

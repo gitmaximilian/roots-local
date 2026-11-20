@@ -59,7 +59,6 @@
   "Ein einzelner Marker erlaubt keine Herkunftszuordnung.": "Ancestry assignment requires more than a single marker.",
   "Europäische und afrikanische Studienpopulationen": "European and African study populations",
   "Bevölkerungsgenetik": "Population genetics",
-  "Vorwärtsstrang (MyHeritage-Format)": "Forward strand (MyHeritage format)",
   "Rückwärtsstrang": "Reverse strand",
   "Referenzgenom unbekannt": "Unknown reference genome",
   "Keine Zuordnung zu diesem Referenzgenom": "No mapping to this reference genome",
@@ -232,7 +231,6 @@
   "Katalogmanifest, Referenzbuilds oder Prüfsumme sind ungültig.": "The catalog manifest, reference builds, or checksum are invalid.",
   "Katalogversion oder IDs sind ungültig.": "The catalog version or identifiers are invalid.",
   "Keine Spalte für den Matchnamen gefunden.": "No match-name column found.",
-  "Keine gültige MyHeritage-Kopfzeile gefunden.": "No valid MyHeritage header found.",
   "Keine gültigen Genotypzeilen im Export gefunden.": "No valid genotype rows found in the export.",
   "Maximal 100 Herkunftseinträge pro Eingabe.": "Enter up to 100 ancestry results at a time.",
   "Merkmalsregel kann nicht gelesen werden.": "The trait rule could not be read.",
@@ -480,5 +478,9 @@
   "Zwei Kopien des geprüften NUDT15-R139C-Allels. Das Ergebnis aus Verbraucherdaten braucht eine Laborbestätigung.": "Two copies of the tested NUDT15 R139C allele. This consumer result needs laboratory confirmation.",
   "Keine Kopie des geprüften VKORC1 −1639A-Allels. Die Warfarin-Empfindlichkeit lässt sich daraus allein nicht bestimmen.": "No copy of the tested VKORC1 −1639A allele. This alone does not determine warfarin sensitivity.",
   "Der Marker spricht für Laktasepersistenz im Erwachsenenalter": "The marker supports lactase persistence in adulthood",
-  "Geprüfte Laktasepersistenz-Variante nicht beobachtet": "Tested lactase persistence variant not observed"
+  "Geprüfte Laktasepersistenz-Variante nicht beobachtet": "Tested lactase persistence variant not observed",
+  "Vorwärtsstrang": "Forward strand",
+  "Keine Kopfzeile mit Chromosom, Position und Genotyp gefunden.": "No header with chromosome, position, and genotype found.",
+  "Die Datei nennt bereits ein Referenzgenom.": "The file already declares a reference genome.",
+  "Unbekanntes Referenzgenom.": "Unknown reference genome."
 }

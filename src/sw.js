@@ -67,7 +67,9 @@ self.addEventListener("fetch", (event) => {
   const request = event.request;
   const url = new URL(request.url);
   if (request.method !== "GET" || url.origin !== self.location.origin) return;
-  const key = url.pathname === "/index.html" ? "/" : url.pathname;
+  // The app shell also serves its direct links to the privacy and terms page.
+  const shell = ["/index.html", "/privacy", "/terms"].includes(url.pathname);
+  const key = shell && request.mode === "navigate" ? "/" : url.pathname === "/index.html" ? "/" : url.pathname;
   event.respondWith(
     caches
       .open(CACHE)

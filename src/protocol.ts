@@ -22,6 +22,7 @@ export type PdfOptions = {
 
 type Call =
   | { method: "importDna"; file: File | null }
+  | { method: "assumeBuild"; build: "GRCh37" | "GRCh38" }
   | {
       method: "variants";
       query: string;

@@ -111,7 +111,7 @@
   box-stat(report.summary.rows, tr("Genotypzeilen", "Genotype rows"))
 )
 #v(11mm)
-#caption([#tr("MyHeritage-Format", "MyHeritage format") · #report.summary.format · #tr("Referenzgenom", "Reference genome") #(if report.summary.build == none { tr("unbekannt", "unknown") } else { report.summary.build }) \
+#caption([#tr("Genotyp-Rohdaten", "Genotype raw data")#(if report.summary.source != none [ · #report.summary.source]) · #report.summary.format · #tr("Referenzgenom", "Reference genome") #(if report.summary.build == none { tr("unbekannt", "unknown") } else { report.summary.build })#(if report.summary.assumed_build [ (#tr("vom Nutzer bestätigt", "confirmed by the user"))]) \
   Roots Local #report.version · #tr("Referenzkatalog", "Reference catalog") #report.catalog_version])
 #pagebreak()
 

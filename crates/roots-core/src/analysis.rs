@@ -37,6 +37,10 @@ pub struct Finding {
 #[derive(Clone, Debug, Serialize)]
 pub struct Summary {
     pub format: &'static str,
+    /// Provider named in the file, if any. Informational only.
+    pub source: Option<&'static str>,
+    /// The build was confirmed by the user, not declared in the file.
+    pub assumed_build: bool,
     pub strand: &'static str,
     pub build: Option<Build>,
     pub rows: usize,
@@ -147,6 +151,8 @@ pub fn summary_with_conflicts(data: &Import) -> (Summary, Conflicts) {
     let total_conflicts = conflicts.values().map(HashSet::len).sum();
     let summary = Summary {
         format: data.format,
+        source: data.source,
+        assumed_build: data.assumed_build,
         strand: data.strand,
         build: data.build,
         rows: data.rows.len(),

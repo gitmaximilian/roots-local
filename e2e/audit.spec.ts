@@ -81,8 +81,10 @@ test("catalog questions abstain on misleading wording and PDF medical content is
     if (await menu.isVisible()) await menu.click();
     await page.getByRole("navigation").getByRole("button", { name, exact: true }).click();
   };
-  await go("Medicine pass");
+  await go("Medicine notes");
   await page.getByRole("button", { name: "Show", exact: true }).click();
+  await expect(page.getByRole("dialog", { name: "Before you show medical topics" })).toBeVisible();
+  await page.getByRole("button", { name: "I understand, show them" }).click();
   await go("PDF report");
   await expect(page.getByRole("checkbox", { name: /Include medical findings/ })).not.toBeChecked();
   await go("Data sources");

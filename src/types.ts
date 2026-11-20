@@ -58,6 +58,8 @@ export type Report = {
   findings: Finding[];
   summary: {
     format: string;
+    source: string | null;
+    assumed_build: boolean;
     build: string | null;
     rows: number;
     skipped: number;

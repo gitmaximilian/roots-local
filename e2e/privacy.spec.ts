@@ -73,7 +73,7 @@ async function workflow(page: Page, source: "file" | "example" = "file") {
     await page.getByRole("button", { name: /^(View example|Beispiel ansehen)$/ }).first().click();
     await expect(page.getByRole("heading", { name: /What your DNA says|Was deine DNA sagt/ })).toBeVisible();
   }
-  for (const view of [/Chapters|Kapitel/, /Atlas/, /Variants|Varianten/, /Medicine pass|Medikamentenpass/, /Data sources|Datenquellen/, /Overview|Übersicht/]) {
+  for (const view of [/Chapters|Kapitel/, /Atlas/, /Variants|Varianten/, /Medicine notes|Medikamenten-Notizen/, /Data sources|Datenquellen/, /Overview|Übersicht/]) {
     await go(page, view);
   }
   // Ask your DNA.
@@ -90,10 +90,12 @@ async function workflow(page: Page, source: "file" | "example" = "file") {
   await page.getByRole("radio", { name: /Summary report/ }).check();
   await save(page, /^(Export PDF|PDF exportieren)/);
 
-  await go(page, /Medicine pass|Medikamentenpass/);
+  await go(page, /Medicine notes|Medikamenten-Notizen/);
   await page.getByRole("button", { name: /^(Show|Anzeigen)$/ }).first().click();
-  const pass = await save(page, /Export pass as PDF|Pass als PDF exportieren/);
-  expect(pass.name).toContain("Medicine Pass");
+  // Medical topics are shown only after the explanation of their limits.
+  await page.getByRole("button", { name: /I understand, show them|Verstanden, einblenden/ }).click();
+  const pass = await save(page, /Export notes as PDF|Notizen als PDF exportieren/);
+  expect(pass.name).toContain("Medicine Notes");
 
   const menu = page.getByRole("button", { name: "Menu", exact: true });
   if (await menu.isVisible()) await menu.click();

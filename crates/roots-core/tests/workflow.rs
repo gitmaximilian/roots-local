@@ -859,7 +859,8 @@ fn medicine_pass_is_one_page_and_includes_medicines() {
     let text = String::from_utf8(result.stdout).unwrap();
     assert!(text.starts_with("1\n"), "{text}");
     for expected in [
-        "Medicine pass",
+        "Medicine notes",
+        "For information only",
         "*2 marker ×0, *3 marker ×1",
         "VKORC1",
         "SLCO1B1",
@@ -935,4 +936,48 @@ fn medicine_pass_fits_full_starter_coverage_in_both_languages() {
 fn render(model: &report::Model, options: report::Options) -> Result<Vec<u8>, String> {
     let prepared = report::prepare(model, options)?;
     roots_pdf::render(prepared.pass, prepared.data, roots_pdf::Fonts::bundled())
+}
+
+/// The same synthetic genotypes in the layouts of five providers give the same
+/// findings. A file without a declared build stays unresolved until the user
+/// confirms one.
+#[test]
+fn provider_layouts_give_identical_findings() {
+    let catalog = Catalog::starter().unwrap();
+    let conclusions = |data: &import::Import| {
+        analysis::evaluate(data, &catalog)
+            .unwrap()
+            .into_iter()
+            .map(|f| (f.item.id, f.status, f.conclusion))
+            .collect::<Vec<_>>()
+    };
+    let cancel = AtomicBool::new(false);
+    let reference = import::parse(SAMPLE, &cancel).unwrap();
+    let expected = conclusions(&reference);
+    assert!(expected.iter().any(|(_, status, _)| *status == Status::Personal));
+    for (name, source) in [
+        ("synthetic-23andme.txt", "23andMe"),
+        ("synthetic-ancestrydna.txt", "AncestryDNA"),
+        ("synthetic-livingdna.txt", "Living DNA"),
+    ] {
+        let path = Path::new(env!("CARGO_MANIFEST_DIR")).join("../../fixtures/formats").join(name);
+        let data = import::file(fs::File::open(&path).unwrap(), &cancel).unwrap();
+        assert_eq!(data.source, Some(source), "{name}");
+        assert_eq!(data.build, Some(import::Build::Grch37), "{name}");
+        assert_eq!(data.rows.len(), reference.rows.len(), "{name}");
+        assert_eq!(conclusions(&data), expected, "{name}");
+    }
+    let path = Path::new(env!("CARGO_MANIFEST_DIR"))
+        .join("../../fixtures/formats/synthetic-familytreedna.csv");
+    let mut data = import::file(fs::File::open(&path).unwrap(), &cancel).unwrap();
+    assert_eq!(data.build, None);
+    assert!(conclusions(&data)
+        .iter()
+        .all(|(_, status, _)| *status != Status::Personal));
+    data.assume_build(import::Build::Grch37).unwrap();
+    assert!(data.assumed_build);
+    assert_eq!(conclusions(&data), expected);
+    // A declared build cannot be overridden.
+    let mut declared = import::parse(SAMPLE, &cancel).unwrap();
+    assert!(declared.assume_build(import::Build::Grch38).is_err());
 }

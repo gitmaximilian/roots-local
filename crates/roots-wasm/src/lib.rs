@@ -183,6 +183,35 @@ impl Session {
         Ok(out)
     }
 
+    /// Confirms the reference build for a file that does not declare one and
+    /// re-runs the analysis. Companion results that depend on coordinates are
+    /// cleared, because they were computed without a build.
+    pub fn assume_build(&mut self, build: &str) -> Result<String, String> {
+        let build = match build {
+            "GRCh37" => import::Build::Grch37,
+            "GRCh38" => import::Build::Grch38,
+            _ => return Err("Unbekanntes Referenzgenom.".into()),
+        };
+        let profile = self.profile.as_mut().ok_or(NO_PROFILE)?;
+        profile.data.assume_build(build)?;
+        let example = self.model.as_ref().is_some_and(|model| model.example);
+        let (summary, conflicts) = analysis::summary_with_conflicts(&profile.data);
+        profile.conflicts = conflicts;
+        let starter;
+        let active = match &self.catalog {
+            Some(catalog) => catalog,
+            None => {
+                starter = Catalog::starter()?;
+                &starter
+            }
+        };
+        let mut model = Model::new(summary, active.version.clone(), Vec::new(), example);
+        model.apply_catalog(&profile.data, active)?;
+        let out = json(&model)?;
+        self.model = Some(model);
+        Ok(out)
+    }
+
     pub fn variants(
         &self,
         query: &str,

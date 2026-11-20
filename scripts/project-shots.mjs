@@ -35,8 +35,9 @@ for (const scheme of ["light", "dark"]) {
     await nav(page, "Atlas");
     await shot(page, "rootslocal-atlas-light");
   } else {
-    await nav(page, "Medicine pass");
+    await nav(page, "Medicine notes");
     await page.getByRole("button", { name: "Show", exact: true }).first().click();
+    await page.getByRole("button", { name: "I understand, show them" }).click();
     await page.waitForTimeout(400);
     await shot(page, "rootslocal-pass-dark");
   }
@@ -51,6 +52,7 @@ for (const scheme of ["light", "dark"]) {
     await page.waitForTimeout(500);
   } else {
     await page.getByRole("button", { name: "Show", exact: true }).first().click();
+    await page.getByRole("button", { name: "I understand, show them" }).click();
     await page.locator(".areas, .area").first().scrollIntoViewIfNeeded().catch(() => undefined);
     await page.waitForTimeout(500);
   }

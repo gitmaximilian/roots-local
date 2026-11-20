@@ -25,5 +25,11 @@
 /index.html
   Cache-Control: no-cache, no-transform
 
+/privacy
+  Cache-Control: no-cache, no-transform
+
+/terms
+  Cache-Control: no-cache, no-transform
+
 /SHA256SUMS
   Content-Type: text/plain; charset=utf-8

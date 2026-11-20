@@ -7,6 +7,8 @@ use std::{
 };
 use zip::ZipArchive;
 
+const NO_HEADER: &str =
+    "Keine Kopfzeile mit Chromosom, Position und Genotyp gefunden.";
 pub const MAX_INPUT: u64 = 128 * 1024 * 1024;
 const MAX_ROWS: usize = 2_000_000;
 const MAX_LINE: u64 = 32 * 1024;
@@ -36,6 +38,10 @@ pub struct Variant {
 #[derive(Debug, Clone, Serialize)]
 pub struct Import {
     pub build: Option<Build>,
+    /// Whether `build` was confirmed by the user because the file did not declare one.
+    pub assumed_build: bool,
+    /// The provider named in the file's comments, if any. Informational only.
+    pub source: Option<&'static str>,
     pub format: &'static str,
     pub strand: &'static str,
     pub rows: Vec<Variant>,
@@ -48,6 +54,11 @@ pub fn chromosome(value: &str) -> Option<String> {
     match bare {
         "X" | "Y" | "XY" => Some(bare.into()),
         "M" | "MT" => Some("MT".into()),
+        // Numeric codes used by AncestryDNA and PLINK.
+        "23" => Some("X".into()),
+        "24" => Some("Y".into()),
+        "25" => Some("XY".into()),
+        "26" => Some("MT".into()),
         n => n
             .parse::<u8>()
             .ok()
@@ -71,6 +82,25 @@ fn canonical_call(raw: &str) -> Option<Option<String>> {
 fn field(row: &StringRecord, index: usize) -> &str {
     row.get(index).unwrap_or("").trim()
 }
+/// Providers that can be recognized from the comment lines of a raw data file.
+const SOURCES: &[(&str, &str)] = &[
+    ("23andme", "23andMe"),
+    ("ancestrydna", "AncestryDNA"),
+    ("livingdna", "Living DNA"),
+    ("living dna", "Living DNA"),
+    ("familytreedna", "FamilyTreeDNA"),
+    ("family tree dna", "FamilyTreeDNA"),
+    ("ftdna", "FamilyTreeDNA"),
+    ("myheritage", "MyHeritage"),
+];
+
+/// Whether a line holds column names for chromosome and position.
+fn is_header(line: &str) -> bool {
+    let fields: Vec<String> = line.split(['\t', ',', ' ']).map(normalized).collect();
+    fields.iter().any(|f| f == "chromosome" || f == "chr")
+        && fields.iter().any(|f| f == "position" || f == "pos")
+}
+
 fn normalized(s: &str) -> String {
     s.to_ascii_lowercase()
         .chars()
@@ -82,7 +112,10 @@ pub fn parse(input: impl Read, cancel: &AtomicBool) -> Result<Import, String> {
     let mut input = BufReader::new(input.take(MAX_INPUT + 1));
     let mut line = String::new();
     let mut build = None;
-    let mut strand = "Vorwärtsstrang (MyHeritage-Format)";
+    let mut strand = "Vorwärtsstrang";
+    let mut source = None;
+    // 23andMe and Living DNA put the column names in the last comment line.
+    let mut commented_header: Option<String> = None;
     let mut read = 0;
     loop {
         line.clear();
@@ -91,7 +124,7 @@ pub fn parse(input: impl Read, cancel: &AtomicBool) -> Result<Import, String> {
             .read_line(&mut line)
             .map_err(|_| "Datei ist keine gültige UTF-8-Textdatei.")?;
         if n == 0 || n as u64 == MAX_LINE {
-            return Err("Keine gültige MyHeritage-Kopfzeile gefunden.".into());
+            return Err(NO_HEADER.into());
         }
         read += n;
         if read > 256 * 1024 {
@@ -105,10 +138,23 @@ pub fn parse(input: impl Read, cancel: &AtomicBool) -> Result<Import, String> {
             continue;
         }
         if !content.starts_with('#') {
-            line = content.to_owned();
+            line = match commented_header.take() {
+                Some(header) if !is_header(content) => format!("{header}\n{content}"),
+                _ => content.to_owned(),
+            };
             break;
         }
+        let comment = content.trim_start_matches('#').trim();
+        if is_header(comment) {
+            commented_header = Some(comment.to_owned());
+        }
         let metadata = content.to_ascii_lowercase();
+        if source.is_none() {
+            source = SOURCES
+                .iter()
+                .find(|(token, _)| metadata.contains(token))
+                .map(|(_, name)| *name);
+        }
         if ["build", "assembly", "reference", "grch"]
             .iter()
             .any(|token| metadata.contains(token))
@@ -156,7 +202,14 @@ pub fn parse(input: impl Read, cancel: &AtomicBool) -> Result<Import, String> {
             strand = "Rückwärtsstrang";
         }
     }
-    let delim = if line.contains('\t') { b'\t' } else { b',' };
+    let first = line.lines().next().unwrap_or("");
+    let delim = if first.contains('\t') {
+        b'\t'
+    } else if first.contains(',') {
+        b','
+    } else {
+        b' '
+    };
     line.push('\n');
     let mut csv = ReaderBuilder::new()
         .delimiter(delim)
@@ -233,7 +286,13 @@ pub fn parse(input: impl Read, cancel: &AtomicBool) -> Result<Import, String> {
     }
     Ok(Import {
         build,
-        format: if delim == b'\t' { "TSV" } else { "CSV" },
+        assumed_build: false,
+        source,
+        format: match delim {
+            b'\t' => "TSV",
+            b',' => "CSV",
+            _ => "TXT",
+        },
         strand,
         rows,
         skipped,
@@ -289,13 +348,25 @@ pub fn file(mut file: impl Read + Seek, cancel: &AtomicBool) -> Result<Import, S
         if tail != 0 {
             return Err("Die entpackte Tabelle überschreitet das Größenlimit.".into());
         }
-        out.format = if out.format == "TSV" {
-            "ZIP / TSV"
-        } else {
-            "ZIP / CSV"
+        out.format = match out.format {
+            "TSV" => "ZIP / TSV",
+            "TXT" => "ZIP / TXT",
+            _ => "ZIP / CSV",
         };
         Ok(out)
     } else {
         parse(reader, cancel)
+    }
+}
+
+impl Import {
+    /// Applies a reference build the user confirmed for a file that declares none.
+    pub fn assume_build(&mut self, build: Build) -> Result<(), String> {
+        if self.build.is_some() && !self.assumed_build {
+            return Err("Die Datei nennt bereits ein Referenzgenom.".into());
+        }
+        self.build = Some(build);
+        self.assumed_build = true;
+        Ok(())
     }
 }
