@@ -1,4 +1,4 @@
-# MyHeritage-compatible synthetic example
+# Synthetic example raw data (no real person)
 # reference=GRCh37
 RSID,CHROMOSOME,POSITION,RESULT
 rs4988235,2,136608646,AG
