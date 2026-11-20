@@ -12,6 +12,16 @@ A rule turns genotypes into a conclusion the user can act on. Each conclusion ca
 Only add an effect allele after confirming its plus-strand orientation in a primary source such as the marker's dbSNP or ClinVar record. - **Questions.** `questions` lists up to eight everyday questions a rule answers, written in German with English translations in `catalog/result-strings.json`. *Ask your DNA* matches typed questions against them offline.
 - **Medical flag.** Set `clinical: true` on a rule whose outcomes concern medicines or disease risk, such as APOE or metabolizer types. The app hides those conclusions until the user turns on medical findings, and reports include them only with the clinical opt-in.
 
+Catalog 1.7.0 adds 32 single-marker effect-allele rules, for 65 rules on 69 markers:
+
+- **Appearance and senses:** OCA2 rs1800407, IRF4 rs12203592, TYR rs1393350 and rs1042602, KITLG rs12821256, HMGA2 rs1042725, OR7D4 rs61729907, OR2M7 region rs4481887.
+- **Nutrition and behaviour:** ADORA2A rs5751876, AHR rs4410790, BCO1 rs7501331, FADS1 rs174537, FTO rs1421085, MC4R rs17782313, COMT rs4680, FOXO3 rs2802292.
+- **Medical flag:** CHRNA5 rs16969968, 9p21 rs10757278, PITX2 region rs2200733, LPA rs10455872, PCSK9 rs11591147, ACKR1 rs2814778, SERPINA1 rs28929474, CFH rs1061170, ARMS2 rs10490924, HLA-DQ2.5 tag rs2187668, HLA-DQ8 tag rs7454108, HLA-B27 tag rs4349859, NOD2 rs2066844, UGT1A1 rs887829, ABCG2 rs2231142, CYP4F2 rs2108622.
+
+Coordinates, plus-strand alleles, and 1000 Genomes frequencies come from the NCBI Variation API. Effect directions were checked against the primary study and the GWAS Catalog v2 API, whose minus-strand report of rs2187668 (A) corresponds to T on the plus strand. PubMed IDs were checked with E-utilities on 2026-11-20. Low confidence marks small or single studies (TYR S192Y, asparagus odour, ADORA2A, BCO1, COMT, FOXO3).
+
+Left out on purpose: strand-symmetric A/T and C/G markers such as FTO rs9939609, PPARG rs1801282, HFE rs1799945, and HBB rs334, because providers can report them on different strands; rare pathogenic variants such as LRRK2 G2019S and BRCA1/2, because consumer arrays often miscall them; indels and multi-variant haplotypes such as CFTR F508del, APOL1 G2, and CYP2D6, which a single SNP call cannot represent; X-linked markers such as G6PD and AR, because hemizygous calls need their own rule type.
+
 Catalog 1.6.0 adds effect-allele rules for SLC24A5 rs1426654 (skin pigmentation), FUT2 rs601338 (secretor status), GC rs2282679 (vitamin D level, low confidence), EDAR rs3827760 (hair thickness), MTHFR rs1801133 (folate metabolism, medical flag, with the ACMG guideline against routine testing), and MC1R rs1805008 (red hair). Coordinates and plus-strand alleles were checked against the NCBI Variation API and the sources against PubMed on 2026-11-20. The strand-symmetric SLC45A2 rs16891982 (C/G) was left out because providers can report it on different strands. Earlier releases use effect alleles for rs671, rs1229984, rs7903146, rs1800562, rs6025, rs1799963, rs4149056, rs3918290, rs55886062, rs116855232, rs9923231, rs776746, rs1805007, and rs4988235. Two-marker outcomes define APOE, CYP2C9, CYP2C19, and TPMT types. Phase is assumed where both markers are heterozygous, and the rule says so.
 
 ## Sign a package

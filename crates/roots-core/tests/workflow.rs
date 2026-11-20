@@ -1013,3 +1013,51 @@ fn catalog_1_6_rules_count_effect_alleles_on_both_builds() {
         }
     }
 }
+
+/// Every single-marker effect-allele rule in the starter catalog counts zero,
+/// one, and two copies on both builds, using the coordinates and bases the
+/// catalog declares.
+#[test]
+fn every_effect_rule_counts_copies_on_both_builds() {
+    let catalog = Catalog::starter().unwrap();
+    let raw: serde_json::Value =
+        serde_json::from_str(include_str!("../../../catalog/starter.json")).unwrap();
+    let markers: std::collections::HashMap<&str, &serde_json::Value> = raw["markers"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .map(|m| (m[0].as_str().unwrap(), m))
+        .collect();
+    let mut checked = 0;
+    for rule in raw["traits"].as_array().unwrap() {
+        let Some(effect) = rule.get("effect") else { continue };
+        if rule["markers"].as_array().unwrap().len() != 1 {
+            continue;
+        }
+        let id = rule["id"].as_str().unwrap();
+        let rs = effect["marker"].as_str().unwrap();
+        let allele = effect["allele"].as_str().unwrap().chars().next().unwrap();
+        let marker = markers[rs];
+        let other = marker[5].as_str().unwrap().chars().find(|&c| c != allele).unwrap();
+        let sorted = |a: char, b: char| if a <= b { format!("{a}{b}") } else { format!("{b}{a}") };
+        let calls = [sorted(other, other), sorted(other, allele), sorted(allele, allele)];
+        for (build, position) in [("37", &marker[3]), ("38", &marker[4])] {
+            for (copies, call) in calls.iter().enumerate() {
+                let raw = format!(
+                    "##reference=build{build}\nRSID,CHROMOSOME,POSITION,RESULT\n{rs},{},{position},{call}\n",
+                    marker[2].as_str().unwrap()
+                );
+                let data = import::parse(raw.as_bytes(), &AtomicBool::new(false)).unwrap();
+                let finding = analysis::evaluate(&data, &catalog)
+                    .unwrap()
+                    .into_iter()
+                    .find(|f| f.item.id == id)
+                    .unwrap();
+                assert_eq!(finding.dosage, Some(copies as u8), "{id} build {build} {call}");
+                assert!(finding.conclusion.is_some(), "{id} build {build} {call}");
+            }
+        }
+        checked += 1;
+    }
+    assert!(checked >= 50, "only {checked} effect rules");
+}

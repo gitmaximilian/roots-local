@@ -12,6 +12,12 @@ const docs = prepare([
     fields: [{ text: "VKORC1 and warfarin", weight: 3 }, { text: "Do I need less warfarin?", weight: 2.5 }] },
   { id: "cyp2c9", group: "finding", value: "cyp2c9", genes: ["CYP2C9"], markers: ["rs1799853", "rs1057910"],
     fields: [{ text: "CYP2C9: two tested markers", weight: 3 }] },
+  { id: "hla-dq2", group: "finding", value: "hla-dq2", genes: ["HLA-DQA1"], markers: ["rs2187668"],
+    fields: [{ text: "HLA-DQ2.5 and coeliac disease", weight: 3 }] },
+  { id: "abcg2", group: "finding", value: "abcg2", genes: ["ABCG2"], markers: ["rs2231142"],
+    fields: [{ text: "ABCG2 Q141K, uric acid and gout", weight: 3 }] },
+  { id: "asparagus", group: "finding", value: "asparagus", genes: ["OR2M7"], markers: ["rs4481887"],
+    fields: [{ text: "Smelling asparagus in urine", weight: 3 }] },
   { id: "export", group: "command", value: "export", fields: [{ text: "Export PDF", weight: 3 }] },
 ]);
 const ids = (query) => search(query, docs).map((hit) => hit.doc.id);
@@ -23,6 +29,12 @@ test("everyday words reach the gene", () => {
   assert.equal(ids("Vertrage ich Milch?")[0], "lactase");
   assert.equal(ids("Kaffee")[0], "caffeine");
   assert.deepEqual(new Set(ids("Blutverdünner")), new Set(["vkorc1", "cyp2c9"]));
+});
+test("everyday words reach the 1.7.0 rules", () => {
+  assert.equal(ids("Zöliakie")[0], "hla-dq2");
+  assert.equal(ids("Vertrage ich Gluten?")[0], "hla-dq2");
+  assert.equal(ids("Gicht")[0], "abcg2");
+  assert.equal(ids("Spargel")[0], "asparagus");
 });
 test("tolerates typos and prefixes", () => {
   assert.equal(ids("lactse")[0], "lactase");
