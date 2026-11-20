@@ -3,6 +3,8 @@
 //   node scripts/interpretation-benchmark.mjs                 catalog only
 //   node scripts/interpretation-benchmark.mjs <ollama-model>  local Ollama model
 //   node scripts/interpretation-benchmark.mjs --claude [id]   Claude via the API
+//   node scripts/interpretation-benchmark.mjs --export <file> one prompt to paste into any chat
+//   node scripts/interpretation-benchmark.mjs --answers <file> score the pasted chat reply
 //
 // Only synthetic genotypes are sent. The model gets the same file, marker
 // metadata and rules as the catalog; each answer is scored against the
@@ -16,8 +18,12 @@ import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
-const useClaude = process.argv[2] === "--claude";
-const model = useClaude ? (process.argv[3] ?? "claude-opus-5-5") : process.argv[2];
+const flag = process.argv[2];
+const useClaude = flag === "--claude";
+const exportFile = flag === "--export" ? process.argv[3] : undefined;
+const answersFile = flag === "--answers" ? process.argv[3] : undefined;
+if ((flag === "--export" || flag === "--answers") && !process.argv[3]) throw new Error("Expected a file name after " + flag + ".");
+const model = useClaude ? (process.argv[3] ?? "claude-opus-5-5") : answersFile ? "pasted chat reply" : exportFile ? undefined : flag;
 const port = process.env.ROOTS_OLLAMA_PORT ?? "11446";
 if (!/^\d{1,5}$/.test(port)) throw new Error("Expected a port number for local Ollama.");
 const origin = "http://127.0.0.1:" + port;
@@ -52,17 +58,19 @@ const schema = {
   required: ["category", "calls", "explanation"],
 };
 
-async function localLlm(csv, markerIds, topic) {
-  const markers = markerIds.map((id) => catalog.markers.find((marker) => marker[0] === id));
-  const instructions = [
+const RULES = [
     "Interpret only the requested topic from this synthetic raw DNA file.",
     "Use a marker only if the file declares the reference build and rsID, chromosome, coordinate and alleles agree. Conflicting rows invalidate the call.",
     "Return one category. 'marker_association' means a limited trait association from a validated marker. 'marker_copies' means only observed marker copies, with insufficient evidence for a complete diplotype or metabolizer type. 'unresolved' means the requested finding cannot be concluded.",
     "Respect phase and untyped alleles. Give one brief plain-language explanation without suggesting diagnosis or medication changes.",
     "List the validated calls in reference-marker order, or null for an unsupported call. Sort the two bases alphabetically.",
     "Marker metadata columns are rsID, gene, chromosome, GRCh37 coordinate, GRCh38 coordinate, allowed bases.",
-    JSON.stringify(markers), "Topic: " + topic, csv,
-  ].join("\n");
+];
+const markersFor = (markerIds) => JSON.stringify(markerIds.map((id) => catalog.markers.find((marker) => marker[0] === id)));
+const topicOf = (ruleId) => catalog.traits.find((entry) => entry.id === ruleId).title;
+
+async function localLlm(csv, markerIds, topic) {
+  const instructions = [...RULES, markersFor(markerIds), "Topic: " + topic, csv].join("\n");
   if (useClaude) return claude(instructions);
   const response = await fetch(origin + "/api/chat", {
     method: "POST",
@@ -96,13 +104,36 @@ async function claude(prompt) {
   return response.parsed_output;
 }
 
+if (exportFile) {
+  // Case names hint at the expected answer, so the chat only sees numbers.
+  const parts = [
+    "# Roots Local interpretation benchmark (synthetic data, no real person)",
+    "", "Answer each numbered case independently with these rules:", "", ...RULES.map((rule) => "- " + rule), "",
+    "Reply with only a JSON array, one object per case in order:",
+    '[{"case": 1, "category": "...", "calls": ["AG"], "explanation": "..."}, ...]', "",
+  ];
+  cases.forEach(([, ruleId, csv, , ], index) => parts.push(
+    "## Case " + (index + 1), "Topic: " + topicOf(ruleId), "Markers: " + markersFor(catalog.traits.find((t) => t.id === ruleId).markers),
+    "File:", "```", csv.trimEnd(), "```", ""));
+  writeFileSync(exportFile, parts.join("\n"));
+  console.log("Wrote " + cases.length + " cases to " + exportFile);
+  process.exit(0);
+}
+let pasted;
+if (answersFile) {
+  const text = readFileSync(answersFile, "utf8");
+  const json = text.slice(text.indexOf("["), text.lastIndexOf("]") + 1);
+  pasted = JSON.parse(json);
+  if (!Array.isArray(pasted) || pasted.length !== cases.length) throw new Error("Expected " + cases.length + " answers in " + answersFile + ".");
+}
+
 const work = mkdtempSync(join(tmpdir(), "roots-interpretation-"));
 let catalogPasses = 0;
 let llmPasses = 0;
 const matches = (actual, expected) => actual.category === expected.category
   && JSON.stringify(actual.calls) === JSON.stringify(expected.calls);
 try {
-  for (const [id, ruleId, csv, category, calls] of cases) {
+  for (const [index, [id, ruleId, csv, category, calls]] of cases.entries()) {
     const rule = catalog.traits.find((entry) => entry.id === ruleId);
     if (!rule) throw new Error("Missing rule: " + ruleId);
     const fixture = join(work, "synthetic.csv");
@@ -118,7 +149,9 @@ try {
     const expected = { category, calls };
     const pass = matches(actual, expected);
     catalogPasses += Number(pass);
-    const llm = model ? await localLlm(csv, rule.markers, rule.title) : null;
+    const llm = pasted ? { ...pasted.find((answer) => answer.case === index + 1) ?? pasted[index] }
+      : model ? await localLlm(csv, rule.markers, rule.title) : null;
+    if (llm) llm.calls ??= [];
     if (llm) llm.calls = llm.calls.map((call) => (call ? [...call].sort().join("") : call));
     const llmPass = llm === null ? null : matches(llm, expected);
     llmPasses += Number(llmPass);

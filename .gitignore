@@ -42,3 +42,4 @@ test-results/
 playwright-report/
 .wrangler/
 !fixtures/formats/*.csv
+benchmark-prompt.md
