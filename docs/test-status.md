@@ -70,3 +70,7 @@ Peak WebAssembly memory after the 700k import and a PDF export: 98 MiB analysis,
 | Further inference validation | Assay benchmarks, known pedigrees, validated clinical diplotype and copy-number references, and suitable risk calibration data |
 
 Tests use synthetic genotype data. The repository contains no personal DNA files.
+
+### 2026-11-20: interpretation benchmark, pasted chat reply
+
+`--export` prompt answered in a free chat (model not recorded), scored with `--answers`: 10/12, catalog 12/12. Both misses are APOE: the reply classed the unphased double heterozygote and the missing rs7412 as `marker_copies` while stating that the APOE type stays open. The catalog withholds any APOE conclusion (`unresolved`). The calls matched in all 12 cases.
