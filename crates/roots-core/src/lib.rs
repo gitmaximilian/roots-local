@@ -8,4 +8,5 @@ pub mod lineage;
 pub mod locale;
 pub mod pgs;
 pub mod report;
+pub mod trait_scores;
 pub mod variants;

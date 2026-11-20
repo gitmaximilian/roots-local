@@ -303,5 +303,14 @@
   "Verstanden, einblenden": "I understand, show them",
   "Datenschutz & Hinweise": "Privacy & terms",
   "Zur Information und zum Lernen. Kein Medizinprodukt, keine Diagnose.": "For information and learning. Not a medical device, no diagnosis.",
-  "Mehr dazu": "Learn more"
+  "Mehr dazu": "Learn more",
+  "niedriger": "lower",
+  "Durchschnitt": "average",
+  "höher": "higher",
+  "Geschätztes Perzentil": "Estimated percentile",
+  "(Schätzung im Vergleich zur Studienpopulation)": "(estimate compared with the study population)",
+  "Genorte des Scores in deiner Datei": "of the score's loci are in your file",
+  "Genetische Scores": "Genetic scores",
+  "Merkmale aus großen Studien, verglichen mit der Studienpopulation. Am weitesten vom Durchschnitt zuerst.": "traits from large studies, compared with the study population. Furthest from average first.",
+  "medizinische Scores sind ausgeblendet.": "medical scores are hidden."
 }

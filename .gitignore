@@ -42,4 +42,5 @@ test-results/
 playwright-report/
 .wrangler/
 !fixtures/formats/*.csv
+!fixtures/synthetic-scores.csv
 benchmark-prompt.md

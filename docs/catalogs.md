@@ -24,6 +24,29 @@ Left out on purpose: strand-symmetric A/T and C/G markers such as FTO rs9939609,
 
 Catalog 1.6.0 adds effect-allele rules for SLC24A5 rs1426654 (skin pigmentation), FUT2 rs601338 (secretor status), GC rs2282679 (vitamin D level, low confidence), EDAR rs3827760 (hair thickness), MTHFR rs1801133 (folate metabolism, medical flag, with the ACMG guideline against routine testing), and MC1R rs1805008 (red hair). Coordinates and plus-strand alleles were checked against the NCBI Variation API and the sources against PubMed on 2026-11-20. The strand-symmetric SLC45A2 rs16891982 (C/G) was left out because providers can report it on different strands. Earlier releases use effect alleles for rs671, rs1229984, rs7903146, rs1800562, rs6025, rs1799963, rs4149056, rs3918290, rs55886062, rs116855232, rs9923231, rs776746, rs1805007, and rs4988235. Two-marker outcomes define APOE, CYP2C9, CYP2C19, and TPMT types. Phase is assumed where both markers are heterozygous, and the rule says so.
 
+## Built-in genetic scores
+
+The app includes genetic scores for the traits in [gwas_score_topics.json](../catalog/gwas_score_topics.json), built by [scripts/gwas_scores.py](../scripts/gwas_scores.py) from the NHGRI-EBI GWAS Catalog association export into [gwas-scores.json](../catalog/gwas-scores.json). They load with the app and run on the device like every other rule.
+
+How a score is built:
+
+1. **One study per trait.** Among genome-wide significant single-trait associations (p ≤ 5 × 10⁻⁸), the builder takes the study with the most usable rows. All weights in a score therefore share one unit: log odds for diseases, the study's beta for measurements. Rows without a clear direction (a beta without "increase" or "decrease") are dropped.
+2. **Independent loci.** Lead variants are taken by significance, keeping at most one per 500 kb on a chromosome. This limits double counting through linkage; it is not a formal clumping with an LD reference. Up to four other significant variants of the same study within 250 kb of a lead are kept as stand-ins. The app uses the first variant of each locus that the file contains, so a locus counts once.
+3. **Verified effect allele.** The GRCh37 position, alleles, and 1000 Genomes frequencies come from the Ensembl GRCh37 REST API; GRCh38 positions come from the catalog. The two alleles observed in 1000 Genomes define the variant. Strand-symmetric A/T and C/G variants are dropped. A reported risk allele that is not one of the two alleles is mapped through its complement; if that fails, the variant is dropped. If the study's allele frequency differs from the European 1000 Genomes frequency by more than 0.25, the variant is dropped as a likely strand or allele error.
+4. **Frequency.** The study's risk-allele frequency is used, or the European 1000 Genomes frequency where the study reports none. Variants with a frequency below 0.5 % or above 99.5 % are dropped.
+
+In the app, each genotyped variant contributes copies × weight. The expected value (Σ 2fw) and variance (Σ 2f(1 − f)w²) over the same variants give a z-score and an estimated percentile in the study population, reported between 1 and 99 because the normal approximation is coarse in the tails. A score needs at least 8 genotyped loci and at least 10 % of its loci. The conclusion names five ranges (below the 10th percentile, 10th to 30th, 30th to 70th, 70th to 90th, above the 90th), and the detail view shows the percentile, the number of loci found in the file, and the eight variants that contribute most. Scores for diseases and laboratory values carry the medical flag and stay hidden until the user opts in. Confidence is always low: a score of lead variants explains only part of the heritability and is calibrated only to the study population.
+
+Rebuild the scores from a new export:
+
+```sh
+python3 scripts/gwas_scores.py select /local/path/ebi-associations.zip tmp/scores/selected.json
+python3 scripts/gwas_scores.py resolve tmp/scores/selected.json tmp/scores/ensembl.json
+python3 scripts/gwas_scores.py build tmp/scores/selected.json tmp/scores/ensembl.json catalog/gwas-scores.json "2026-10-29"
+```
+
+Traits left out on purpose: social outcomes (educational attainment, income, intelligence), because they mostly reflect environment and invite misreading; pooled measurements such as "protein measurement" or "fatty acid amount", whose associations mix different molecules; pigmentation scores, whose direction has no single meaning; and traits whose largest study has fewer than five independent variants.
+
 ## Sign a package
 
 ```sh

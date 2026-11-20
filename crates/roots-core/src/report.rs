@@ -79,7 +79,8 @@ impl Model {
         data: &crate::import::Import,
         catalog: &crate::catalog::Catalog,
     ) -> Result<(), String> {
-        let (gwas_total, findings) = crate::analysis::evaluate_with_coverage(data, catalog)?;
+        let (gwas_total, mut findings) = crate::analysis::evaluate_with_coverage(data, catalog)?;
+        findings.extend(crate::trait_scores::evaluate(data));
         self.findings = findings;
         if let Some(trio) = &self.trio {
             crate::analysis::resolve_bitter_phase(&mut self.findings, trio);
@@ -151,6 +152,7 @@ fn document(model: &Model, mut options: Options) -> Document {
                 finding.conclusion = None;
                 finding.confidence = None;
                 finding.dosage = None;
+                finding.score = None;
                 finding.status = Status::Research;
                 finding.message = locale::english_if(
                     options.language,

@@ -43,6 +43,79 @@ export function ConfidenceMeter({ value }: { value: Confidence }) {
   );
 }
 
+/** Position of a genetic score in the study population, as an estimate. */
+export function ScoreMeter({ score }: { score: NonNullable<Finding["score"]> }) {
+  const percent = score.percentile;
+  return (
+    <div className="score-meter">
+      {percent !== null && (
+        <>
+          <div className="track" aria-hidden="true">
+            <span className="band low" />
+            <span className="band mid" />
+            <span className="band high" />
+            <i style={{ left: `${Math.min(99, Math.max(1, percent))}%` }} />
+          </div>
+          <div className="scale" aria-hidden="true">
+            <span>{t("niedriger")}</span>
+            <span>{t("Durchschnitt")}</span>
+            <span>{t("höher")}</span>
+          </div>
+          <p>
+            {t("Geschätztes Perzentil")}: <b>{Math.round(percent)}</b>{" "}
+            <small>{t("(Schätzung im Vergleich zur Studienpopulation)")}</small>
+          </p>
+        </>
+      )}
+      <p className="muted">
+        {score.matched} / {score.total} {t("Genorte des Scores in deiner Datei")} · GWAS Catalog {score.release}
+      </p>
+    </div>
+  );
+}
+
+/** The most notable genetic scores, furthest from the average first. */
+export function ScoreOverview({
+  findings,
+  showMedical,
+  onOpen,
+}: {
+  findings: Finding[];
+  showMedical: boolean;
+  onOpen: (finding: Finding) => void;
+}) {
+  const scored = findings.filter((f) => f.score?.z != null);
+  const visible = scored
+    .filter((f) => showMedical || !isMedical(f))
+    .sort((a, b) => Math.abs(b.score!.z!) - Math.abs(a.score!.z!));
+  if (!scored.length) return null;
+  const hidden = scored.length - visible.length;
+  return (
+    <section className="score-overview">
+      <header className="section-heading">
+        <h2>{t("Genetische Scores")}</h2>
+      </header>
+      <p className="muted">
+        {scored.length} {t("Merkmale aus großen Studien, verglichen mit der Studienpopulation. Am weitesten vom Durchschnitt zuerst.")}
+        {hidden > 0 && ` ${hidden} ${t("medizinische Scores sind ausgeblendet.")}`}
+      </p>
+      <ul>
+        {visible.slice(0, 8).map((f) => (
+          <li key={f.id}>
+            <button className="text-button" onClick={() => onOpen(f)}>
+              <span>{resultText(f.title)}</span>
+              <span className="mini-track" aria-hidden="true">
+                <i style={{ left: `${f.score!.percentile}%` }} />
+              </span>
+              <span className="mono">{Math.round(f.score!.percentile!)}</span>
+            </button>
+          </li>
+        ))}
+      </ul>
+    </section>
+  );
+}
+
 export const isMedical = (finding: Finding) =>
   Boolean(finding.clinical || finding.effect?.clinical);
 
@@ -108,6 +181,7 @@ export function Inspector({
         {finding.confidence && !hidden && (
           <ConfidenceMeter value={finding.confidence} />
         )}
+        {finding.score && !hidden && <ScoreMeter score={finding.score} />}
         <p>{resultText(finding.summary)}</p>
         {!hidden && (
           <p className="interpretation">{resultText(finding.message)}</p>

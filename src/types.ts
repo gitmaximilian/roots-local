@@ -33,6 +33,14 @@ export type Finding = {
   checks: MarkerCheck[];
   sources: [string, string][];
   cross: string[];
+  method?: string;
+  score?: {
+    matched: number;
+    total: number;
+    percentile: number | null;
+    z: number | null;
+    release: string;
+  };
   study?: {
     reported_trait: string;
     accession: string;

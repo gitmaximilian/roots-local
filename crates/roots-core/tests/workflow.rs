@@ -1061,3 +1061,43 @@ fn every_effect_rule_counts_copies_on_both_builds() {
     }
     assert!(checked >= 50, "only {checked} effect rules");
 }
+
+/// Built-in genetic scores: a file carrying every score-raising allele lands
+/// at the top, one carrying none at the bottom, on both builds; findings only
+/// appear for scores with genotyped variants.
+#[test]
+fn trait_scores_follow_effect_alleles_on_both_builds() {
+    let raw: serde_json::Value =
+        serde_json::from_str(include_str!("../../../catalog/gwas-scores.json")).unwrap();
+    let score = raw["traits"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .find(|t| t["id"] == "score-oba-vt0001253")
+        .expect("height score");
+    let id = score["id"].as_str().unwrap();
+    for (build, column) in [("37", 2), ("38", 3)] {
+        let mut percentiles = Vec::new();
+        for raising in [true, false] {
+            let mut file = format!("##reference=build{build}\nRSID,CHROMOSOME,POSITION,RESULT\n");
+            for v in score["variants"].as_array().unwrap() {
+                // The effect allele raises the score when its weight is positive.
+                let effect = (v[6].as_f64().unwrap() > 0.0) == raising;
+                let base = v[if effect { 4 } else { 5 }].as_str().unwrap();
+                file += &format!("{},{},{},{base}{base}\n", v[0].as_str().unwrap(), v[1].as_str().unwrap(), v[column]);
+            }
+            let data = import::parse(file.as_bytes(), &AtomicBool::new(false)).unwrap();
+            let findings = roots_core::trait_scores::evaluate(&data);
+            let finding = findings.iter().find(|f| f.item.id == id).unwrap();
+            assert_eq!(finding.status, analysis::Status::Personal);
+            let detail = finding.score.as_ref().unwrap();
+            assert_eq!(detail.matched, detail.total);
+            percentiles.push(detail.percentile.unwrap());
+        }
+        assert!(percentiles[0] == 99.0 && percentiles[1] == 1.0, "build {build}: {percentiles:?}");
+    }
+    let data = import::parse(SAMPLE, &AtomicBool::new(false)).unwrap();
+    assert!(roots_core::trait_scores::evaluate(&data)
+        .iter()
+        .all(|f| f.score.as_ref().unwrap().matched > 0));
+}

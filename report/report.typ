@@ -44,6 +44,14 @@
       #tr("Studienpopulation", "Study population") · #finding.population \
       #finding.limits])
     #parbreak()
+    #if "score" in finding and finding.score.percentile != none [
+      #let p = finding.score.percentile
+      #box(width: 60%, height: 5pt, radius: 2.5pt, fill: paper, place(dx: calc.min(calc.max(p, 1), 99) * 1% - 1.5pt, dy: -2.5pt, rect(width: 3pt, height: 10pt, radius: 1.5pt, fill: theme)))
+      #h(0.6em) #caption([#tr("Geschätztes Perzentil", "Estimated percentile") #calc.round(p)])
+      #linebreak()
+      #caption([#finding.score.matched / #finding.score.total #tr("Genorte des Scores in der Datei", "of the score's loci in the file") · GWAS Catalog #finding.score.release])
+      #parbreak()
+    ]
     #if "study" in finding [
       #caption([#tr("Merkmal in der Studie", "Reported trait") · #finding.study.reported_trait \
         #tr("Signifikanz in der Studie", "Study significance") · p = #finding.study.p_value])

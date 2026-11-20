@@ -151,6 +151,8 @@ pub enum Method {
     Bitter,
     Research,
     Gwas,
+    /// Built-in genetic scores; never accepted from a catalog package.
+    Score,
 }
 #[derive(Debug, Deserialize, Serialize)]
 #[serde(deny_unknown_fields)]
@@ -298,6 +300,7 @@ impl Catalog {
                             && !item.outcomes.is_empty()
                     }
                     Method::Research => item.outcomes.is_empty(),
+                    Method::Score => false,
                     Method::Gwas => {
                         item.markers.len() == 1
                             && item.study.as_ref().is_some_and(Study::valid)
