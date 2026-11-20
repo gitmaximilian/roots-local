@@ -36,6 +36,8 @@ import { Logo, Mark } from "./brand";
 import { CommandPalette, type Command } from "./command-palette";
 import {
   ConfidenceMeter,
+  ScoreMeter,
+  ScoreOverview,
   Inspector,
   StatusLabel,
   isMedical,
@@ -172,6 +174,7 @@ function FindingDetail({
         {finding.confidence && !hidden && (
           <ConfidenceMeter value={finding.confidence} />
         )}
+        {finding.score && !hidden && <ScoreMeter score={finding.score} />}
         <p>{resultText(finding.summary)}</p>
         {!hidden && (
           <p className="interpretation">{resultText(finding.message)}</p>
@@ -1440,9 +1443,9 @@ function App() {
                       onShowMedical={() => setShowMedical(true)}
                       onOpen={(finding) => setInspected(finding.id)}
                     />
-                    <div>
+                    <div className="radar-wrap">
                     <NucleusRadar
-                      findings={results}
+                      findings={results.filter((finding) => finding.method !== "score")}
                       showMedical={showMedical}
                       selected={inspected}
                       onOpen={(finding) => setInspected(finding.id)}
@@ -1462,6 +1465,11 @@ function App() {
                     selected={area}
                     onSelect={(id) => setArea(area === id ? undefined : id)}
                     onOpenPass={() => navigate("pass")}
+                  />
+                  <ScoreOverview
+                    findings={results}
+                    showMedical={showMedical}
+                    onOpen={(finding) => setInspected(finding.id)}
                   />
                   <header className="section-heading">
                     <h2>
@@ -1492,7 +1500,9 @@ function App() {
                   {shownConclusions.length ? (
                     <div className="conclusions">
                       {shownConclusions
-                        .filter((finding) => !area || areaOf(finding) === area)
+                        .filter((finding) =>
+                          area ? areaOf(finding) === area : finding.method !== "score",
+                        )
                         .map((finding) => (
                           <button
                             key={finding.id}
@@ -1520,12 +1530,14 @@ function App() {
                               <ConfidenceMeter value={finding.confidence} />
                             )}
                             <span className="gene">
-                              {finding.checks
-                                .map(
-                                  (check) =>
-                                    `${resultText(check.gene)} · ${check.id}`,
-                                )
-                                .join("  ")}
+                              {finding.score
+                                ? `${finding.score.matched} / ${finding.score.total} ${t("Genorte des Scores in deiner Datei")}`
+                                : finding.checks
+                                    .map(
+                                      (check) =>
+                                        `${resultText(check.gene)} · ${check.id}`,
+                                    )
+                                    .join("  ")}
                             </span>
                           </button>
                         ))}

@@ -143,6 +143,9 @@ struct CatalogState<'a> {
 impl Session {
     #[wasm_bindgen(constructor)]
     pub fn new() -> Self {
+        // Parse the built-in genetic scores while the app starts, not during
+        // the first import.
+        roots_core::trait_scores::count();
         Self::default()
     }
 

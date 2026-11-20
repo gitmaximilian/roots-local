@@ -313,6 +313,12 @@ main {
 .local-note,
 .ask-help,
 .radar-key { color: var(--muted); }
+.radar-wrap {
+  display: grid;
+  justify-items: center;
+  align-content: center;
+  text-align: center;
+}
 .example {
   font-size: 11px;
   font-weight: 600;
@@ -1811,4 +1817,85 @@ tr.clickable:hover td {
   display: grid;
   gap: 8px;
   line-height: 1.5;
+}
+
+.score-meter {
+  display: grid;
+  gap: 4px;
+  margin: 4px 0 2px;
+}
+.score-meter .track {
+  position: relative;
+  display: grid;
+  grid-template-columns: 30fr 40fr 30fr;
+  gap: 2px;
+  height: 8px;
+}
+.score-meter .band {
+  border-radius: 4px;
+  background: var(--line);
+}
+.score-meter .band.mid {
+  background: var(--accent-soft);
+}
+.score-meter .track i {
+  position: absolute;
+  top: -4px;
+  width: 4px;
+  height: 16px;
+  margin-left: -2px;
+  border-radius: 2px;
+  background: var(--accent);
+}
+.score-meter .scale {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  color: var(--muted);
+}
+.score-meter p {
+  margin: 0;
+  font-size: 13px;
+}
+.score-meter small,
+.score-meter .muted {
+  color: var(--muted);
+  font-size: 12px;
+}
+.score-overview ul {
+  list-style: none;
+  margin: 8px 0 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 6px 18px;
+}
+.score-overview button {
+  display: grid;
+  grid-template-columns: 1fr 90px 28px;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 32px;
+  text-align: left;
+  color: var(--ink);
+}
+.score-overview .mono {
+  text-align: right;
+  color: var(--muted);
+}
+.mini-track {
+  position: relative;
+  height: 6px;
+  border-radius: 3px;
+  background: linear-gradient(90deg, var(--line) 0 30%, var(--accent-soft) 30% 70%, var(--line) 70%);
+}
+.mini-track i {
+  position: absolute;
+  top: -3px;
+  width: 3px;
+  height: 12px;
+  margin-left: -1.5px;
+  border-radius: 2px;
+  background: var(--accent);
 }

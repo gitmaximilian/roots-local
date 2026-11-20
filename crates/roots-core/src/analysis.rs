@@ -33,6 +33,9 @@ pub struct Finding {
     pub confidence: Option<Confidence>,
     /// Copies of the verified effect allele, when the rule defines one.
     pub dosage: Option<u8>,
+    /// Numbers behind a built-in genetic score.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub score: Option<crate::trait_scores::ScoreDetail>,
 }
 #[derive(Clone, Debug, Serialize)]
 pub struct Summary {
@@ -390,6 +393,7 @@ pub fn evaluate_with_coverage(
             conclusion,
             confidence,
             dosage: copies,
+            score: None,
         });
     }
     Ok((gwas_total, findings))

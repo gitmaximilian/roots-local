@@ -39,7 +39,11 @@ Object.assign(globalThis, {
     ),
 });
 
-const ready = init({ module_or_path: analysisUrl }).then((exports) => {
+// The modules bypass the HTTP cache (see sw.js); the service worker still
+// answers these requests from its own cache once it controls the page.
+const wasm = (url: string) => fetch(url, { cache: "no-store" });
+
+const ready = init({ module_or_path: wasm(analysisUrl) }).then((exports) => {
   memories.analysis = exports.memory;
   return new Session();
 });
@@ -49,7 +53,7 @@ let pdf: Promise<PdfModule> | undefined;
 function loadPdf(): Promise<PdfModule> {
   pdf ??= (async () => {
     const module = await import("./generated/roots_pdf_wasm.js");
-    memories.pdf = (await module.default({ module_or_path: pdfUrl })).memory;
+    memories.pdf = (await module.default({ module_or_path: wasm(pdfUrl) })).memory;
     const fonts = await Promise.all(
       fontUrls.map(async (url) => {
         const response = await fetch(url);

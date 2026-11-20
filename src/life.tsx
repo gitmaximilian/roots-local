@@ -84,10 +84,12 @@ export function LifeAreas({
       const items = findings.filter((f) => areaOf(f) === area.id);
       const concluded = items.filter((f) => f.conclusion);
       const visible = concluded.filter((f) => showMedical || !isMedical(f));
+      // Curated rules first; a genetic score only when nothing else concludes.
       const best = [...visible].sort(
         (a, b) =>
+          Number(a.method === "score") - Number(b.method === "score") ||
           confidenceValue[b.confidence ?? "low"] -
-          confidenceValue[a.confidence ?? "low"],
+            confidenceValue[a.confidence ?? "low"],
       )[0];
       const score = visible.length
         ? visible.reduce(
@@ -118,7 +120,9 @@ export function LifeAreas({
               </span>
               <strong>
                 {best
-                  ? resultText(best.conclusion!)
+                  ? best.method === "score"
+                    ? `${resultText(best.title)}: ${resultText(best.conclusion!)}`
+                    : resultText(best.conclusion!)
                   : locked
                     ? t("Gesperrt, bis du medizinische Befunde einschaltest")
                     : t("Bisher nur Studienbezüge")}
