@@ -12,7 +12,7 @@ async function open(browser, options, scheme) {
   const context = await browser.newContext({ ...options, colorScheme: scheme, locale: "en-US" });
   const page = await context.newPage();
   await page.goto(base);
-  await page.waitForSelector("html[data-pdf=ready]");
+  await page.waitForSelector("html[data-pdf=ready]", { timeout: 120_000 });
   await page.getByRole("button", { name: "View example" }).first().click();
   await page.getByRole("heading", { name: "What your DNA says" }).waitFor();
   return { context, page };

@@ -2,6 +2,10 @@
 
 Roots Local v0.3.0 is a static web app. The browser reads local inputs and runs the Rust analysis and Typst PDF engines in WebAssembly. The repository retains desktop history through the v0.2.0 release.
 
+## November 20, 2026 provider-neutral release
+
+[Production](https://rootslocal.maximilianauer.at/) serves build `490a226187589e83` from branch `web/info-and-search` via [Pages deployment 1a61d11e](https://1a61d11e.rootslocal.pages.dev/). Rollback target: build `00d4ea5941d7502e`. Changes: raw data from 23andMe, AncestryDNA, Living DNA, FamilyTreeDNA, and MyHeritage; a confirmable reference build for files that declare none; local search with everyday words; catalog 1.6.0; medicine notes for information only; a notice before medical topics; intended purpose, terms, controller, and rights on the in-app privacy page, also at `/privacy` and `/terms`. All 28 public files matched `SHA256SUMS` on the custom domain, and the privacy and CRAM suites passed there (12 checks). Portfolio [deployment 31b2ce45](https://31b2ce45.maximilianauer.pages.dev/) updates the project page, screenshots, and the Roots Local legal section.
+
 ## November 17, 2026 mobile follow-up
 
 [Production](https://rootslocal.maximilianauer.at/) serves build `9429d0e3901f1f7b` from source [`0ffe2a8`](https://github.com/gitmaximilian/roots-local/commit/0ffe2a8) via [Pages deployment b53b2dd1](https://b53b2dd1.rootslocal.pages.dev/). The app rollback target for this update is [047b2778](https://047b2778.rootslocal.pages.dev/). All 27 public assets matched the build manifest and `/icons/touch-180.png` was served as `image/png`. See the [mobile audit notes](audit/mobile-follow-up.md) for the changes and device evidence.
