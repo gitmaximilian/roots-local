@@ -1,11 +1,23 @@
-// Compare deterministic catalog results with an optional, local Ollama model.
-// Run from the repository: node scripts/interpretation-benchmark.mjs [model]
+// Compare deterministic catalog results with a language model on synthetic cases.
+//
+//   node scripts/interpretation-benchmark.mjs                 catalog only
+//   node scripts/interpretation-benchmark.mjs <ollama-model>  local Ollama model
+//   node scripts/interpretation-benchmark.mjs --claude [id]   Claude via the API
+//
+// Only synthetic genotypes are sent. The model gets the same file, marker
+// metadata and rules as the catalog; each answer is scored against the
+// expected category and calls, which are fixed independently of both.
+// Claude reads credentials from ANTHROPIC_API_KEY or an `ant auth login` profile.
+import Anthropic from "@anthropic-ai/sdk";
+import { zodOutputFormat } from "@anthropic-ai/sdk/helpers/zod";
+import { z } from "zod";
 import { execFileSync } from "node:child_process";
 import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
-const model = process.argv[2];
+const useClaude = process.argv[2] === "--claude";
+const model = useClaude ? (process.argv[3] ?? "claude-opus-5-5") : process.argv[2];
 const port = process.env.ROOTS_OLLAMA_PORT ?? "11446";
 if (!/^\d{1,5}$/.test(port)) throw new Error("Expected a port number for local Ollama.");
 const origin = "http://127.0.0.1:" + port;
@@ -21,6 +33,13 @@ const cases = [
   ["cyp2c9-unphased", "cyp2c9", input("rs1799853,10,96702047,CT\nrs1057910,10,96741053,AC"), "marker_copies", ["CT", "AC"]],
   ["cyp2c19-reference-markers", "cyp2c19", input("rs4244285,10,96541616,GG\nrs12248560,10,96521657,CC"), "marker_copies", ["GG", "CC"]],
   ["tpmt-unphased", "tpmt", input("rs1800460,6,18139228,CT\nrs1142345,6,18130918,CT"), "marker_copies", ["CT", "CT"]],
+  ["earwax-23andme-layout", "earwax",
+    "# reference human assembly build 37\n# rsid\tchromosome\tposition\tgenotype\nrs17822931\t16\t48258198\tTT\n",
+    "marker_association", ["TT"]],
+  ["actn3-ancestry-allele-columns", "actn3",
+    "#Chromosome positions are relative to human reference build 37.1.\nrsid\tchromosome\tposition\tallele1\tallele2\nrs1815739\t11\t66328095\tC\tT\n",
+    "marker_association", ["CT"]],
+  ["lactase-no-call", "lactase", input("rs4988235,2,136608646,--"), "unresolved", [null]],
 ];
 
 const schema = {
@@ -44,6 +63,7 @@ async function localLlm(csv, markerIds, topic) {
     "Marker metadata columns are rsID, gene, chromosome, GRCh37 coordinate, GRCh38 coordinate, allowed bases.",
     JSON.stringify(markers), "Topic: " + topic, csv,
   ].join("\n");
+  if (useClaude) return claude(instructions);
   const response = await fetch(origin + "/api/chat", {
     method: "POST",
     body: JSON.stringify({ model, messages: [{ role: "user", content: instructions }],
@@ -53,6 +73,27 @@ async function localLlm(csv, markerIds, topic) {
   });
   if (!response.ok) throw new Error("Ollama error " + response.status + ": " + await response.text());
   return JSON.parse((await response.json()).message.content);
+}
+
+const Answer = z.object({
+  category: z.enum(["unresolved", "marker_copies", "marker_association"]),
+  calls: z.array(z.string().nullable()),
+  explanation: z.string(),
+});
+
+async function claude(prompt) {
+  const client = new Anthropic();
+  const response = await client.messages.parse({
+    model,
+    max_tokens: 16000,
+    output_config: { effort: "high", format: zodOutputFormat(Answer) },
+    messages: [{ role: "user", content: prompt }],
+  });
+  // A refusal is recorded as a failed answer; the benchmark never swaps models.
+  if (response.stop_reason === "refusal" || !response.parsed_output) {
+    return { category: "refused", calls: [], explanation: response.stop_reason ?? "" };
+  }
+  return response.parsed_output;
 }
 
 const work = mkdtempSync(join(tmpdir(), "roots-interpretation-"));
@@ -78,6 +119,7 @@ try {
     const pass = matches(actual, expected);
     catalogPasses += Number(pass);
     const llm = model ? await localLlm(csv, rule.markers, rule.title) : null;
+    if (llm) llm.calls = llm.calls.map((call) => (call ? [...call].sort().join("") : call));
     const llmPass = llm === null ? null : matches(llm, expected);
     llmPasses += Number(llmPass);
     console.log(JSON.stringify({ id, expected, catalog: actual, pass, llm, llmPass }));
