@@ -1,6 +1,6 @@
 # Local reference catalogs
 
-The [starter catalog](../catalog/starter.json) initializes an indexed, in-memory SQLite catalog. The app validates rules against stable chapter and section IDs. Reference packages and build scripts contain public reference material only.
+The [starter catalog](../catalog/starter.json) is loaded into indexed in-memory structures (by rsID and by coordinate). The app validates rules against stable chapter and section IDs. Reference packages and build scripts contain public reference material only.
 
 ## Interpretation rules
 
@@ -12,7 +12,7 @@ A rule turns genotypes into a conclusion the user can act on. Each conclusion ca
 Only add an effect allele after confirming its plus-strand orientation in a primary source such as the marker's dbSNP or ClinVar record. - **Questions.** `questions` lists up to eight everyday questions a rule answers, written in German with English translations in `catalog/result-strings.json`. *Ask your DNA* matches typed questions against them offline.
 - **Medical flag.** Set `clinical: true` on a rule whose outcomes concern medicines or disease risk, such as APOE or metabolizer types. The app hides those conclusions until the user turns on medical findings, and reports include them only with the clinical opt-in.
 
-Catalog 1.4.0 uses effect alleles for rs671, rs1229984, rs7903146, rs1800562, rs6025, rs1799963, rs4149056, rs3918290, rs55886062, rs116855232, rs9923231, rs776746, rs1805007, and rs4988235. Two-marker outcomes define APOE, CYP2C9, CYP2C19, and TPMT types. Phase is assumed where both markers are heterozygous, and the rule says so.
+Catalog 1.6.0 adds effect-allele rules for SLC24A5 rs1426654 (skin pigmentation), FUT2 rs601338 (secretor status), GC rs2282679 (vitamin D level, low confidence), EDAR rs3827760 (hair thickness), MTHFR rs1801133 (folate metabolism, medical flag, with the ACMG guideline against routine testing), and MC1R rs1805008 (red hair). Coordinates and plus-strand alleles were checked against the NCBI Variation API and the sources against PubMed on 2026-11-20. The strand-symmetric SLC45A2 rs16891982 (C/G) was left out because providers can report it on different strands. Earlier releases use effect alleles for rs671, rs1229984, rs7903146, rs1800562, rs6025, rs1799963, rs4149056, rs3918290, rs55886062, rs116855232, rs9923231, rs776746, rs1805007, and rs4988235. Two-marker outcomes define APOE, CYP2C9, CYP2C19, and TPMT types. Phase is assumed where both markers are heterozygous, and the rule says so.
 
 ## Sign a package
 

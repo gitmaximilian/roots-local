@@ -1,5 +1,5 @@
 {
-  "version": "1.5.0",
+  "version": "1.6.0",
   "markers": [
     [
       "rs4988235",
@@ -247,6 +247,54 @@
       "4",
       100239319,
       99318162,
+      "CT"
+    ],
+    [
+      "rs1426654",
+      "SLC24A5",
+      "15",
+      48426484,
+      48134287,
+      "AG"
+    ],
+    [
+      "rs601338",
+      "FUT2",
+      "19",
+      49206674,
+      48703417,
+      "AG"
+    ],
+    [
+      "rs2282679",
+      "GC",
+      "4",
+      72608383,
+      71742666,
+      "GT"
+    ],
+    [
+      "rs3827760",
+      "EDAR",
+      "2",
+      109513601,
+      108897145,
+      "AG"
+    ],
+    [
+      "rs1801133",
+      "MTHFR",
+      "1",
+      11856378,
+      11796321,
+      "AG"
+    ],
+    [
+      "rs1805008",
+      "MC1R",
+      "16",
+      89986144,
+      89919736,
       "CT"
     ]
   ],
@@ -1418,6 +1466,249 @@
       },
       "questions": [
         "Wie schnell baue ich Alkohol ab?"
+      ]
+    },
+    {
+      "id": "slc24a5-skin",
+      "section": "04.1",
+      "title": "SLC24A5 und Hautpigmentierung",
+      "markers": [
+        "rs1426654"
+      ],
+      "method": "research",
+      "require_identifier": true,
+      "evidence": "Studienassoziation für Pigmentierung oder Haarform",
+      "summary": "Die Variante A111T in SLC24A5 erklärt einen deutlichen Teil der Unterschiede in der Hautpigmentierung zwischen europäischen und afrikanischen Populationen.",
+      "limits": "Hautfarbe hängt von vielen Genen und von Sonne ab. Ein einzelner Marker sagt die eigene Hautfarbe nicht voraus.",
+      "population": "Europäische, afrikanische und gemischte Studienpopulationen",
+      "sources": [
+        [
+          "Lamason et al. · Science (2005)",
+          "https://pubmed.ncbi.nlm.nih.gov/16357253/"
+        ],
+        [
+          "dbSNP",
+          "https://www.ncbi.nlm.nih.gov/snp/rs1426654"
+        ]
+      ],
+      "effect": {
+        "marker": "rs1426654",
+        "allele": "A",
+        "conclusions": [
+          "Keine Kopie der hellen Pigmentvariante SLC24A5 Thr111.",
+          "Eine Kopie von SLC24A5 Thr111. Die Variante ist mit hellerer Haut verbunden.",
+          "Zwei Kopien von SLC24A5 Thr111. Das ist in Europa häufig und mit hellerer Haut verbunden."
+        ],
+        "confidence": "moderate",
+        "clinical": false
+      },
+      "questions": [
+        "Welche Gene beeinflussen meine Hautfarbe?"
+      ]
+    },
+    {
+      "id": "fut2-secretor",
+      "section": "11.4",
+      "title": "FUT2 und Sekretorstatus",
+      "markers": [
+        "rs601338"
+      ],
+      "method": "research",
+      "require_identifier": true,
+      "evidence": "Replizierter genetischer Zusammenhang",
+      "summary": "Die Stoppvariante W154X in FUT2 bestimmt, ob Blutgruppenantigene im Speichel und Darm ausgeschieden werden. Nicht-Sekretoren sind in Studien seltener mit häufigen Norovirus-Stämmen infiziert und haben im Mittel höhere Vitamin-B12-Spiegel.",
+      "limits": "Die Regel prüft eine Variante, die vor allem in europäischen und afrikanischen Populationen den Sekretorstatus bestimmt. In Ostasien sind andere FUT2-Varianten häufiger. Ein Schutz vor Infektionen lässt sich daraus nicht ableiten.",
+      "population": "Europäische Studienpopulationen und Infektionsstudien mit Freiwilligen",
+      "sources": [
+        [
+          "Lindesmith et al. · Nature Medicine (2003)",
+          "https://pubmed.ncbi.nlm.nih.gov/12692541/"
+        ],
+        [
+          "Hazra et al. · Nature Genetics (2008)",
+          "https://pubmed.ncbi.nlm.nih.gov/18776911/"
+        ],
+        [
+          "dbSNP",
+          "https://www.ncbi.nlm.nih.gov/snp/rs601338"
+        ]
+      ],
+      "effect": {
+        "marker": "rs601338",
+        "allele": "A",
+        "conclusions": [
+          "Keine Kopie von FUT2 W154X. Mit dieser Variante allein spricht das für Sekretorstatus.",
+          "Eine Kopie von FUT2 W154X. Mit einer funktionierenden Kopie bleibt der Sekretorstatus erhalten.",
+          "Zwei Kopien von FUT2 W154X. Das spricht für Nicht-Sekretor-Status, der in Studien mit seltenerer Norovirus-Infektion und höheren Vitamin-B12-Spiegeln verbunden ist."
+        ],
+        "confidence": "moderate",
+        "clinical": false
+      },
+      "questions": [
+        "Bin ich Sekretor?",
+        "Bin ich anfällig für Norovirus?"
+      ]
+    },
+    {
+      "id": "gc-vitamin-d",
+      "section": "07.3",
+      "title": "GC und Vitamin-D-Spiegel",
+      "markers": [
+        "rs2282679"
+      ],
+      "method": "research",
+      "require_identifier": true,
+      "evidence": "Genomweite Assoziationsstudie",
+      "summary": "GC kodiert das Vitamin-D-bindende Protein. In einer großen genomweiten Studie war rs2282679 der stärkste genetische Marker für den 25-Hydroxy-Vitamin-D-Spiegel im Blut.",
+      "limits": "Der Effekt ist klein im Vergleich zu Sonne, Jahreszeit und Ernährung. Der eigene Vitamin-D-Spiegel lässt sich nur mit einem Bluttest bestimmen.",
+      "population": "Kohorten europäischer Abstammung",
+      "sources": [
+        [
+          "Wang et al. · Lancet (2010)",
+          "https://pubmed.ncbi.nlm.nih.gov/20541252/"
+        ],
+        [
+          "dbSNP",
+          "https://www.ncbi.nlm.nih.gov/snp/rs2282679"
+        ]
+      ],
+      "effect": {
+        "marker": "rs2282679",
+        "allele": "G",
+        "conclusions": [
+          "Keine Kopie des GC-Allels, das in Studien mit etwas niedrigerem Vitamin D verbunden ist.",
+          "Eine Kopie des GC-Allels, das in Studien mit etwas niedrigerem Vitamin-D-Spiegel verbunden ist.",
+          "Zwei Kopien des GC-Allels, das in Studien mit etwas niedrigerem Vitamin-D-Spiegel verbunden ist."
+        ],
+        "confidence": "low",
+        "clinical": false
+      },
+      "questions": [
+        "Habe ich eher wenig Vitamin D?"
+      ]
+    },
+    {
+      "id": "edar-hair",
+      "section": "04.2",
+      "title": "EDAR V370A und Haardicke",
+      "markers": [
+        "rs3827760"
+      ],
+      "method": "research",
+      "require_identifier": true,
+      "evidence": "Studienassoziation für Pigmentierung oder Haarform",
+      "summary": "Die Variante EDAR 370A ist in Ostasien und bei indigenen Amerikanern häufig. Sie ist mit dickeren Kopfhaaren und weiteren Merkmalen von Haut, Zähnen und Schweißdrüsen verbunden.",
+      "limits": "In europäischen und afrikanischen Populationen ist die Variante sehr selten. Haarform und Haardicke hängen von vielen weiteren Genen ab.",
+      "population": "Ostasiatische Studienpopulationen und Mausmodelle",
+      "sources": [
+        [
+          "Kamberov et al. · Cell (2013)",
+          "https://pubmed.ncbi.nlm.nih.gov/23415220/"
+        ],
+        [
+          "dbSNP",
+          "https://www.ncbi.nlm.nih.gov/snp/rs3827760"
+        ]
+      ],
+      "effect": {
+        "marker": "rs3827760",
+        "allele": "G",
+        "conclusions": [
+          "Keine Kopie von EDAR 370A.",
+          "Eine Kopie von EDAR 370A. Die Variante ist mit dickeren Kopfhaaren verbunden.",
+          "Zwei Kopien von EDAR 370A. Das ist mit dickeren, glatteren Kopfhaaren verbunden."
+        ],
+        "confidence": "moderate",
+        "clinical": false
+      },
+      "questions": [
+        "Habe ich dicke Haare von meinen Genen?"
+      ]
+    },
+    {
+      "id": "mthfr-c677t",
+      "section": "07.3",
+      "title": "MTHFR C677T und Folatstoffwechsel",
+      "markers": [
+        "rs1801133"
+      ],
+      "method": "research",
+      "require_identifier": true,
+      "evidence": "Replizierter genetischer Zusammenhang",
+      "summary": "Die Variante C677T verringert die Aktivität des Enzyms MTHFR. Zwei Kopien gehen im Mittel mit höherem Homocystein einher, vor allem bei niedriger Folataufnahme.",
+      "limits": "Die Variante ist sehr häufig. Fachgesellschaften wie das American College of Medical Genetics empfehlen keine Testung auf MTHFR-Varianten, weil sie allein keinen Krankheitswert belegen. Eine Folatversorgung lässt sich nur im Blut messen.",
+      "population": "Verschiedene Populationen, überwiegend europäischer Abstammung",
+      "sources": [
+        [
+          "Frosst et al. · Nature Genetics (1995)",
+          "https://pubmed.ncbi.nlm.nih.gov/7647779/"
+        ],
+        [
+          "Hickey et al. · ACMG Leitlinie · Genetics in Medicine (2013)",
+          "https://pubmed.ncbi.nlm.nih.gov/23288205/"
+        ],
+        [
+          "dbSNP",
+          "https://www.ncbi.nlm.nih.gov/snp/rs1801133"
+        ]
+      ],
+      "effect": {
+        "marker": "rs1801133",
+        "allele": "A",
+        "conclusions": [
+          "Keine Kopie von MTHFR 677T.",
+          "Eine Kopie von MTHFR 677T. Das ist sehr häufig und ohne bekannte Bedeutung für die Gesundheit.",
+          "Zwei Kopien von MTHFR 677T. Das ist mit geringerer Enzymaktivität und im Mittel höherem Homocystein verbunden. Allein ist es kein Befund und kein Grund für eine Behandlung."
+        ],
+        "confidence": "moderate",
+        "clinical": true
+      },
+      "questions": [
+        "Was bedeutet MTHFR bei mir?",
+        "Brauche ich mehr Folsäure?"
+      ],
+      "clinical": true
+    },
+    {
+      "id": "mc1r-r160w",
+      "section": "04.1",
+      "title": "MC1R R160W und rote Haarfarbe",
+      "markers": [
+        "rs1805008"
+      ],
+      "method": "research",
+      "require_identifier": true,
+      "evidence": "Studienassoziation für Pigmentierung oder Haarform",
+      "summary": "R160W ist eine der häufigen MC1R-Varianten, die mit roten Haaren, heller Haut und Sommersprossen verbunden sind.",
+      "limits": "Die Auswertung zeigt einen passenden Marker. Weitere Varianten beeinflussen das Merkmal, daher lässt sich daraus die eigene Haarfarbe oder Haarform nicht ableiten.",
+      "population": "Europäische Studienpopulationen",
+      "sources": [
+        [
+          "Valverde et al. · Nature Genetics (1995)",
+          "https://pubmed.ncbi.nlm.nih.gov/7581459/"
+        ],
+        [
+          "Morgan et al. (2018)",
+          "https://doi.org/10.1038/s41467-018-07691-z"
+        ],
+        [
+          "dbSNP",
+          "https://www.ncbi.nlm.nih.gov/snp/rs1805008"
+        ]
+      ],
+      "effect": {
+        "marker": "rs1805008",
+        "allele": "T",
+        "conclusions": [
+          "Keine Kopie von MC1R R160W.",
+          "Eine Kopie von MC1R R160W. Sie ist mit hellerer Haut und Sommersprossen verbunden.",
+          "Zwei Kopien von MC1R R160W. Das ist stark mit roten Haaren und heller Haut verbunden."
+        ],
+        "confidence": "moderate",
+        "clinical": false
+      },
+      "questions": [
+        "Trage ich weitere Varianten für rote Haare?"
       ]
     }
   ]

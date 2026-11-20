@@ -2,10 +2,23 @@
 
 *Explore your DNA. Offline.*
 
-Roots Local is an open-source web app for analyzing MyHeritage raw DNA exports in your browser. Your file is read and analyzed on your device: nothing is uploaded. It matches selected genotypes against a versioned reference catalog and creates a PDF report with 17 chapters and 76 sections.
+Roots Local is an open-source web app that explains the raw data of consumer DNA tests in your browser. Your file is read and analyzed on your device: nothing is uploaded. It matches selected genotypes against a versioned reference catalog and creates a PDF report with 17 chapters and 76 sections. Roots Local is for information and learning. It is not a medical device and does not diagnose anything.
 
+### Which file to use
 
-### Which MyHeritage download to use
+Roots Local reads **genotype raw data**: a table with an rsID, chromosome, position, and genotype (or two allele columns) per row, as CSV, TSV, TXT, or a ZIP with one such table. Most testing services offer it as a "raw data" download:
+
+| Provider | Layout | Reference genome |
+|---|---|---|
+| 23andMe | tab-separated, column names in the last `#` comment line | declared (build 37) |
+| AncestryDNA | tab-separated, two allele columns, chromosomes 23–26 for X, Y, XY, MT | declared (build 37.1) |
+| Living DNA | tab-separated, column names in a `#` comment line | declared (GRCh37) |
+| MyHeritage | CSV with `RSID,CHROMOSOME,POSITION,RESULT` | declared in a `#` comment line |
+| FamilyTreeDNA | CSV with `RSID,CHROMOSOME,POSITION,RESULT` | not declared: confirm GRCh37 in the app if your provider states it |
+
+Synthetic examples of every layout are in [`fixtures/formats/`](fixtures/formats). The importer recognizes the provider from the comment lines only to label the file; the analysis is the same for all.
+
+#### MyHeritage download
 
 In MyHeritage, open **DNA → Manage DNA kits → ⋯ → Download kit** and choose **DNA data file**. This is the tabular genotype export with variant ID (rsID where present), chromosome, position, and observed alleles. Open the downloaded ZIP or its extracted CSV/TXT in Roots Local. MyHeritage provides this download on desktop and Android. To use it on an iPhone, transfer the downloaded file to its Files app first. [Download instructions](https://www.myheritage.com/help/en/articles/12851869-how-do-i-download-my-raw-dna-data-file-or-cram-file-from-myheritage) · [Raw data fields](https://www.myheritage.com/help/en/articles/12852246-how-should-i-interpret-my-raw-dna-data)
 
@@ -13,7 +26,7 @@ For kits processed with whole-genome sequencing, MyHeritage also offers the **Sp
 
 ## Use in your browser
 
-Open **[rootslocal.maximilianauer.at](https://rootslocal.maximilianauer.at)** in a current browser on a computer, iPhone, or Android phone. Select **View example**, choose **Open DNA file** (⌘O or Ctrl+O), or drag the [synthetic MyHeritage file](fixtures/synthetic-myheritage.txt) into the window. The overview answers what your DNA says, with a confidence level for each conclusion. Ask questions such as *Can I drink milk?* in **Ask your DNA**; answers come from the catalog rules in your browser. Your conclusions are grouped by area of life, from food to medicines, and the **Nucleus radar** shows how certain each one is. The **Medicine pass** collects drug-response findings on one page to show your physician. Press ⌘K or Ctrl+K to search findings, questions, genes, and commands. The **Atlas** shows every catalog marker on its chromosome. Open **PDF report** to preview or download the report. The app and PDF default to English; select **Deutsch** (under **Menu → Settings** on mobile once a profile is open) to switch both while keeping the current analysis.
+Open **[rootslocal.maximilianauer.at](https://rootslocal.maximilianauer.at)** in a current browser on a computer, iPhone, or Android phone. Select **View example**, choose **Open DNA file** (⌘O or Ctrl+O), or drag a [synthetic example file](fixtures/formats) into the window. The overview answers what your DNA says, with a confidence level for each conclusion. Ask questions such as *Can I drink milk?* in **Ask your DNA**; answers come from the catalog rules in your browser. If a question fits several rules, the app offers them instead of guessing. Your conclusions are grouped by area of life, from food to medicines, and the **Nucleus radar** shows how certain each one is. **Medicine notes** summarize, for information only, what studies report about drug-response variants in the file. Medical topics stay hidden until you choose to show them, after a short explanation of their limits. Press ⌘K or Ctrl+K to search findings, questions, genes, markers, and commands; the search understands everyday words in English and German (*milk*, *Kaffee*, *blood thinner*), tolerates typos, and needs no accents. The **Atlas** shows every catalog marker on its chromosome. Open **PDF report** to preview or download the report. The app and PDF default to English; select **Deutsch** (under **Menu → Settings** on mobile once a profile is open) to switch both while keeping the current analysis.
 
 After the first visit the app also works offline, and you can add it to your home screen. [Roots Local on maximilianauer.at](https://maximilianauer.at/projects/rootslocal/)
 
@@ -22,7 +35,7 @@ After the first visit the app also works offline, and you can add it to your hom
 - Files are read by a background worker in your browser tab. There is no server, API, or upload.
 - The page's Content Security Policy blocks direct network connections. Workers load the app's WebAssembly and fonts from the same host.
 - The browser stores your language choice and caches the app's program files for offline use. Closing the tab clears the in-memory analysis.
-- PDF reports and the medicine pass are created in your browser and saved as normal downloads.
+- PDF reports and medicine notes are created in your browser and saved as normal downloads.
 - Automated tests fail on any request after start-up, on any request to another origin, and on stored data, and repeat the workflow offline. [Web app plan and enforcement](docs/web-plan.md)
 
 **Check it yourself:** open the developer tools, select the Network tab, reload Roots Local, wait for the app and its offline cache to finish loading, and clear the list. Open your file and export a PDF. Or switch to airplane mode once the app has been cached. Every build includes [`SHA256SUMS`](https://rootslocal.maximilianauer.at/SHA256SUMS) for its output files. The in-app **Privacy** page explains the same steps and describes the technical connection data Cloudflare Pages processes when serving the files.

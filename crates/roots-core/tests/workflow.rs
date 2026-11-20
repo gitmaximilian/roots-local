@@ -981,3 +981,35 @@ fn provider_layouts_give_identical_findings() {
     let mut declared = import::parse(SAMPLE, &cancel).unwrap();
     assert!(declared.assume_build(import::Build::Grch38).is_err());
 }
+
+/// Catalog 1.6.0 effect-allele rules give zero, one, and two copies on both
+/// builds. Coordinates and plus-strand alleles were checked against dbSNP.
+#[test]
+fn catalog_1_6_rules_count_effect_alleles_on_both_builds() {
+    let catalog = Catalog::starter().unwrap();
+    let cases = [
+        ("slc24a5-skin", "rs1426654", "15", 48426484, 48134287, ["GG", "AG", "AA"]),
+        ("fut2-secretor", "rs601338", "19", 49206674, 48703417, ["GG", "AG", "AA"]),
+        ("gc-vitamin-d", "rs2282679", "4", 72608383, 71742666, ["TT", "GT", "GG"]),
+        ("edar-hair", "rs3827760", "2", 109513601, 108897145, ["AA", "AG", "GG"]),
+        ("mthfr-c677t", "rs1801133", "1", 11856378, 11796321, ["GG", "AG", "AA"]),
+        ("mc1r-r160w", "rs1805008", "16", 89986144, 89919736, ["CC", "CT", "TT"]),
+    ];
+    for (id, rs, chr, b37, b38, calls) in cases {
+        for (build, position) in [("37", b37), ("38", b38)] {
+            for (copies, call) in calls.iter().enumerate() {
+                let raw = format!(
+                    "##reference=build{build}\nRSID,CHROMOSOME,POSITION,RESULT\n{rs},{chr},{position},{call}\n"
+                );
+                let data = import::parse(raw.as_bytes(), &AtomicBool::new(false)).unwrap();
+                let finding = analysis::evaluate(&data, &catalog)
+                    .unwrap()
+                    .into_iter()
+                    .find(|f| f.item.id == id)
+                    .unwrap();
+                assert_eq!(finding.dosage, Some(copies as u8), "{id} build {build} {call}");
+                assert!(finding.conclusion.is_some(), "{id} build {build} {call}");
+            }
+        }
+    }
+}
