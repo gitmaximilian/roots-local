@@ -2,6 +2,10 @@
 
 Roots Local v0.3.0 is a static web app. The browser reads local inputs and runs the Rust analysis and Typst PDF engines in WebAssembly. The repository retains desktop history through the v0.2.0 release.
 
+## November 20, 2026 catalog 1.7.0
+
+[Production](https://rootslocal.maximilianauer.at/) serves build `59854745ba86fd84` from [`ee0ff27`](https://github.com/gitmaximilian/roots-local/commit/ee0ff27) via [Pages deployment b5b126a4](https://b5b126a4.rootslocal.pages.dev/). Rollback target: build `490a226187589e83` ([1a61d11e](https://1a61d11e.rootslocal.pages.dev/)). Changes: 32 new rules (catalog 1.7.0, 65 rules on 69 markers) and everyday search words for them. All 27 served files matched `SHA256SUMS` on the custom domain (`index.html` through `/`; `_headers` is configuration and not served). The privacy and CRAM suites passed there in Chromium, WebKit, iPhone, and Android emulation (12 checks). The source is on `main` through [gitmaximilian/roots-local#4](https://github.com/gitmaximilian/roots-local/pull/4) plus this release's pull request.
+
 ## November 20, 2026 provider-neutral release
 
 [Production](https://rootslocal.maximilianauer.at/) serves build `490a226187589e83` from branch `web/info-and-search` via [Pages deployment 1a61d11e](https://1a61d11e.rootslocal.pages.dev/). Rollback target: build `00d4ea5941d7502e`. Changes: raw data from 23andMe, AncestryDNA, Living DNA, FamilyTreeDNA, and MyHeritage; a confirmable reference build for files that declare none; local search with everyday words; catalog 1.6.0; medicine notes for information only; a notice before medical topics; intended purpose, terms, controller, and rights on the in-app privacy page, also at `/privacy` and `/terms`. All 28 public files matched `SHA256SUMS` on the custom domain, and the privacy and CRAM suites passed there (12 checks). Portfolio [deployment 31b2ce45](https://31b2ce45.maximilianauer.pages.dev/) updates the project page, screenshots, and the Roots Local legal section.

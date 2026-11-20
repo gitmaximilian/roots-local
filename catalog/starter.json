@@ -1,5 +1,5 @@
 {
-  "version": "1.6.0",
+  "version": "1.7.0",
   "markers": [
     [
       "rs4988235",
@@ -295,6 +295,262 @@
       "16",
       89986144,
       89919736,
+      "CT"
+    ],
+    [
+      "rs1800407",
+      "OCA2",
+      "15",
+      28230318,
+      27985172,
+      "CT"
+    ],
+    [
+      "rs12203592",
+      "IRF4",
+      "6",
+      396321,
+      396321,
+      "CT"
+    ],
+    [
+      "rs1393350",
+      "TYR",
+      "11",
+      89011046,
+      89277878,
+      "AG"
+    ],
+    [
+      "rs1042602",
+      "TYR",
+      "11",
+      88911696,
+      89178528,
+      "AC"
+    ],
+    [
+      "rs12821256",
+      "KITLG",
+      "12",
+      89328335,
+      88934558,
+      "CT"
+    ],
+    [
+      "rs1042725",
+      "HMGA2",
+      "12",
+      66358347,
+      65964567,
+      "CT"
+    ],
+    [
+      "rs61729907",
+      "OR7D4",
+      "19",
+      9325252,
+      9214576,
+      "AG"
+    ],
+    [
+      "rs4481887",
+      "OR2M7",
+      "1",
+      248496863,
+      248333561,
+      "AG"
+    ],
+    [
+      "rs5751876",
+      "ADORA2A",
+      "22",
+      24837301,
+      24441333,
+      "CT"
+    ],
+    [
+      "rs4410790",
+      "AHR",
+      "7",
+      17284577,
+      17244953,
+      "CT"
+    ],
+    [
+      "rs7501331",
+      "BCO1",
+      "16",
+      81314496,
+      81280891,
+      "CT"
+    ],
+    [
+      "rs174537",
+      "FADS1",
+      "11",
+      61552680,
+      61785208,
+      "GT"
+    ],
+    [
+      "rs1421085",
+      "FTO",
+      "16",
+      53800954,
+      53767042,
+      "CT"
+    ],
+    [
+      "rs17782313",
+      "MC4R",
+      "18",
+      57851097,
+      60183864,
+      "CT"
+    ],
+    [
+      "rs4680",
+      "COMT",
+      "22",
+      19951271,
+      19963748,
+      "AG"
+    ],
+    [
+      "rs2802292",
+      "FOXO3",
+      "6",
+      108908518,
+      108587315,
+      "GT"
+    ],
+    [
+      "rs16969968",
+      "CHRNA5",
+      "15",
+      78882925,
+      78590583,
+      "AG"
+    ],
+    [
+      "rs10757278",
+      "CDKN2B-AS1",
+      "9",
+      22124477,
+      22124478,
+      "AG"
+    ],
+    [
+      "rs2200733",
+      "PITX2",
+      "4",
+      111710169,
+      110789013,
+      "CT"
+    ],
+    [
+      "rs10455872",
+      "LPA",
+      "6",
+      161010118,
+      160589086,
+      "AG"
+    ],
+    [
+      "rs11591147",
+      "PCSK9",
+      "1",
+      55505647,
+      55039974,
+      "GT"
+    ],
+    [
+      "rs2814778",
+      "ACKR1",
+      "1",
+      159174683,
+      159204893,
+      "CT"
+    ],
+    [
+      "rs28929474",
+      "SERPINA1",
+      "14",
+      94844947,
+      94378610,
+      "CT"
+    ],
+    [
+      "rs1061170",
+      "CFH",
+      "1",
+      196659237,
+      196690107,
+      "CT"
+    ],
+    [
+      "rs10490924",
+      "ARMS2",
+      "10",
+      124214448,
+      122454932,
+      "GT"
+    ],
+    [
+      "rs2187668",
+      "HLA-DQA1",
+      "6",
+      32605884,
+      32638107,
+      "CT"
+    ],
+    [
+      "rs7454108",
+      "HLA-DQB1",
+      "6",
+      32681483,
+      32713706,
+      "CT"
+    ],
+    [
+      "rs4349859",
+      "HLA-B",
+      "6",
+      31365787,
+      31398010,
+      "AG"
+    ],
+    [
+      "rs2066844",
+      "NOD2",
+      "16",
+      50745926,
+      50712015,
+      "CT"
+    ],
+    [
+      "rs887829",
+      "UGT1A1",
+      "2",
+      234668570,
+      233759924,
+      "CT"
+    ],
+    [
+      "rs2231142",
+      "ABCG2",
+      "4",
+      89052323,
+      88131171,
+      "GT"
+    ],
+    [
+      "rs2108622",
+      "CYP4F2",
+      "19",
+      15990431,
+      15879621,
       "CT"
     ]
   ],
@@ -1710,6 +1966,1295 @@
       "questions": [
         "Trage ich weitere Varianten für rote Haare?"
       ]
+    },
+    {
+      "id": "oca2-r419q",
+      "section": "04.1",
+      "title": "OCA2 R419Q und grüne oder haselnussbraune Augen",
+      "markers": [
+        "rs1800407"
+      ],
+      "method": "research",
+      "require_identifier": true,
+      "evidence": "Studienassoziation für Pigmentierung oder Haarform",
+      "summary": "Die Variante R419Q verändert OCA2, ein Protein für die Melaninbildung in der Iris. Sie wurde vor allem bei Menschen mit grünen oder haselnussbraunen Augen beobachtet.",
+      "limits": "Die Augenfarbe hängt vor allem von HERC2 und weiteren Varianten ab. Ein einzelner Marker sagt die eigene Augenfarbe nicht vorher.",
+      "population": "Europäische Studienpopulationen",
+      "sources": [
+        [
+          "Duffy et al. · American Journal of Human Genetics (2007)",
+          "https://pubmed.ncbi.nlm.nih.gov/17236130/"
+        ],
+        [
+          "dbSNP",
+          "https://www.ncbi.nlm.nih.gov/snp/rs1800407"
+        ]
+      ],
+      "effect": {
+        "marker": "rs1800407",
+        "allele": "T",
+        "conclusions": [
+          "Keine Kopie von OCA2 R419Q.",
+          "Eine Kopie von OCA2 R419Q. Sie ist in Studien eher mit grünen oder haselnussbraunen als mit braunen Augen verbunden.",
+          "Zwei Kopien von OCA2 R419Q. Sie sind in Studien mit grünen oder haselnussbraunen Augen verbunden."
+        ],
+        "confidence": "moderate",
+        "clinical": false
+      },
+      "questions": [
+        "Habe ich Gene für grüne Augen?"
+      ]
+    },
+    {
+      "id": "irf4-freckles",
+      "section": "04.1",
+      "title": "IRF4 und Sommersprossen",
+      "markers": [
+        "rs12203592"
+      ],
+      "method": "research",
+      "require_identifier": true,
+      "evidence": "Studienassoziation für Pigmentierung oder Haarform",
+      "summary": "Die Variante liegt in einem Verstärkerelement von IRF4, das die Melaninbildung in Pigmentzellen mitsteuert. Das T-Allel ist mit Sommersprossen und sonnenempfindlicherer Haut verbunden.",
+      "limits": "Sommersprossen und Sonnenempfindlichkeit hängen von vielen Genen und von der Sonne ab. Der Marker sagt kein Hautkrebsrisiko vorher und ersetzt keinen Sonnenschutz.",
+      "population": "Europäische Studienpopulationen",
+      "sources": [
+        [
+          "Han et al. · PLoS Genetics (2008)",
+          "https://pubmed.ncbi.nlm.nih.gov/18483556/"
+        ],
+        [
+          "Praetorius et al. · Cell (2013)",
+          "https://pubmed.ncbi.nlm.nih.gov/24267888/"
+        ],
+        [
+          "dbSNP",
+          "https://www.ncbi.nlm.nih.gov/snp/rs12203592"
+        ]
+      ],
+      "effect": {
+        "marker": "rs12203592",
+        "allele": "T",
+        "conclusions": [
+          "Keine Kopie des IRF4-T-Allels.",
+          "Eine Kopie des IRF4-T-Allels. Sie ist in Studien mit Sommersprossen und sonnenempfindlicherer Haut verbunden.",
+          "Zwei Kopien des IRF4-T-Allels. Sie sind in Studien deutlich mit Sommersprossen und sonnenempfindlicher Haut verbunden."
+        ],
+        "confidence": "moderate",
+        "clinical": false
+      },
+      "questions": [
+        "Bekomme ich leicht Sommersprossen?"
+      ]
+    },
+    {
+      "id": "tyr-light-eyes",
+      "section": "04.1",
+      "title": "TYR und helle Augen",
+      "markers": [
+        "rs1393350"
+      ],
+      "method": "research",
+      "require_identifier": true,
+      "evidence": "Studienassoziation für Pigmentierung oder Haarform",
+      "summary": "TYR kodiert Tyrosinase, das Schlüsselenzym der Melaninbildung. Das A-Allel markiert die weniger aktive Form TYR R402Q und ist mit blauen statt grünen Augen und sonnenempfindlicher Haut verbunden.",
+      "limits": "Der Effekt ist klein im Vergleich zu HERC2. Augen- und Hautfarbe lassen sich aus diesem Marker nicht ableiten.",
+      "population": "Europäische Studienpopulationen",
+      "sources": [
+        [
+          "Sulem et al. · Nature Genetics (2007)",
+          "https://pubmed.ncbi.nlm.nih.gov/17952075/"
+        ],
+        [
+          "dbSNP",
+          "https://www.ncbi.nlm.nih.gov/snp/rs1393350"
+        ]
+      ],
+      "effect": {
+        "marker": "rs1393350",
+        "allele": "A",
+        "conclusions": [
+          "Keine Kopie des TYR-A-Allels.",
+          "Eine Kopie des TYR-A-Allels. Sie ist in Studien mit helleren Augen und sonnenempfindlicherer Haut verbunden.",
+          "Zwei Kopien des TYR-A-Allels. Sie sind in Studien mit blauen Augen und sonnenempfindlicher Haut verbunden."
+        ],
+        "confidence": "moderate",
+        "clinical": false
+      },
+      "questions": [
+        "Warum habe ich helle Augen?"
+      ]
+    },
+    {
+      "id": "tyr-s192y",
+      "section": "04.1",
+      "title": "TYR S192Y und Hautpigmentierung",
+      "markers": [
+        "rs1042602"
+      ],
+      "method": "research",
+      "require_identifier": true,
+      "evidence": "Studienassoziation für Pigmentierung oder Haarform",
+      "summary": "Die Variante S192Y verändert die Tyrosinase. In einer Studie in Südasien war das A-Allel mit hellerer Haut verbunden.",
+      "limits": "Hautfarbe entsteht aus vielen Varianten, vor allem SLC24A5 und SLC45A2. Der Einzelmarker hat nur einen kleinen Effekt.",
+      "population": "Südasiatische Studienpopulation",
+      "sources": [
+        [
+          "Stokowski et al. · American Journal of Human Genetics (2007)",
+          "https://pubmed.ncbi.nlm.nih.gov/17999355/"
+        ],
+        [
+          "dbSNP",
+          "https://www.ncbi.nlm.nih.gov/snp/rs1042602"
+        ]
+      ],
+      "effect": {
+        "marker": "rs1042602",
+        "allele": "A",
+        "conclusions": [
+          "Keine Kopie von TYR 192Y.",
+          "Eine Kopie von TYR 192Y. Sie ist in einer Studie mit etwas hellerer Haut verbunden.",
+          "Zwei Kopien von TYR 192Y. Sie sind in einer Studie mit hellerer Haut verbunden."
+        ],
+        "confidence": "low",
+        "clinical": false
+      },
+      "questions": [
+        "Welche Gene bestimmen meine Hautfarbe?"
+      ]
+    },
+    {
+      "id": "kitlg-blond",
+      "section": "04.1",
+      "title": "KITLG und blondes Haar",
+      "markers": [
+        "rs12821256"
+      ],
+      "method": "research",
+      "require_identifier": true,
+      "evidence": "Studienassoziation für Pigmentierung oder Haarform",
+      "summary": "Das C-Allel liegt in einem Steuerelement von KITLG und senkt dessen Aktivität in Haarfollikeln um etwa ein Fünftel. Es ist bei Nordeuropäern mit blondem Haar verbunden.",
+      "limits": "Haarfarbe hängt von vielen Genen ab und verändert sich mit dem Alter. Der Marker sagt die eigene Haarfarbe nicht vorher.",
+      "population": "Europäische Studienpopulationen",
+      "sources": [
+        [
+          "Sulem et al. · Nature Genetics (2007)",
+          "https://pubmed.ncbi.nlm.nih.gov/17952075/"
+        ],
+        [
+          "Guenther et al. · Nature Genetics (2014)",
+          "https://pubmed.ncbi.nlm.nih.gov/24880339/"
+        ],
+        [
+          "dbSNP",
+          "https://www.ncbi.nlm.nih.gov/snp/rs12821256"
+        ]
+      ],
+      "effect": {
+        "marker": "rs12821256",
+        "allele": "C",
+        "conclusions": [
+          "Keine Kopie des KITLG-Blond-Allels.",
+          "Eine Kopie des KITLG-Blond-Allels. Sie ist in Studien mit hellerem, blondem Haar verbunden.",
+          "Zwei Kopien des KITLG-Blond-Allels. Sie sind in Studien deutlich mit blondem Haar verbunden."
+        ],
+        "confidence": "moderate",
+        "clinical": false
+      },
+      "questions": [
+        "Habe ich Gene für blondes Haar?"
+      ]
+    },
+    {
+      "id": "hmga2-height",
+      "section": "04.4",
+      "title": "HMGA2 und Körpergröße",
+      "markers": [
+        "rs1042725"
+      ],
+      "method": "research",
+      "require_identifier": true,
+      "evidence": "Genomweite Assoziationsstudie",
+      "summary": "HMGA2 war eines der ersten Gene, die mit der Körpergröße in Verbindung gebracht wurden. Jede Kopie des C-Allels ist im Mittel mit etwa einem halben Zentimeter mehr Größe verbunden.",
+      "limits": "Körpergröße hängt von Tausenden Varianten, Ernährung und Kindheit ab. Dieser Marker erklärt nur einen winzigen Teil.",
+      "population": "Kohorten europäischer Abstammung",
+      "sources": [
+        [
+          "Weedon et al. · Nature Genetics (2007)",
+          "https://pubmed.ncbi.nlm.nih.gov/17767157/"
+        ],
+        [
+          "dbSNP",
+          "https://www.ncbi.nlm.nih.gov/snp/rs1042725"
+        ]
+      ],
+      "effect": {
+        "marker": "rs1042725",
+        "allele": "C",
+        "conclusions": [
+          "Keine Kopie des HMGA2-C-Allels.",
+          "Eine Kopie des HMGA2-C-Allels. Sie ist im Mittel mit etwa einem halben Zentimeter mehr Körpergröße verbunden.",
+          "Zwei Kopien des HMGA2-C-Allels. Sie sind im Mittel mit knapp einem Zentimeter mehr Körpergröße verbunden."
+        ],
+        "confidence": "moderate",
+        "clinical": false
+      },
+      "questions": [
+        "Haben meine Gene Einfluss auf meine Größe?"
+      ]
+    },
+    {
+      "id": "or7d4-androstenone",
+      "section": "05.1",
+      "title": "OR7D4 und der Geruch von Androstenon",
+      "markers": [
+        "rs61729907"
+      ],
+      "method": "research",
+      "require_identifier": true,
+      "evidence": "Funktionelle Forschung",
+      "summary": "OR7D4 ist ein Riechrezeptor für Androstenon, einen Duftstoff in Schweiß und Eberfleisch. Die Variante R88W schwächt den Rezeptor im Labor deutlich.",
+      "limits": "R88W tritt meist zusammen mit einer zweiten Variante (T133M) auf, die hier nicht geprüft wird. Geruchsempfinden hängt auch von weiteren Rezeptoren ab.",
+      "population": "Mehrere untersuchte Populationen",
+      "sources": [
+        [
+          "Keller et al. · Nature (2007)",
+          "https://pubmed.ncbi.nlm.nih.gov/17873857/"
+        ],
+        [
+          "dbSNP",
+          "https://www.ncbi.nlm.nih.gov/snp/rs61729907"
+        ]
+      ],
+      "effect": {
+        "marker": "rs61729907",
+        "allele": "A",
+        "conclusions": [
+          "Keine Kopie von OR7D4 R88W. Menschen mit diesem Typ beschreiben Androstenon oft als intensiv und unangenehm.",
+          "Eine Kopie von OR7D4 R88W. Träger beschrieben Androstenon in einer Studie als weniger unangenehm und weniger intensiv.",
+          "Zwei Kopien von OR7D4 R88W. Androstenon wird wahrscheinlich nur schwach wahrgenommen."
+        ],
+        "confidence": "moderate",
+        "clinical": false
+      },
+      "questions": [
+        "Rieche ich Schweiß anders als andere?",
+        "Warum riecht Eberfleisch für mich komisch?"
+      ]
+    },
+    {
+      "id": "asparagus-smell",
+      "section": "05.1",
+      "title": "Spargelgeruch im Urin",
+      "markers": [
+        "rs4481887"
+      ],
+      "method": "research",
+      "require_identifier": true,
+      "evidence": "Genomweite Assoziationsstudie",
+      "summary": "Nicht alle Menschen riechen den typischen Geruch von Urin nach Spargel. In einer großen Online-Studie lag der stärkste Marker dafür in einer Gruppe von Riechrezeptor-Genen; das G-Allel war häufiger bei Menschen, die den Geruch nicht wahrnehmen.",
+      "limits": "Die Studie beruht auf Selbstauskünften. Das G-Allel ist sehr häufig, und viele Träger riechen den Geruch trotzdem.",
+      "population": "Kohorten europäischer Abstammung",
+      "sources": [
+        [
+          "Eriksson et al. · PLoS Genetics (2010)",
+          "https://pubmed.ncbi.nlm.nih.gov/20585627/"
+        ],
+        [
+          "dbSNP",
+          "https://www.ncbi.nlm.nih.gov/snp/rs4481887"
+        ]
+      ],
+      "effect": {
+        "marker": "rs4481887",
+        "allele": "G",
+        "conclusions": [
+          "Keine Kopie des G-Allels. Das ist mit einer höheren Chance verbunden, Spargelgeruch im Urin wahrzunehmen.",
+          "Eine Kopie des G-Allels. Die Chance, Spargelgeruch im Urin wahrzunehmen, liegt im Durchschnitt.",
+          "Zwei Kopien des G-Allels. Das ist mit einer etwas geringeren Chance verbunden, Spargelgeruch im Urin wahrzunehmen."
+        ],
+        "confidence": "low",
+        "clinical": false
+      },
+      "questions": [
+        "Rieche ich Spargel im Urin?"
+      ]
+    },
+    {
+      "id": "adora2a-caffeine-anxiety",
+      "section": "07.2",
+      "title": "ADORA2A und Unruhe durch Koffein",
+      "markers": [
+        "rs5751876"
+      ],
+      "method": "research",
+      "require_identifier": true,
+      "evidence": "Replizierter genetischer Zusammenhang",
+      "summary": "Koffein wirkt, indem es den Adenosin-Rezeptor A2A blockiert. Menschen mit zwei T-Kopien von rs5751876 berichteten in kontrollierten Studien nach Koffein häufiger Angst und Unruhe.",
+      "limits": "Die Studien waren klein. Gewohnheit, Schlaf und Dosis beeinflussen die Wirkung von Koffein stärker als dieser Marker.",
+      "population": "Kohorten europäischer Abstammung",
+      "sources": [
+        [
+          "Alsene et al. · Neuropsychopharmacology (2003)",
+          "https://pubmed.ncbi.nlm.nih.gov/12825092/"
+        ],
+        [
+          "Childs et al. · Neuropsychopharmacology (2008)",
+          "https://pubmed.ncbi.nlm.nih.gov/18305461/"
+        ],
+        [
+          "dbSNP",
+          "https://www.ncbi.nlm.nih.gov/snp/rs5751876"
+        ]
+      ],
+      "effect": {
+        "marker": "rs5751876",
+        "allele": "T",
+        "conclusions": [
+          "Keine Kopie des ADORA2A-T-Allels.",
+          "Eine Kopie des ADORA2A-T-Allels. In Studien war die Unruhe nach Koffein bei diesem Typ nicht deutlich erhöht.",
+          "Zwei Kopien des ADORA2A-T-Allels. Das ist in Studien mit mehr Angst und Unruhe nach Koffein verbunden."
+        ],
+        "confidence": "low",
+        "clinical": false
+      },
+      "questions": [
+        "Macht mich Kaffee nervös?"
+      ]
+    },
+    {
+      "id": "ahr-coffee-intake",
+      "section": "07.2",
+      "title": "AHR und Kaffeekonsum",
+      "markers": [
+        "rs4410790"
+      ],
+      "method": "research",
+      "require_identifier": true,
+      "evidence": "Genomweite Assoziationsstudie",
+      "summary": "AHR steuert unter anderem CYP1A2, das Enzym für den Koffeinabbau. Das C-Allel ist in großen Studien mit etwas mehr getrunkenem Kaffee pro Tag verbunden.",
+      "limits": "Der Unterschied liegt im Mittel bei einem kleinen Teil einer Tasse pro Tag. Gewohnheiten und Kultur prägen den Kaffeekonsum weit stärker.",
+      "population": "Kohorten europäischer Abstammung",
+      "sources": [
+        [
+          "Cornelis et al. · PLoS Genetics (2011)",
+          "https://pubmed.ncbi.nlm.nih.gov/21490707/"
+        ],
+        [
+          "dbSNP",
+          "https://www.ncbi.nlm.nih.gov/snp/rs4410790"
+        ]
+      ],
+      "effect": {
+        "marker": "rs4410790",
+        "allele": "C",
+        "conclusions": [
+          "Keine Kopie des AHR-C-Allels.",
+          "Eine Kopie des AHR-C-Allels. Sie ist in Studien mit etwas höherem Kaffeekonsum verbunden.",
+          "Zwei Kopien des AHR-C-Allels. Sie sind in Studien mit höherem Kaffeekonsum verbunden."
+        ],
+        "confidence": "moderate",
+        "clinical": false
+      },
+      "questions": [
+        "Trinke ich wegen meiner Gene mehr Kaffee?"
+      ]
+    },
+    {
+      "id": "bco1-beta-carotene",
+      "section": "07.3",
+      "title": "BCO1 und Vitamin A aus Beta-Carotin",
+      "markers": [
+        "rs7501331"
+      ],
+      "method": "research",
+      "require_identifier": true,
+      "evidence": "Funktionelle Forschung",
+      "summary": "BCO1 wandelt pflanzliches Beta-Carotin in Vitamin A um. Die Variante A379V (T-Allel) senkte diese Umwandlung in einer Studie messbar.",
+      "limits": "Die Studie war klein. Wer Vitamin A auch aus tierischen Lebensmitteln aufnimmt, ist auf diese Umwandlung kaum angewiesen. Die Versorgung lässt sich nur im Blut messen.",
+      "population": "Europäische Studienpopulationen",
+      "sources": [
+        [
+          "Leung et al. · FASEB Journal (2009)",
+          "https://pubmed.ncbi.nlm.nih.gov/19103647/"
+        ],
+        [
+          "dbSNP",
+          "https://www.ncbi.nlm.nih.gov/snp/rs7501331"
+        ]
+      ],
+      "effect": {
+        "marker": "rs7501331",
+        "allele": "T",
+        "conclusions": [
+          "Keine Kopie von BCO1 379V.",
+          "Eine Kopie von BCO1 379V. Sie ist in einer Studie mit etwas geringerer Umwandlung von Beta-Carotin verbunden.",
+          "Zwei Kopien von BCO1 379V. Sie sind in einer Studie mit geringerer Umwandlung von Beta-Carotin in Vitamin A verbunden."
+        ],
+        "confidence": "low",
+        "clinical": false
+      },
+      "questions": [
+        "Bekomme ich genug Vitamin A aus Karotten?"
+      ]
+    },
+    {
+      "id": "fads1-omega",
+      "section": "07.4",
+      "title": "FADS1 und Omega-Fettsäuren",
+      "markers": [
+        "rs174537"
+      ],
+      "method": "research",
+      "require_identifier": true,
+      "evidence": "Genomweite Assoziationsstudie",
+      "summary": "FADS1 baut kurzkettige Omega-3- und Omega-6-Fettsäuren aus Pflanzen zu langkettigen um. Das T-Allel ist mit geringerer Umwandlung verbunden: mehr Linolsäure und weniger Arachidonsäure im Blut.",
+      "limits": "Der Marker beschreibt Fettsäurespiegel im Blut, keinen Bedarf. Fisch und Algen liefern langkettige Omega-3-Fettsäuren direkt.",
+      "population": "Kohorten europäischer Abstammung",
+      "sources": [
+        [
+          "Tanaka et al. · PLoS Genetics (2009)",
+          "https://pubmed.ncbi.nlm.nih.gov/19148276/"
+        ],
+        [
+          "dbSNP",
+          "https://www.ncbi.nlm.nih.gov/snp/rs174537"
+        ]
+      ],
+      "effect": {
+        "marker": "rs174537",
+        "allele": "T",
+        "conclusions": [
+          "Keine Kopie des FADS1-T-Allels. Das ist mit der höheren Umwandlungsaktivität verbunden.",
+          "Eine Kopie des FADS1-T-Allels. Sie ist mit etwas geringerer Umwandlung pflanzlicher Fettsäuren verbunden.",
+          "Zwei Kopien des FADS1-T-Allels. Sie sind mit geringerer Umwandlung pflanzlicher Fettsäuren in langkettige verbunden."
+        ],
+        "confidence": "moderate",
+        "clinical": false
+      },
+      "questions": [
+        "Brauche ich Omega-3 aus Fisch?"
+      ]
+    },
+    {
+      "id": "fto-weight",
+      "section": "07.4",
+      "title": "FTO und Körpergewicht",
+      "markers": [
+        "rs1421085"
+      ],
+      "method": "research",
+      "require_identifier": true,
+      "evidence": "Replizierter genetischer Zusammenhang",
+      "summary": "FTO enthält die bekannteste häufige Variante für das Körpergewicht. Das C-Allel von rs1421085 verändert, ob Fettzellen Energie speichern oder als Wärme abgeben, und ist im Mittel mit etwas höherem BMI verbunden.",
+      "limits": "Pro Kopie liegt der Unterschied im Mittel bei etwa anderthalb Kilogramm. Bewegung schwächt den Effekt in Studien deutlich ab. Ernährung und Lebensstil wiegen weit mehr.",
+      "population": "Kohorten europäischer Abstammung",
+      "sources": [
+        [
+          "Claussnitzer et al. · New England Journal of Medicine (2015)",
+          "https://pubmed.ncbi.nlm.nih.gov/26287746/"
+        ],
+        [
+          "dbSNP",
+          "https://www.ncbi.nlm.nih.gov/snp/rs1421085"
+        ]
+      ],
+      "effect": {
+        "marker": "rs1421085",
+        "allele": "C",
+        "conclusions": [
+          "Keine Kopie des FTO-C-Allels.",
+          "Eine Kopie des FTO-C-Allels. Sie ist im Mittel mit etwas höherem Körpergewicht verbunden.",
+          "Zwei Kopien des FTO-C-Allels. Sie sind im Mittel mit einigen Kilogramm mehr Körpergewicht verbunden; Bewegung schwächt das in Studien ab."
+        ],
+        "confidence": "moderate",
+        "clinical": false
+      },
+      "questions": [
+        "Nehme ich wegen meiner Gene leichter zu?"
+      ]
+    },
+    {
+      "id": "mc4r-weight",
+      "section": "07.4",
+      "title": "MC4R und Appetit",
+      "markers": [
+        "rs17782313"
+      ],
+      "method": "research",
+      "require_identifier": true,
+      "evidence": "Replizierter genetischer Zusammenhang",
+      "summary": "MC4R ist ein Rezeptor im Gehirn, der Sättigung signalisiert. Das C-Allel nahe dem Gen ist mit etwas höherem BMI und mehr Fettmasse verbunden.",
+      "limits": "Der Effekt pro Kopie ist klein. Seltene MC4R-Mutationen mit starkem Effekt werden hier nicht erfasst.",
+      "population": "Kohorten europäischer Abstammung",
+      "sources": [
+        [
+          "Loos et al. · Nature Genetics (2008)",
+          "https://pubmed.ncbi.nlm.nih.gov/18454148/"
+        ],
+        [
+          "dbSNP",
+          "https://www.ncbi.nlm.nih.gov/snp/rs17782313"
+        ]
+      ],
+      "effect": {
+        "marker": "rs17782313",
+        "allele": "C",
+        "conclusions": [
+          "Keine Kopie des MC4R-C-Allels.",
+          "Eine Kopie des MC4R-C-Allels. Sie ist im Mittel mit etwas höherem BMI verbunden.",
+          "Zwei Kopien des MC4R-C-Allels. Sie sind im Mittel mit höherem BMI und mehr Fettmasse verbunden."
+        ],
+        "confidence": "moderate",
+        "clinical": false
+      },
+      "questions": [
+        "Habe ich mehr Appetit wegen meiner Gene?"
+      ]
+    },
+    {
+      "id": "comt-val158met",
+      "section": "12.2",
+      "title": "COMT Val158Met und Schmerzempfinden",
+      "markers": [
+        "rs4680"
+      ],
+      "method": "research",
+      "require_identifier": true,
+      "evidence": "Funktionelle Forschung",
+      "summary": "COMT baut Botenstoffe wie Dopamin ab. Die Met-Form (A-Allel) ist drei- bis viermal weniger aktiv. In einer Studie reagierten Menschen mit zwei Met-Kopien stärker auf einen Schmerzreiz.",
+      "limits": "Die Enzymaktivität ist gut belegt, Zusammenhänge mit Schmerz, Stress oder Denken sind uneinheitlich. Der Marker beschreibt keine Persönlichkeit.",
+      "population": "Mehrere untersuchte Populationen",
+      "sources": [
+        [
+          "Lachman et al. · Pharmacogenetics (1996)",
+          "https://pubmed.ncbi.nlm.nih.gov/8807664/"
+        ],
+        [
+          "Zubieta et al. · Science (2003)",
+          "https://pubmed.ncbi.nlm.nih.gov/12595695/"
+        ],
+        [
+          "dbSNP",
+          "https://www.ncbi.nlm.nih.gov/snp/rs4680"
+        ]
+      ],
+      "effect": {
+        "marker": "rs4680",
+        "allele": "A",
+        "conclusions": [
+          "Zwei Kopien von COMT Val. Das ist mit der höheren Enzymaktivität verbunden.",
+          "Je eine Kopie von COMT Val und Met. Das ist mit mittlerer Enzymaktivität verbunden.",
+          "Zwei Kopien von COMT Met. Das ist mit geringerer Enzymaktivität und in einer Studie mit höherem Schmerzempfinden verbunden."
+        ],
+        "confidence": "low",
+        "clinical": false
+      },
+      "questions": [
+        "Bin ich schmerzempfindlich?"
+      ]
+    },
+    {
+      "id": "foxo3-longevity",
+      "section": "08.4",
+      "title": "FOXO3 und Langlebigkeit",
+      "markers": [
+        "rs2802292"
+      ],
+      "method": "research",
+      "require_identifier": true,
+      "evidence": "Replizierter genetischer Zusammenhang",
+      "summary": "FOXO3 steuert Zellschutz und Stoffwechsel. Das G-Allel war in einer Studie mit hochbetagten Männern auf Hawaii häufiger und wurde in mehreren Populationen mit Langlebigkeit verbunden.",
+      "limits": "Lebensdauer hängt vor allem von Lebensstil, Umwelt und Zufall ab. Der Marker sagt keine persönliche Lebenserwartung vorher.",
+      "population": "Mehrere untersuchte Populationen",
+      "sources": [
+        [
+          "Willcox et al. · PNAS (2008)",
+          "https://pubmed.ncbi.nlm.nih.gov/18765803/"
+        ],
+        [
+          "dbSNP",
+          "https://www.ncbi.nlm.nih.gov/snp/rs2802292"
+        ]
+      ],
+      "effect": {
+        "marker": "rs2802292",
+        "allele": "G",
+        "conclusions": [
+          "Keine Kopie des FOXO3-G-Allels.",
+          "Eine Kopie des FOXO3-G-Allels. Es ist in Studien etwas häufiger bei sehr alten Menschen.",
+          "Zwei Kopien des FOXO3-G-Allels. Das Allel ist in Studien häufiger bei sehr alten Menschen."
+        ],
+        "confidence": "low",
+        "clinical": false
+      },
+      "questions": [
+        "Habe ich Gene für ein langes Leben?"
+      ]
+    },
+    {
+      "id": "chrna5-nicotine",
+      "section": "12.4",
+      "title": "CHRNA5 und Nikotinabhängigkeit",
+      "markers": [
+        "rs16969968"
+      ],
+      "method": "research",
+      "require_identifier": true,
+      "evidence": "Replizierter genetischer Zusammenhang",
+      "summary": "CHRNA5 ist Teil eines Nikotinrezeptors im Gehirn. Die Variante D398N (A-Allel) schwächt den Rezeptor und ist bei Rauchenden mit mehr Zigaretten pro Tag und stärkerer Abhängigkeit verbunden.",
+      "limits": "Der Marker betrifft nur Menschen, die rauchen. Er sagt nicht vorher, ob jemand zu rauchen beginnt oder aufhören kann.",
+      "population": "Kohorten europäischer Abstammung",
+      "sources": [
+        [
+          "Saccone et al. · Human Molecular Genetics (2007)",
+          "https://pubmed.ncbi.nlm.nih.gov/17135278/"
+        ],
+        [
+          "Tobacco and Genetics Consortium · Nature Genetics (2010)",
+          "https://pubmed.ncbi.nlm.nih.gov/20418890/"
+        ],
+        [
+          "dbSNP",
+          "https://www.ncbi.nlm.nih.gov/snp/rs16969968"
+        ]
+      ],
+      "effect": {
+        "marker": "rs16969968",
+        "allele": "A",
+        "conclusions": [
+          "Keine Kopie von CHRNA5 398N.",
+          "Eine Kopie von CHRNA5 398N. Bei Rauchenden ist sie mit etwas mehr Zigaretten pro Tag verbunden.",
+          "Zwei Kopien von CHRNA5 398N. Bei Rauchenden sind sie mit stärkerer Nikotinabhängigkeit verbunden."
+        ],
+        "confidence": "moderate",
+        "clinical": true
+      },
+      "questions": [
+        "Mache ich mich durch Rauchen leichter abhängig?"
+      ],
+      "clinical": true
+    },
+    {
+      "id": "cad-9p21",
+      "section": "09.1",
+      "title": "Chromosom 9p21 und koronare Herzkrankheit",
+      "markers": [
+        "rs10757278"
+      ],
+      "method": "research",
+      "require_identifier": true,
+      "evidence": "Gut belegter Risikofaktor",
+      "summary": "Die Region 9p21 ist der am häufigsten bestätigte genetische Ort für koronare Herzkrankheit und Herzinfarkt. Jede Kopie des G-Allels ist im Mittel mit etwa einem Viertel höherem relativem Risiko verbunden.",
+      "limits": "Das G-Allel ist sehr häufig. Blutdruck, Cholesterin, Rauchen, Diabetes und Bewegung bestimmen das Herzrisiko weit stärker. Der Marker ergibt keine persönliche Risikozahl.",
+      "population": "Mehrere untersuchte Populationen",
+      "sources": [
+        [
+          "Helgadottir et al. · Science (2007)",
+          "https://pubmed.ncbi.nlm.nih.gov/17478679/"
+        ],
+        [
+          "McPherson et al. · Science (2007)",
+          "https://pubmed.ncbi.nlm.nih.gov/17478681/"
+        ],
+        [
+          "dbSNP",
+          "https://www.ncbi.nlm.nih.gov/snp/rs10757278"
+        ]
+      ],
+      "effect": {
+        "marker": "rs10757278",
+        "allele": "G",
+        "conclusions": [
+          "Keine Kopie des 9p21-Risikoallels.",
+          "Eine Kopie des 9p21-Risikoallels. Das ist sehr häufig und im Mittel mit leicht erhöhtem Risiko für koronare Herzkrankheit verbunden.",
+          "Zwei Kopien des 9p21-Risikoallels. Das ist im Mittel mit einem moderat erhöhten Risiko für koronare Herzkrankheit verbunden."
+        ],
+        "confidence": "moderate",
+        "clinical": true
+      },
+      "questions": [
+        "Habe ich ein erhöhtes Herzinfarktrisiko?"
+      ],
+      "clinical": true
+    },
+    {
+      "id": "pitx2-atrial-fibrillation",
+      "section": "09.1",
+      "title": "4q25 und Vorhofflimmern",
+      "markers": [
+        "rs2200733"
+      ],
+      "method": "research",
+      "require_identifier": true,
+      "evidence": "Gut belegter Risikofaktor",
+      "summary": "Nahe dem Gen PITX2, das die Entwicklung des linken Herzvorhofs steuert, liegt der stärkste häufige Marker für Vorhofflimmern. Das T-Allel ist mit einem deutlich höheren relativen Risiko verbunden.",
+      "limits": "Vorhofflimmern hängt vor allem von Alter, Blutdruck und Herzerkrankungen ab. Der Marker ist keine Diagnose; Herzrhythmusstörungen lassen sich mit einem EKG feststellen.",
+      "population": "Mehrere untersuchte Populationen",
+      "sources": [
+        [
+          "Gudbjartsson et al. · Nature (2007)",
+          "https://pubmed.ncbi.nlm.nih.gov/17603472/"
+        ],
+        [
+          "dbSNP",
+          "https://www.ncbi.nlm.nih.gov/snp/rs2200733"
+        ]
+      ],
+      "effect": {
+        "marker": "rs2200733",
+        "allele": "T",
+        "conclusions": [
+          "Keine Kopie des 4q25-Risikoallels.",
+          "Eine Kopie des 4q25-Risikoallels. Sie ist im Mittel mit einem höheren Risiko für Vorhofflimmern verbunden.",
+          "Zwei Kopien des 4q25-Risikoallels. Sie sind im Mittel mit einem deutlich höheren Risiko für Vorhofflimmern verbunden."
+        ],
+        "confidence": "moderate",
+        "clinical": true
+      },
+      "questions": [
+        "Neige ich zu Herzrhythmusstörungen?"
+      ],
+      "clinical": true
+    },
+    {
+      "id": "lpa-lipoprotein-a",
+      "section": "16.3",
+      "title": "LPA und Lipoprotein(a)",
+      "markers": [
+        "rs10455872"
+      ],
+      "method": "research",
+      "require_identifier": true,
+      "evidence": "Gut belegter Risikofaktor",
+      "summary": "Lipoprotein(a) ist ein vor allem erblich bestimmtes Blutfett. Das G-Allel in LPA ist mit deutlich höheren Lp(a)-Werten und einem höheren Risiko für koronare Herzkrankheit verbunden.",
+      "limits": "Der Lp(a)-Wert lässt sich mit einem einmaligen Bluttest messen. Der Marker erfasst nur einen Teil der erblichen Unterschiede.",
+      "population": "Kohorten europäischer Abstammung",
+      "sources": [
+        [
+          "Clarke et al. · New England Journal of Medicine (2009)",
+          "https://pubmed.ncbi.nlm.nih.gov/20032323/"
+        ],
+        [
+          "dbSNP",
+          "https://www.ncbi.nlm.nih.gov/snp/rs10455872"
+        ]
+      ],
+      "cross": [
+        "09.2"
+      ],
+      "effect": {
+        "marker": "rs10455872",
+        "allele": "G",
+        "conclusions": [
+          "Keine Kopie des LPA-G-Allels.",
+          "Eine Kopie des LPA-G-Allels. Sie ist mit höheren Lp(a)-Werten und einem höheren Risiko für koronare Herzkrankheit verbunden.",
+          "Zwei Kopien des LPA-G-Allels. Sie sind mit deutlich höheren Lp(a)-Werten verbunden."
+        ],
+        "confidence": "moderate",
+        "clinical": true
+      },
+      "questions": [
+        "Habe ich ein hohes Lipoprotein(a)?"
+      ],
+      "clinical": true
+    },
+    {
+      "id": "pcsk9-r46l",
+      "section": "16.3",
+      "title": "PCSK9 R46L und LDL-Cholesterin",
+      "markers": [
+        "rs11591147"
+      ],
+      "method": "research",
+      "require_identifier": true,
+      "evidence": "Gut belegter Risikofaktor",
+      "summary": "PCSK9 baut LDL-Rezeptoren in der Leber ab. Die Variante R46L (T-Allel) schwächt PCSK9 und ist mit niedrigerem LDL-Cholesterin und weniger koronarer Herzkrankheit verbunden.",
+      "limits": "Die Variante ist selten. Das eigene Cholesterin lässt sich nur im Blut bestimmen.",
+      "population": "Kohorten europäischer Abstammung",
+      "sources": [
+        [
+          "Cohen et al. · New England Journal of Medicine (2006)",
+          "https://pubmed.ncbi.nlm.nih.gov/16554528/"
+        ],
+        [
+          "dbSNP",
+          "https://www.ncbi.nlm.nih.gov/snp/rs11591147"
+        ]
+      ],
+      "cross": [
+        "09.2"
+      ],
+      "effect": {
+        "marker": "rs11591147",
+        "allele": "T",
+        "conclusions": [
+          "Keine Kopie von PCSK9 R46L. Das ist der häufige Typ.",
+          "Eine Kopie von PCSK9 R46L. Sie ist im Mittel mit niedrigerem LDL-Cholesterin und weniger koronarer Herzkrankheit verbunden.",
+          "Zwei Kopien von PCSK9 R46L. Das ist sehr selten und mit niedrigerem LDL-Cholesterin verbunden."
+        ],
+        "confidence": "moderate",
+        "clinical": true
+      },
+      "questions": [
+        "Habe ich Gene für niedriges Cholesterin?"
+      ],
+      "clinical": true
+    },
+    {
+      "id": "ackr1-duffy-null",
+      "section": "09.4",
+      "title": "Duffy-Blutgruppe und Neutrophilenzahl",
+      "markers": [
+        "rs2814778"
+      ],
+      "method": "research",
+      "require_identifier": true,
+      "evidence": "Funktionelle Forschung",
+      "summary": "Das C-Allel schaltet die Duffy-Blutgruppe auf roten Blutkörperchen ab. Zwei Kopien (Duffy-null) sind bei Menschen afrikanischer Abstammung häufig, schützen vor einer Malariaform und gehen mit einer natürlich niedrigeren Neutrophilenzahl im Blutbild einher.",
+      "limits": "Die niedrigere Neutrophilenzahl bei Duffy-null ist harmlos und kein Infektionsrisiko. Die Einordnung eines Blutbilds gehört zu Ärztin oder Arzt.",
+      "population": "Mehrere untersuchte Populationen",
+      "sources": [
+        [
+          "Reich et al. · PLoS Genetics (2009)",
+          "https://pubmed.ncbi.nlm.nih.gov/19180233/"
+        ],
+        [
+          "dbSNP",
+          "https://www.ncbi.nlm.nih.gov/snp/rs2814778"
+        ]
+      ],
+      "effect": {
+        "marker": "rs2814778",
+        "allele": "C",
+        "conclusions": [
+          "Keine Kopie des Duffy-null-Allels. Die Duffy-Blutgruppe wird gebildet.",
+          "Eine Kopie des Duffy-null-Allels. Die Duffy-Blutgruppe wird weiter gebildet.",
+          "Zwei Kopien des Duffy-null-Allels. Das ist mit einer natürlich niedrigeren, harmlosen Neutrophilenzahl im Blutbild verbunden."
+        ],
+        "confidence": "high",
+        "clinical": true
+      },
+      "questions": [
+        "Warum sind meine Neutrophilen niedrig?",
+        "Welche Duffy-Blutgruppe habe ich?"
+      ],
+      "clinical": true
+    },
+    {
+      "id": "serpina1-pi-z",
+      "section": "09.5",
+      "title": "Alpha-1-Antitrypsin PiZ",
+      "markers": [
+        "rs28929474"
+      ],
+      "method": "research",
+      "require_identifier": true,
+      "evidence": "Gut belegter Risikofaktor",
+      "summary": "Alpha-1-Antitrypsin schützt die Lunge vor Entzündungsenzymen. Die Z-Variante (T-Allel) führt zu wenig wirksamem Protein. Zwei Kopien (PiZZ) verursachen einen schweren Mangel mit Risiko für Lungen- und Lebererkrankungen.",
+      "limits": "Seltene Varianten werden von Verbrauchertests häufig falsch gemeldet. Die häufige S-Variante wird hier nicht geprüft. Ein Mangel wird mit einem Bluttest bestätigt.",
+      "population": "Europäische Studienpopulationen",
+      "sources": [
+        [
+          "Strnad et al. · New England Journal of Medicine (2020)",
+          "https://pubmed.ncbi.nlm.nih.gov/32268028/"
+        ],
+        [
+          "dbSNP",
+          "https://www.ncbi.nlm.nih.gov/snp/rs28929474"
+        ]
+      ],
+      "cross": [
+        "10.3"
+      ],
+      "effect": {
+        "marker": "rs28929474",
+        "allele": "T",
+        "conclusions": [
+          "Keine Kopie der Z-Variante.",
+          "Eine Kopie der Z-Variante (PiMZ). Das ist ein Trägerstatus mit leicht vermindertem Alpha-1-Antitrypsin; Rauchen schadet Trägern besonders.",
+          "Zwei Kopien der Z-Variante (PiZZ). Das entspricht einem schweren Alpha-1-Antitrypsin-Mangel und braucht eine Bestätigung im Labor."
+        ],
+        "confidence": "high",
+        "clinical": true
+      },
+      "questions": [
+        "Habe ich einen Alpha-1-Antitrypsin-Mangel?"
+      ],
+      "clinical": true
+    },
+    {
+      "id": "cfh-y402h",
+      "section": "05.2",
+      "title": "CFH Y402H und altersbedingte Makuladegeneration",
+      "markers": [
+        "rs1061170"
+      ],
+      "method": "research",
+      "require_identifier": true,
+      "evidence": "Gut belegter Risikofaktor",
+      "summary": "CFH reguliert das Komplementsystem. Die Variante Y402H (C-Allel) ist einer der beiden stärksten häufigen Risikofaktoren für die altersbedingte Makuladegeneration.",
+      "limits": "Alter und Rauchen beeinflussen das Risiko stark. Der Marker ist keine Diagnose; die Netzhaut lässt sich augenärztlich untersuchen.",
+      "population": "Kohorten europäischer Abstammung",
+      "sources": [
+        [
+          "Klein et al. · Science (2005)",
+          "https://pubmed.ncbi.nlm.nih.gov/15761122/"
+        ],
+        [
+          "dbSNP",
+          "https://www.ncbi.nlm.nih.gov/snp/rs1061170"
+        ]
+      ],
+      "effect": {
+        "marker": "rs1061170",
+        "allele": "C",
+        "conclusions": [
+          "Keine Kopie von CFH 402H.",
+          "Eine Kopie von CFH 402H. Sie ist im Mittel mit einem höheren Risiko für Makuladegeneration im Alter verbunden.",
+          "Zwei Kopien von CFH 402H. Sie sind im Mittel mit einem deutlich höheren Risiko für Makuladegeneration im Alter verbunden."
+        ],
+        "confidence": "moderate",
+        "clinical": true
+      },
+      "questions": [
+        "Habe ich ein Risiko für Makuladegeneration?"
+      ],
+      "clinical": true
+    },
+    {
+      "id": "arms2-a69s",
+      "section": "05.2",
+      "title": "ARMS2 A69S und altersbedingte Makuladegeneration",
+      "markers": [
+        "rs10490924"
+      ],
+      "method": "research",
+      "require_identifier": true,
+      "evidence": "Gut belegter Risikofaktor",
+      "summary": "Neben CFH ist die Region ARMS2/HTRA1 der zweite große genetische Risikoort für die altersbedingte Makuladegeneration. Das T-Allel (A69S) erhöht das relative Risiko deutlich.",
+      "limits": "Rauchen verstärkt den Effekt. Der Marker ist keine Diagnose; die Netzhaut lässt sich augenärztlich untersuchen.",
+      "population": "Kohorten europäischer Abstammung",
+      "sources": [
+        [
+          "Rivera et al. · Human Molecular Genetics (2005)",
+          "https://pubmed.ncbi.nlm.nih.gov/16174643/"
+        ],
+        [
+          "dbSNP",
+          "https://www.ncbi.nlm.nih.gov/snp/rs10490924"
+        ]
+      ],
+      "effect": {
+        "marker": "rs10490924",
+        "allele": "T",
+        "conclusions": [
+          "Keine Kopie von ARMS2 A69S.",
+          "Eine Kopie von ARMS2 A69S. Sie ist im Mittel mit einem höheren Risiko für Makuladegeneration im Alter verbunden.",
+          "Zwei Kopien von ARMS2 A69S. Sie sind im Mittel mit einem deutlich höheren Risiko für Makuladegeneration im Alter verbunden."
+        ],
+        "confidence": "moderate",
+        "clinical": true
+      },
+      "questions": [
+        "Schadet Rauchen meinen Augen besonders?"
+      ],
+      "clinical": true
+    },
+    {
+      "id": "hla-dq2-celiac",
+      "section": "11.3",
+      "title": "HLA-DQ2.5 und Zöliakie",
+      "markers": [
+        "rs2187668"
+      ],
+      "method": "research",
+      "require_identifier": true,
+      "evidence": "Gut belegter Risikofaktor",
+      "summary": "Fast alle Menschen mit Zöliakie tragen HLA-DQ2 oder HLA-DQ8. Das T-Allel von rs2187668 markiert HLA-DQ2.5, die häufigste Risikoform.",
+      "limits": "Ein einzelner Markierungs-SNP gibt den HLA-Typ nur näherungsweise wieder, vor allem außerhalb europäischer Populationen. Eine HLA-Typisierung im Labor ist genauer.",
+      "population": "Europäische Studienpopulationen",
+      "sources": [
+        [
+          "Monsuur et al. · PLoS One (2008)",
+          "https://pubmed.ncbi.nlm.nih.gov/18509540/"
+        ],
+        [
+          "dbSNP",
+          "https://www.ncbi.nlm.nih.gov/snp/rs2187668"
+        ]
+      ],
+      "cross": [
+        "10.2"
+      ],
+      "effect": {
+        "marker": "rs2187668",
+        "allele": "T",
+        "conclusions": [
+          "Kein Hinweis auf HLA-DQ2.5 an diesem Marker. Andere Formen wie HLA-DQ8 werden getrennt geprüft.",
+          "Der Marker weist auf eine Kopie von HLA-DQ2.5 hin. Die meisten Menschen mit Zöliakie tragen diese Form, aber auch viele ohne Zöliakie. Allein ist das keine Diagnose.",
+          "Der Marker weist auf zwei Kopien von HLA-DQ2.5 hin. Das ist mit dem höchsten genetischen Zöliakie-Risiko verbunden; die meisten Träger erkranken trotzdem nicht."
+        ],
+        "confidence": "moderate",
+        "clinical": true
+      },
+      "questions": [
+        "Kann ich Zöliakie bekommen?",
+        "Vertrage ich Gluten?"
+      ],
+      "clinical": true
+    },
+    {
+      "id": "hla-dq8-celiac",
+      "section": "11.3",
+      "title": "HLA-DQ8 und Zöliakie",
+      "markers": [
+        "rs7454108"
+      ],
+      "method": "research",
+      "require_identifier": true,
+      "evidence": "Gut belegter Risikofaktor",
+      "summary": "HLA-DQ8 ist die zweite Risikoform für Zöliakie und kommt auch bei Typ-1-Diabetes häufiger vor. Das C-Allel von rs7454108 markiert HLA-DQ8.",
+      "limits": "Ein einzelner Markierungs-SNP gibt den HLA-Typ nur näherungsweise wieder, vor allem außerhalb europäischer Populationen. Eine HLA-Typisierung im Labor ist genauer.",
+      "population": "Europäische Studienpopulationen",
+      "sources": [
+        [
+          "Monsuur et al. · PLoS One (2008)",
+          "https://pubmed.ncbi.nlm.nih.gov/18509540/"
+        ],
+        [
+          "dbSNP",
+          "https://www.ncbi.nlm.nih.gov/snp/rs7454108"
+        ]
+      ],
+      "cross": [
+        "10.2"
+      ],
+      "effect": {
+        "marker": "rs7454108",
+        "allele": "C",
+        "conclusions": [
+          "Kein Hinweis auf HLA-DQ8 an diesem Marker.",
+          "Der Marker weist auf eine Kopie von HLA-DQ8 hin. Sie ist mit einem höheren Zöliakie-Risiko verbunden; die meisten Träger erkranken nicht.",
+          "Der Marker weist auf zwei Kopien von HLA-DQ8 hin. Sie sind mit einem höheren Zöliakie-Risiko verbunden; die meisten Träger erkranken nicht."
+        ],
+        "confidence": "moderate",
+        "clinical": true
+      },
+      "questions": [
+        "Trage ich HLA-DQ8?"
+      ],
+      "clinical": true
+    },
+    {
+      "id": "hla-b27",
+      "section": "11.3",
+      "title": "HLA-B27 und Morbus Bechterew",
+      "markers": [
+        "rs4349859"
+      ],
+      "method": "research",
+      "require_identifier": true,
+      "evidence": "Gut belegter Risikofaktor",
+      "summary": "HLA-B27 ist der stärkste genetische Risikofaktor für Morbus Bechterew (axiale Spondyloarthritis) und eine Form der Regenbogenhautentzündung. Das A-Allel von rs4349859 markiert HLA-B27.",
+      "limits": "Ein einzelner Markierungs-SNP gibt den HLA-Typ nur näherungsweise wieder, vor allem außerhalb europäischer Populationen. Eine HLA-Typisierung im Labor ist genauer.",
+      "population": "Europäische Studienpopulationen",
+      "sources": [
+        [
+          "Evans et al. · Nature Genetics (2011)",
+          "https://pubmed.ncbi.nlm.nih.gov/21743469/"
+        ],
+        [
+          "dbSNP",
+          "https://www.ncbi.nlm.nih.gov/snp/rs4349859"
+        ]
+      ],
+      "effect": {
+        "marker": "rs4349859",
+        "allele": "A",
+        "conclusions": [
+          "Kein Hinweis auf HLA-B27 an diesem Marker.",
+          "Der Marker weist auf HLA-B27 hin. Die meisten Träger bleiben gesund; Morbus Bechterew ist bei ihnen aber deutlich häufiger.",
+          "Der Marker weist auf zwei Kopien von HLA-B27 hin. Das ist selten; die meisten Träger bleiben gesund."
+        ],
+        "confidence": "moderate",
+        "clinical": true
+      },
+      "questions": [
+        "Bin ich HLA-B27-positiv?"
+      ],
+      "clinical": true
+    },
+    {
+      "id": "nod2-r702w",
+      "section": "10.2",
+      "title": "NOD2 R702W und Morbus Crohn",
+      "markers": [
+        "rs2066844"
+      ],
+      "method": "research",
+      "require_identifier": true,
+      "evidence": "Gut belegter Risikofaktor",
+      "summary": "NOD2 erkennt Bakterienbestandteile im Darm. Die Variante R702W (T-Allel) ist eine der drei bekannten NOD2-Varianten, die das Risiko für Morbus Crohn erhöhen.",
+      "limits": "Die beiden anderen NOD2-Hauptvarianten werden hier nicht geprüft. Die meisten Träger erkranken nie.",
+      "population": "Europäische Studienpopulationen",
+      "sources": [
+        [
+          "Hugot et al. · Nature (2001)",
+          "https://pubmed.ncbi.nlm.nih.gov/11385576/"
+        ],
+        [
+          "dbSNP",
+          "https://www.ncbi.nlm.nih.gov/snp/rs2066844"
+        ]
+      ],
+      "effect": {
+        "marker": "rs2066844",
+        "allele": "T",
+        "conclusions": [
+          "Keine Kopie von NOD2 R702W.",
+          "Eine Kopie von NOD2 R702W. Sie ist mit einem leicht erhöhten Risiko für Morbus Crohn verbunden; die meisten Träger erkranken nicht.",
+          "Zwei Kopien von NOD2 R702W. Sie sind mit einem deutlich erhöhten Risiko für Morbus Crohn verbunden."
+        ],
+        "confidence": "moderate",
+        "clinical": true
+      },
+      "questions": [
+        "Habe ich ein Risiko für Morbus Crohn?"
+      ],
+      "clinical": true
+    },
+    {
+      "id": "ugt1a1-gilbert",
+      "section": "10.3",
+      "title": "UGT1A1 und Gilbert-Syndrom",
+      "markers": [
+        "rs887829"
+      ],
+      "method": "research",
+      "require_identifier": true,
+      "evidence": "Gen-Wirkstoff-Beziehung in Leitlinie",
+      "summary": "UGT1A1 baut Bilirubin und einige Medikamente ab. Das T-Allel (UGT1A1*80) tritt fast immer zusammen mit UGT1A1*28 auf. Zwei Kopien sind mit dem harmlosen Gilbert-Syndrom verbunden: zeitweise leicht erhöhtes Bilirubin, etwa beim Fasten.",
+      "limits": "Der Marker steht stellvertretend für UGT1A1*28, das selbst nicht gelesen wird. Leitlinien zu Irinotecan und Atazanavir berücksichtigen UGT1A1; über Medikamente entscheidet die Ärztin oder der Arzt.",
+      "population": "Mehrere untersuchte Populationen",
+      "sources": [
+        [
+          "Bosma et al. · New England Journal of Medicine (1995)",
+          "https://pubmed.ncbi.nlm.nih.gov/7565971/"
+        ],
+        [
+          "CPIC-Leitlinie zu UGT1A1 und Atazanavir (2016)",
+          "https://pubmed.ncbi.nlm.nih.gov/26417955/"
+        ],
+        [
+          "dbSNP",
+          "https://www.ncbi.nlm.nih.gov/snp/rs887829"
+        ]
+      ],
+      "cross": [
+        "15.2"
+      ],
+      "effect": {
+        "marker": "rs887829",
+        "allele": "T",
+        "conclusions": [
+          "Keine Kopie von UGT1A1*80.",
+          "Eine Kopie von UGT1A1*80. Sie ist mit leicht höherem Bilirubin verbunden.",
+          "Zwei Kopien von UGT1A1*80. Das passt zum harmlosen Gilbert-Syndrom mit zeitweise erhöhtem Bilirubin und verlangsamtem Abbau einiger Medikamente."
+        ],
+        "confidence": "high",
+        "clinical": true
+      },
+      "questions": [
+        "Habe ich Morbus Meulengracht?",
+        "Warum ist mein Bilirubin erhöht?"
+      ],
+      "clinical": true
+    },
+    {
+      "id": "abcg2-urate",
+      "section": "16.1",
+      "title": "ABCG2 Q141K, Harnsäure und Gicht",
+      "markers": [
+        "rs2231142"
+      ],
+      "method": "research",
+      "require_identifier": true,
+      "evidence": "Gen-Wirkstoff-Beziehung in Leitlinie",
+      "summary": "ABCG2 transportiert Harnsäure aus dem Körper. Die Variante Q141K (T-Allel) halbiert etwa seine Leistung und ist mit höherer Harnsäure und einem höheren Gichtrisiko verbunden. Sie beeinflusst auch den Spiegel von Rosuvastatin.",
+      "limits": "Ernährung, Alkohol und Nierenfunktion beeinflussen die Harnsäure stark. Die Harnsäure lässt sich im Blut messen; über Medikamente entscheidet die Ärztin oder der Arzt.",
+      "population": "Mehrere untersuchte Populationen",
+      "sources": [
+        [
+          "Woodward et al. · PNAS (2009)",
+          "https://pubmed.ncbi.nlm.nih.gov/19506252/"
+        ],
+        [
+          "CPIC-Leitlinie zu Statinen (2022)",
+          "https://pubmed.ncbi.nlm.nih.gov/35152405/"
+        ],
+        [
+          "dbSNP",
+          "https://www.ncbi.nlm.nih.gov/snp/rs2231142"
+        ]
+      ],
+      "cross": [
+        "15.2"
+      ],
+      "effect": {
+        "marker": "rs2231142",
+        "allele": "T",
+        "conclusions": [
+          "Keine Kopie von ABCG2 Q141K.",
+          "Eine Kopie von ABCG2 Q141K. Sie ist mit höherer Harnsäure, einem höheren Gichtrisiko und höheren Rosuvastatin-Spiegeln verbunden.",
+          "Zwei Kopien von ABCG2 Q141K. Sie sind mit deutlich verminderter Transportleistung, höherer Harnsäure und höheren Rosuvastatin-Spiegeln verbunden."
+        ],
+        "confidence": "high",
+        "clinical": true
+      },
+      "questions": [
+        "Habe ich ein erhöhtes Gichtrisiko?"
+      ],
+      "clinical": true
+    },
+    {
+      "id": "cyp4f2-warfarin",
+      "section": "15.2",
+      "title": "CYP4F2 und Warfarin",
+      "markers": [
+        "rs2108622"
+      ],
+      "method": "research",
+      "require_identifier": true,
+      "evidence": "Gen-Wirkstoff-Beziehung in Leitlinie",
+      "summary": "CYP4F2 baut Vitamin K ab. Die Variante V433M (T-Allel) verlangsamt diesen Abbau. Die CPIC-Leitlinie berücksichtigt sie zusammen mit VKORC1 und CYP2C9 bei der Warfarin-Dosierung.",
+      "limits": "Der Effekt ist kleiner als der von VKORC1 und CYP2C9. Dieser Eintrag begründet keine Dosis; Gerinnungshemmer werden ärztlich eingestellt.",
+      "population": "Mehrere untersuchte Populationen",
+      "sources": [
+        [
+          "CPIC-Leitlinie zu Warfarin (2017)",
+          "https://pubmed.ncbi.nlm.nih.gov/28198005/"
+        ],
+        [
+          "dbSNP",
+          "https://www.ncbi.nlm.nih.gov/snp/rs2108622"
+        ]
+      ],
+      "effect": {
+        "marker": "rs2108622",
+        "allele": "T",
+        "conclusions": [
+          "Keine Kopie von CYP4F2 V433M.",
+          "Eine Kopie von CYP4F2 V433M. Sie ist mit einem etwas höheren Warfarin-Bedarf verbunden.",
+          "Zwei Kopien von CYP4F2 V433M. Sie sind mit einem höheren Warfarin-Bedarf verbunden."
+        ],
+        "confidence": "moderate",
+        "clinical": true
+      },
+      "questions": [
+        "Brauche ich mehr Warfarin?"
+      ],
+      "clinical": true
     }
   ]
 }

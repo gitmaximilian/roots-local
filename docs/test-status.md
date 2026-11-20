@@ -13,6 +13,8 @@ Roots Local is a web app. The macOS desktop app (v0.2.0) was retired on 2026-11-
 
 ## Verification log
 
+**2026-11-20, catalog 1.7.0.** 25 Rust tests passed; the new `every_effect_rule_counts_copies_on_both_builds` checks zero, one, and two copies for all single-marker effect rules on GRCh37 and GRCh38. Every rule string has an English translation. `tests/search.test.mjs` passed 8 cases. Parity reported identical web and native output for all five comparisons. The catalog passed 12 of 12 benchmark cases. Playwright passed per project in Chromium (10), WebKit (8), iPhone (9), and Android (10).
+
 **2026-11-20, branch `web/info-and-search`.** 24 Rust tests passed, including identical findings for the synthetic profile in five provider layouts, the confirmed-build path, and zero, one, and two copies for each catalog 1.6.0 rule on GRCh37 and GRCh38. `tests/search.test.mjs` passed 7 cases (accents, typos, everyday words, rsIDs, abstention). `scripts/parity.mjs` reported identical web and native output. `scripts/interpretation-benchmark.mjs` passed 12 of 12 catalog cases; the Claude comparison (`--claude`) is implemented but has not run, because it needs an API key and spends money. The Playwright suites passed in Chromium (10), WebKit (8), iPhone (9), and Pixel (10); running all four projects in one invocation can lose the local preview server near the end, which is a test-infrastructure issue, not an app failure.
 
 
