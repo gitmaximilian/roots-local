@@ -1,0 +1,19 @@
+#AncestryDNA raw data download (synthetic example, no real person)
+#Genetic data is provided below as five TAB delimited columns.
+#Chromosome positions are relative to human reference build 37.1.
+rsid	chromosome	position	allele1	allele2
+rs4988235	2	136608646	A	G
+rs17822931	16	48258198	T	T
+rs1815739	11	66328095	C	T
+rs713598	7	141673345	G	G
+rs1726866	7	141672705	A	A
+rs10246939	7	141672604	C	C
+rs72921001	11	6889648	A	C
+rs671	12	112241766	G	G
+rs762551	15	75041917	A	C
+rs4149056	12	21331549	T	C
+rs1800562	6	26093141	G	G
+rs7903146	10	114758349	C	T
+rs12913832	15	28365618	A	G
+rs90000001	1	12000	0	0
+rs6025	1	169519049	C	C

@@ -1,0 +1,12 @@
+{
+  "schema": 1,
+  "tool_version": "3.3.2",
+  "tree": "phylotree-rcrs@17.3",
+  "covered_positions": 1200,
+  "candidates": [
+    { "haplogroup": "H100", "quality": 0.8351 },
+    { "haplogroup": "H", "quality": 0.8054 }
+  ],
+  "warnings": 1,
+  "errors": 1
+}

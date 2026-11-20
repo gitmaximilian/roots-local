@@ -1,0 +1,16 @@
+[package]
+name = "roots-pdf"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "Compiles the Roots Local Typst templates to PDF in-process."
+
+[features]
+# Embed the report fonts from typst-assets. The web build loads the same files
+# from its own origin instead, which keeps the WebAssembly module small.
+bundled-fonts = []
+
+[dependencies]
+typst = "0.15.1"
+typst-pdf = "0.15.1"
+typst-layout = "0.15.1"

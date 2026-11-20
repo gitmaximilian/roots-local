@@ -29,3 +29,17 @@ reports/
 *.db
 *.sqlite
 *.sqlite3
+src-tauri/binaries/
+src-tauri/gen/
+__pycache__/
+
+tmp/
+output/
+*.pem
+*.rootscat
+src/generated/
+test-results/
+playwright-report/
+.wrangler/
+!fixtures/formats/*.csv
+benchmark-prompt.md

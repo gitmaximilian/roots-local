@@ -1,0 +1,1715 @@
+{
+  "version": "1.6.0",
+  "markers": [
+    [
+      "rs4988235",
+      "MCM6 / LCT",
+      "2",
+      136608646,
+      135851076,
+      "AG"
+    ],
+    [
+      "rs17822931",
+      "ABCC11",
+      "16",
+      48258198,
+      48224287,
+      "CT"
+    ],
+    [
+      "rs1815739",
+      "ACTN3",
+      "11",
+      66328095,
+      66560624,
+      "CT"
+    ],
+    [
+      "rs713598",
+      "TAS2R38",
+      "7",
+      141673345,
+      141973545,
+      "CG"
+    ],
+    [
+      "rs1726866",
+      "TAS2R38",
+      "7",
+      141672705,
+      141972905,
+      "AG"
+    ],
+    [
+      "rs10246939",
+      "TAS2R38",
+      "7",
+      141672604,
+      141972804,
+      "CT"
+    ],
+    [
+      "rs72921001",
+      "OR6A2-Region",
+      "11",
+      6889648,
+      6868417,
+      "AC"
+    ],
+    [
+      "rs671",
+      "ALDH2",
+      "12",
+      112241766,
+      111803962,
+      "AG"
+    ],
+    [
+      "rs762551",
+      "CYP1A2",
+      "15",
+      75041917,
+      74749576,
+      "AC"
+    ],
+    [
+      "rs4149056",
+      "SLCO1B1",
+      "12",
+      21331549,
+      21178615,
+      "CT"
+    ],
+    [
+      "rs1800562",
+      "HFE",
+      "6",
+      26093141,
+      26092913,
+      "AG"
+    ],
+    [
+      "rs7903146",
+      "TCF7L2",
+      "10",
+      114758349,
+      112998590,
+      "CT"
+    ],
+    [
+      "rs6025",
+      "F5",
+      "1",
+      169519049,
+      169549811,
+      "CT"
+    ],
+    [
+      "rs12913832",
+      "HERC2 / OCA2",
+      "15",
+      28365618,
+      28120472,
+      "AG"
+    ],
+    [
+      "rs4244285",
+      "CYP2C19",
+      "10",
+      96541616,
+      94781859,
+      "AG"
+    ],
+    [
+      "rs3918290",
+      "DPYD",
+      "1",
+      97915614,
+      97450058,
+      "CT"
+    ],
+    [
+      "rs55886062",
+      "DPYD",
+      "1",
+      97981343,
+      97515787,
+      "AC"
+    ],
+    [
+      "rs776746",
+      "CYP3A5",
+      "7",
+      99270539,
+      99672916,
+      "CT"
+    ],
+    [
+      "rs1805007",
+      "MC1R",
+      "16",
+      89986117,
+      89919709,
+      "CT"
+    ],
+    [
+      "rs11803731",
+      "TCHH",
+      "1",
+      152083325,
+      152110849,
+      "AT"
+    ],
+    [
+      "rs429358",
+      "APOE",
+      "19",
+      45411941,
+      44908684,
+      "CT"
+    ],
+    [
+      "rs7412",
+      "APOE",
+      "19",
+      45412079,
+      44908822,
+      "CT"
+    ],
+    [
+      "rs1799853",
+      "CYP2C9",
+      "10",
+      96702047,
+      94942290,
+      "CT"
+    ],
+    [
+      "rs1057910",
+      "CYP2C9",
+      "10",
+      96741053,
+      94981296,
+      "AC"
+    ],
+    [
+      "rs9923231",
+      "VKORC1",
+      "16",
+      31107689,
+      31096368,
+      "CT"
+    ],
+    [
+      "rs12248560",
+      "CYP2C19",
+      "10",
+      96521657,
+      94761900,
+      "CT"
+    ],
+    [
+      "rs1142345",
+      "TPMT",
+      "6",
+      18130918,
+      18130687,
+      "CT"
+    ],
+    [
+      "rs1800460",
+      "TPMT",
+      "6",
+      18139228,
+      18138997,
+      "CT"
+    ],
+    [
+      "rs116855232",
+      "NUDT15",
+      "13",
+      48619855,
+      48045719,
+      "CT"
+    ],
+    [
+      "rs1799963",
+      "F2",
+      "11",
+      46761055,
+      46739505,
+      "AG"
+    ],
+    [
+      "rs1229984",
+      "ADH1B",
+      "4",
+      100239319,
+      99318162,
+      "CT"
+    ],
+    [
+      "rs1426654",
+      "SLC24A5",
+      "15",
+      48426484,
+      48134287,
+      "AG"
+    ],
+    [
+      "rs601338",
+      "FUT2",
+      "19",
+      49206674,
+      48703417,
+      "AG"
+    ],
+    [
+      "rs2282679",
+      "GC",
+      "4",
+      72608383,
+      71742666,
+      "GT"
+    ],
+    [
+      "rs3827760",
+      "EDAR",
+      "2",
+      109513601,
+      108897145,
+      "AG"
+    ],
+    [
+      "rs1801133",
+      "MTHFR",
+      "1",
+      11856378,
+      11796321,
+      "AG"
+    ],
+    [
+      "rs1805008",
+      "MC1R",
+      "16",
+      89986144,
+      89919736,
+      "CT"
+    ]
+  ],
+  "traits": [
+    {
+      "id": "lactase",
+      "section": "07.1",
+      "title": "Laktaseaktivität im Erwachsenenalter",
+      "markers": [
+        "rs4988235"
+      ],
+      "method": "single",
+      "evidence": "Replizierter genetischer Zusammenhang",
+      "summary": "Die Variante liegt in einer regulatorischen Region von MCM6 nahe dem Laktasegen LCT.",
+      "limits": "Die Regel deckt eine insbesondere in europäischen Populationen untersuchte Variante ab. Andere Varianten und Symptome werden nicht bewertet.",
+      "population": "Europäische und weitere Referenzpopulationen",
+      "sources": [
+        [
+          "Enattah et al. · Nature Genetics (2002)",
+          "https://pubmed.ncbi.nlm.nih.gov/11788828/"
+        ],
+        [
+          "Tishkoff et al. · Nature Genetics (2007)",
+          "https://pubmed.ncbi.nlm.nih.gov/17159977/"
+        ]
+      ],
+      "outcomes": [
+        {
+          "calls": [
+            "AA",
+            "AG"
+          ],
+          "conclusion": "Der Marker spricht für Laktasepersistenz im Erwachsenenalter",
+          "message": "Der Genotyp enthält die hier untersuchte Variante, die mit erhaltener Laktaseaktivität im Erwachsenenalter verbunden ist.",
+          "confidence": "moderate"
+        },
+        {
+          "calls": [
+            "GG"
+          ],
+          "conclusion": "Geprüfte Laktasepersistenz-Variante nicht beobachtet",
+          "message": "Die hier untersuchte Variante für erhaltene Laktaseaktivität liegt an dieser Position nicht vor. Andere Varianten können ebenfalls eine Rolle spielen.",
+          "confidence": "moderate"
+        }
+      ],
+      "questions": [
+        "Vertrage ich Milch?",
+        "Bin ich laktoseintolerant?"
+      ]
+    },
+    {
+      "id": "earwax",
+      "section": "04.3",
+      "title": "Ohrenschmalztyp",
+      "markers": [
+        "rs17822931"
+      ],
+      "method": "single",
+      "evidence": "Gut untersuchter Einzelmarker",
+      "summary": "ABCC11 beeinflusst, ob Ohrenschmalz überwiegend trocken oder feucht ist.",
+      "limits": "Die Zuordnung gilt für die hier unterstützten Allele C und T auf dem Referenzstrang.",
+      "population": "Mehrere untersuchte Populationen",
+      "sources": [
+        [
+          "Yoshiura et al. · Nature Genetics (2006)",
+          "https://pubmed.ncbi.nlm.nih.gov/16444273/"
+        ]
+      ],
+      "outcomes": [
+        {
+          "calls": [
+            "TT"
+          ],
+          "conclusion": "Trockenes Ohrenschmalz",
+          "message": "Dieser Genotyp ist mit trockenem Ohrenschmalz verbunden.",
+          "confidence": "high"
+        },
+        {
+          "calls": [
+            "CC",
+            "CT"
+          ],
+          "conclusion": "Feuchtes Ohrenschmalz",
+          "message": "Dieser Genotyp ist mit überwiegend feuchtem Ohrenschmalz verbunden.",
+          "confidence": "high"
+        }
+      ],
+      "questions": [
+        "Habe ich trockenes oder feuchtes Ohrenschmalz?"
+      ]
+    },
+    {
+      "id": "actn3",
+      "section": "06.1",
+      "title": "Alpha-Actinin-3 in der Muskulatur",
+      "markers": [
+        "rs1815739"
+      ],
+      "method": "single",
+      "evidence": "Funktionelle Variante",
+      "summary": "ACTN3 codiert ein Protein, das in schnellen Muskelfasern vorkommt.",
+      "limits": "Der Marker erlaubt keine verlässliche Vorhersage deiner Leistung oder Trainingsreaktion.",
+      "population": "Mehrere untersuchte Populationen",
+      "sources": [
+        [
+          "Genathlete-Studie (2010)",
+          "https://pubmed.ncbi.nlm.nih.gov/20845221/"
+        ],
+        [
+          "Sportgenetik-Konsens (2015)",
+          "https://bjsm.bmj.com/content/49/23/1486"
+        ]
+      ],
+      "outcomes": [
+        {
+          "calls": [
+            "TT"
+          ],
+          "conclusion": "Kein Alpha-Actinin-3 in schnellen Muskelfasern",
+          "message": "Der vorliegende Genotyp entspricht zwei Stoppvarianten am untersuchten Marker. Das ist mit fehlendem Alpha-Actinin-3 verbunden.",
+          "confidence": "high"
+        },
+        {
+          "calls": [
+            "CC",
+            "CT"
+          ],
+          "conclusion": "Alpha-Actinin-3 wird gebildet",
+          "message": "Am untersuchten Marker ist mindestens eine Kopie ohne diese Stoppvariante vorhanden.",
+          "confidence": "high"
+        }
+      ],
+      "questions": [
+        "Bin ich eher Sprinter oder Ausdauertyp?",
+        "Wie sind meine Muskelfasern?"
+      ]
+    },
+    {
+      "id": "bitter",
+      "section": "05.1",
+      "title": "Bitterwahrnehmung von PTC",
+      "markers": [
+        "rs713598",
+        "rs1726866",
+        "rs10246939"
+      ],
+      "method": "bitter",
+      "evidence": "Kombination dreier TAS2R38-Positionen",
+      "summary": "Häufige TAS2R38-Haplotypen hängen mit der Wahrnehmung des Bitterstoffs PTC zusammen.",
+      "limits": "Bei unklarer Phase oder anderen Haplotypen bleibt der kombinierte Befund offen. Die Regel betrifft PTC und bildet Geschmackserleben nur teilweise ab.",
+      "population": "Studienkohorten mit genotypisierten TAS2R38-Haplotypen",
+      "sources": [
+        [
+          "Kim et al. · Science (2003)",
+          "https://pubmed.ncbi.nlm.nih.gov/12595690/"
+        ]
+      ],
+      "outcomes": [
+        {
+          "calls": [
+            "GG/AA/CC"
+          ],
+          "conclusion": "Wahrscheinlich ausgeprägte Bitter-Wahrnehmung (PAV/PAV)",
+          "message": "Die drei Positionen sind mit zwei PAV-Kopien vereinbar. PAV ist in Studien mit stärkerer Wahrnehmung von PTC verbunden.",
+          "confidence": "moderate"
+        },
+        {
+          "calls": [
+            "CC/GG/TT"
+          ],
+          "conclusion": "Wahrscheinlich kaum Bitter-Wahrnehmung für PTC (AVI/AVI)",
+          "message": "Die drei Positionen sind mit zwei AVI-Kopien vereinbar. AVI ist in Studien mit schwächerer Wahrnehmung von PTC verbunden.",
+          "confidence": "moderate"
+        }
+      ],
+      "questions": [
+        "Schmecke ich Bitterstoffe stark?",
+        "Mag ich Brokkoli nicht wegen meiner Gene?"
+      ]
+    },
+    {
+      "id": "cilantro",
+      "section": "05.1",
+      "title": "Seifiger Koriandergeschmack",
+      "markers": [
+        "rs72921001"
+      ],
+      "method": "research",
+      "evidence": "Statistischer Studienzusammenhang",
+      "summary": "In einer Befragung war die Variante in der Nähe mehrerer Geruchsrezeptoren mit seifigem Koriandergeschmack assoziiert.",
+      "limits": "Der Befund ist keine Geschmacksprognose.",
+      "population": "Überwiegend europäische Herkunft",
+      "sources": [
+        [
+          "Eriksson et al. · Flavour (2012)",
+          "https://doi.org/10.1186/2044-7248-1-22"
+        ]
+      ],
+      "questions": [
+        "Schmeckt Koriander für mich nach Seife?"
+      ]
+    },
+    {
+      "id": "alcohol",
+      "section": "07.2",
+      "title": "ALDH2 und Alkoholstoffwechsel",
+      "markers": [
+        "rs671"
+      ],
+      "method": "research",
+      "evidence": "Funktionelle Forschung",
+      "summary": "rs671 wurde mit veränderter ALDH2-Aktivität und Gesichtsrötung nach Alkoholkonsum in Verbindung gebracht.",
+      "limits": "Der Befund bestimmt keine verträgliche Alkoholmenge.",
+      "population": "Insbesondere ostasiatische Kohorten",
+      "sources": [
+        [
+          "Rwere et al. (2024)",
+          "https://pubmed.ncbi.nlm.nih.gov/39075523/"
+        ]
+      ],
+      "effect": {
+        "marker": "rs671",
+        "allele": "A",
+        "conclusions": [
+          "Keine Kopie von ALDH2*2. Eine starke Gesichtsrötung nach Alkohol ist von dieser Variante her nicht zu erwarten.",
+          "Eine Kopie von ALDH2*2. Sie ist mit Gesichtsrötung nach Alkohol und verlangsamtem Acetaldehyd-Abbau verbunden.",
+          "Zwei Kopien von ALDH2*2. Das ist mit sehr geringer ALDH2-Aktivität und deutlicher Gesichtsrötung nach Alkohol verbunden."
+        ],
+        "confidence": "high",
+        "clinical": false
+      },
+      "questions": [
+        "Bekomme ich rote Haut nach Alkohol?",
+        "Wie vertrage ich Alkohol?"
+      ]
+    },
+    {
+      "id": "caffeine",
+      "section": "07.2",
+      "title": "CYP1A2 und Koffein",
+      "markers": [
+        "rs762551"
+      ],
+      "method": "research",
+      "evidence": "Kontextabhängiger Studienzusammenhang",
+      "summary": "Der Marker wurde in einem Versuch mit Koffein mit induzierbarer CYP1A2-Aktivität in Verbindung gebracht.",
+      "limits": "Die Wirkung ist kontextabhängig. Individuelle Abbauzeit und Dosierung bleiben offen.",
+      "population": "Versuchsgruppe mit Rauchenden und Nichtrauchenden",
+      "sources": [
+        [
+          "Sachse et al. (1999)",
+          "https://pubmed.ncbi.nlm.nih.gov/10233211/"
+        ]
+      ],
+      "questions": [
+        "Wie vertrage ich Kaffee?"
+      ]
+    },
+    {
+      "id": "eye",
+      "section": "04.1",
+      "title": "HERC2 und Augenpigmentierung",
+      "markers": [
+        "rs12913832"
+      ],
+      "method": "research",
+      "evidence": "Marker in veröffentlichten Modellen",
+      "summary": "Der Marker ist Bestandteil von Modellen für Augenpigmentierung.",
+      "limits": "Das vollständige Mehrmarker-Modell ist hier nicht implementiert.",
+      "population": "Mehrere untersuchte Populationen",
+      "sources": [
+        [
+          "HIrisPlex-S (2018)",
+          "https://pubmed.ncbi.nlm.nih.gov/29753263/"
+        ]
+      ],
+      "questions": [
+        "Welche Augenfarbe verraten meine Gene?"
+      ]
+    },
+    {
+      "id": "diabetes",
+      "section": "07.4",
+      "title": "TCF7L2 und Typ-2-Diabetes",
+      "markers": [
+        "rs7903146"
+      ],
+      "method": "research",
+      "evidence": "Replizierte Assoziation",
+      "summary": "Eine häufige Variante in TCF7L2 wurde mit Risiko für Typ-2-Diabetes in Verbindung gebracht.",
+      "limits": "Ein Einzelmarker ersetzt weder ein validiertes Risikomodell noch eine Messung des Blutzuckers.",
+      "population": "Mehrere untersuchte Populationen",
+      "sources": [
+        [
+          "Grant et al. · Nature Genetics (2006)",
+          "https://pubmed.ncbi.nlm.nih.gov/16415884/"
+        ]
+      ],
+      "effect": {
+        "marker": "rs7903146",
+        "allele": "T",
+        "conclusions": [
+          "Keine Kopie des TCF7L2-Risikoallels T.",
+          "Eine Kopie des TCF7L2-Risikoallels T. In Studien ist das Typ-2-Diabetes-Risiko damit moderat erhöht.",
+          "Zwei Kopien des TCF7L2-Risikoallels T. In Studien ist das Typ-2-Diabetes-Risiko damit moderat erhöht. Gewicht und Bewegung wiegen deutlich stärker."
+        ],
+        "confidence": "moderate",
+        "clinical": true
+      },
+      "questions": [
+        "Habe ich ein erhöhtes Diabetesrisiko?"
+      ]
+    },
+    {
+      "id": "iron",
+      "section": "14.1",
+      "title": "HFE p.Cys282Tyr und Eisenstoffwechsel",
+      "markers": [
+        "rs1800562"
+      ],
+      "method": "research",
+      "evidence": "Klinisch untersuchte Variante",
+      "summary": "HFE p.Cys282Tyr ist bei der genetischen Einordnung erblicher Hämochromatose relevant.",
+      "limits": "Der Rohdateneintrag ist unbestätigt. Klinisch relevante Befunde brauchen eine Laborbestätigung. Eisenwerte und Erkrankungsstatus bleiben offen.",
+      "population": "Kohorten mit europäischer Herkunft",
+      "sources": [
+        [
+          "Tiroler Kohortenstudie (2024)",
+          "https://pubmed.ncbi.nlm.nih.gov/38263707/"
+        ]
+      ],
+      "cross": [
+        "10.3",
+        "07.3",
+        "16.1"
+      ],
+      "effect": {
+        "marker": "rs1800562",
+        "allele": "A",
+        "conclusions": [
+          "Keine Kopie von HFE C282Y.",
+          "Eine Kopie von HFE C282Y. Trägerschaft allein führt selten zu Eisenüberladung.",
+          "Zwei Kopien von HFE C282Y. Das ist die häufigste genetische Ursache erblicher Hämochromatose. Eine Laborbestätigung und Eisenwerte sind sinnvoll."
+        ],
+        "confidence": "high",
+        "clinical": true
+      },
+      "questions": [
+        "Speichere ich zu viel Eisen?",
+        "Habe ich ein Risiko für Hämochromatose?"
+      ]
+    },
+    {
+      "id": "slco",
+      "section": "15.2",
+      "title": "SLCO1B1 und Statine",
+      "markers": [
+        "rs4149056"
+      ],
+      "method": "research",
+      "evidence": "Gen-Wirkstoff-Beziehung in Leitlinie",
+      "summary": "rs4149056 ist für die Einordnung von SLCO1B1 und bestimmten Statinen dokumentiert.",
+      "limits": "Dieser Rohdateneintrag begründet weder eine Therapieentscheidung noch einen vollständigen Diplotyp.",
+      "population": "Mehrere untersuchte Populationen",
+      "sources": [
+        [
+          "CPIC-Leitlinie zu Statinen (2022)",
+          "https://pubmed.ncbi.nlm.nih.gov/35152405/"
+        ]
+      ],
+      "effect": {
+        "marker": "rs4149056",
+        "allele": "C",
+        "conclusions": [
+          "Keine Kopie von SLCO1B1 c.521C.",
+          "Eine Kopie von SLCO1B1 c.521C. Sie ist mit verminderter Transporterfunktion und höherem Muskelrisiko unter Simvastatin verbunden.",
+          "Zwei Kopien von SLCO1B1 c.521C. Sie sind mit geringer Transporterfunktion und deutlich höherem Muskelrisiko unter Simvastatin verbunden."
+        ],
+        "confidence": "moderate",
+        "clinical": true
+      },
+      "questions": [
+        "Bekomme ich Muskelschmerzen von Statinen?"
+      ]
+    },
+    {
+      "id": "clotting-study",
+      "section": "09.3",
+      "title": "Faktor V Leiden in der Gerinnungsforschung",
+      "markers": [
+        "rs6025"
+      ],
+      "method": "research",
+      "evidence": "Klinisch untersuchte Variante",
+      "summary": "Der Marker umfasst die in der Thromboseforschung beschriebene Faktor-V-Leiden-Variante.",
+      "limits": "Eine Consumer-Rohdatei ersetzt keine Bestätigung im Labor und erfasst keinen vollständigen Thrombophilie-Befund.",
+      "population": "Studienkohorten mit venösen Thromboembolien",
+      "sources": [
+        [
+          "Klarin et al. (2019)",
+          "https://pubmed.ncbi.nlm.nih.gov/31676865/"
+        ]
+      ],
+      "effect": {
+        "marker": "rs6025",
+        "allele": "T",
+        "conclusions": [
+          "Keine Kopie von Faktor-V-Leiden.",
+          "Eine Kopie von Faktor-V-Leiden. Sie ist mit einem erhöhten Thromboserisiko verbunden.",
+          "Zwei Kopien von Faktor-V-Leiden. Sie sind mit einem deutlich erhöhten Thromboserisiko verbunden."
+        ],
+        "confidence": "high",
+        "clinical": true
+      },
+      "questions": [
+        "Habe ich ein erhöhtes Thromboserisiko?",
+        "Trage ich Faktor-V-Leiden?"
+      ]
+    },
+    {
+      "id": "lactase-evolution",
+      "section": "01.5",
+      "title": "Laktase und die Geschichte der Milchwirtschaft",
+      "markers": [
+        "rs4988235"
+      ],
+      "method": "research",
+      "evidence": "Bevölkerungsgenetik",
+      "summary": "Mehrere Populationen entwickelten unterschiedliche Varianten, die mit Laktaseaktivität im Erwachsenenalter zusammenhängen.",
+      "limits": "Ein einzelner Marker erlaubt keine Herkunftszuordnung.",
+      "population": "Europäische und afrikanische Studienpopulationen",
+      "sources": [
+        [
+          "Tishkoff et al. (2007)",
+          "https://pubmed.ncbi.nlm.nih.gov/17159977/"
+        ]
+      ],
+      "effect": {
+        "marker": "rs4988235",
+        "allele": "A",
+        "conclusions": [
+          "Keine Kopie der europäischen Laktasepersistenz-Variante.",
+          "Eine Kopie der europäischen Laktasepersistenz-Variante, die sich in den letzten Jahrtausenden stark ausgebreitet hat.",
+          "Zwei Kopien der europäischen Laktasepersistenz-Variante, die sich in den letzten Jahrtausenden stark ausgebreitet hat."
+        ],
+        "confidence": "high",
+        "clinical": false
+      },
+      "questions": [
+        "Woher kommt meine Laktosetoleranz?"
+      ]
+    },
+    {
+      "id": "cyp2c19-clopidogrel",
+      "section": "15.2",
+      "title": "CYP2C19 und Clopidogrel",
+      "markers": [
+        "rs4244285"
+      ],
+      "method": "research",
+      "evidence": "Gen-Wirkstoff-Beziehung in Leitlinie",
+      "summary": "Die CPIC-Leitlinie erklärt den Zusammenhang zwischen CYP2C19-Funktion und der Aktivierung von Clopidogrel.",
+      "limits": "Die Auswertung zeigt die Abdeckung eines einzelnen Markers. Ein vollständiger Genotyp und eine klinische Beurteilung sind für Therapieentscheidungen erforderlich.",
+      "population": "Mehrere untersuchte Populationen",
+      "sources": [
+        [
+          "CPIC-Leitlinie",
+          "https://files.cpicpgx.org/data/guideline/publication/clopidogrel/2022/35034351.pdf"
+        ]
+      ],
+      "cross": [
+        "15.1"
+      ]
+    },
+    {
+      "id": "dpyd-splice-fluoropyrimidines",
+      "section": "15.2",
+      "title": "DPYD-Spleißvariante und Fluoropyrimidine",
+      "markers": [
+        "rs3918290"
+      ],
+      "method": "research",
+      "evidence": "Gen-Wirkstoff-Beziehung in Leitlinie",
+      "summary": "Die CPIC-Leitlinie berücksichtigt die DPYD-Spleißvariante c.1905+1G>A bei Fluoropyrimidinen.",
+      "limits": "Die Auswertung zeigt die Abdeckung eines einzelnen Markers. Ein vollständiger Genotyp und eine klinische Beurteilung sind für Therapieentscheidungen erforderlich.",
+      "population": "Mehrere untersuchte Populationen",
+      "sources": [
+        [
+          "CPIC-Leitlinie",
+          "https://files.cpicpgx.org/data/guideline/publication/fluoropyrimidines/2017/29152729.pdf"
+        ]
+      ],
+      "effect": {
+        "marker": "rs3918290",
+        "allele": "T",
+        "conclusions": [
+          "Keine Kopie von DPYD*2A.",
+          "Eine Kopie von DPYD*2A. Sie verringert die DPD-Aktivität. Fluoropyrimidine erfordern eine ärztliche Dosisprüfung.",
+          "Zwei Kopien von DPYD*2A. Das ist mit fehlender DPD-Aktivität verbunden. Fluoropyrimidine erfordern eine ärztliche Prüfung."
+        ],
+        "confidence": "high",
+        "clinical": true
+      },
+      "questions": [
+        "Vertrage ich Fluorouracil?"
+      ]
+    },
+    {
+      "id": "dpyd-ile560ser-fluoropyrimidines",
+      "section": "15.2",
+      "title": "DPYD-Ile560Ser und Fluoropyrimidine",
+      "markers": [
+        "rs55886062"
+      ],
+      "method": "research",
+      "evidence": "Gen-Wirkstoff-Beziehung in Leitlinie",
+      "summary": "Die CPIC-Leitlinie berücksichtigt die DPYD-Variante Ile560Ser bei Fluoropyrimidinen.",
+      "limits": "Die Auswertung zeigt die Abdeckung eines einzelnen Markers. Ein vollständiger Genotyp und eine klinische Beurteilung sind für Therapieentscheidungen erforderlich.",
+      "population": "Mehrere untersuchte Populationen",
+      "sources": [
+        [
+          "CPIC-Leitlinie",
+          "https://files.cpicpgx.org/data/guideline/publication/fluoropyrimidines/2017/29152729.pdf"
+        ]
+      ],
+      "effect": {
+        "marker": "rs55886062",
+        "allele": "C",
+        "conclusions": [
+          "Keine Kopie von DPYD c.1679T>G (I560S).",
+          "Eine Kopie von DPYD c.1679T>G (I560S). Sie verringert die DPD-Aktivität. Fluoropyrimidine erfordern eine ärztliche Dosisprüfung.",
+          "Zwei Kopien von DPYD c.1679T>G (I560S). Das ist mit fehlender DPD-Aktivität verbunden. Fluoropyrimidine erfordern eine ärztliche Prüfung."
+        ],
+        "confidence": "high",
+        "clinical": true
+      }
+    },
+    {
+      "id": "cyp3a5-tacrolimus",
+      "section": "15.2",
+      "title": "CYP3A5 und Tacrolimus",
+      "markers": [
+        "rs776746"
+      ],
+      "method": "research",
+      "evidence": "Gen-Wirkstoff-Beziehung in Leitlinie",
+      "summary": "Die CPIC-Leitlinie beschreibt den Zusammenhang zwischen CYP3A5-Expression und dem Stoffwechsel von Tacrolimus.",
+      "limits": "Die Auswertung zeigt die Abdeckung eines einzelnen Markers. Ein vollständiger Genotyp und eine klinische Beurteilung sind für Therapieentscheidungen erforderlich.",
+      "population": "Mehrere untersuchte Populationen",
+      "sources": [
+        [
+          "CPIC-Leitlinie",
+          "https://cpicpgx.org/guidelines/guideline-for-tacrolimus-and-CYP3A5/"
+        ]
+      ],
+      "effect": {
+        "marker": "rs776746",
+        "allele": "C",
+        "conclusions": [
+          "Keine Kopie von CYP3A5*3. CYP3A5 wird gebildet; Tacrolimus wird schneller abgebaut.",
+          "Eine Kopie von CYP3A5*3. CYP3A5 wird gebildet; Tacrolimus wird schneller abgebaut.",
+          "Zwei Kopien von CYP3A5*3. Kein funktionelles CYP3A5, der häufigste Typ in Europa."
+        ],
+        "confidence": "moderate",
+        "clinical": true
+      },
+      "questions": [
+        "Wie baue ich Tacrolimus ab?"
+      ]
+    },
+    {
+      "id": "mc1r-red-hair",
+      "section": "04.1",
+      "title": "MC1R und rote Haarfarbe",
+      "markers": [
+        "rs1805007"
+      ],
+      "method": "research",
+      "require_identifier": true,
+      "evidence": "Studienassoziation für Pigmentierung oder Haarform",
+      "summary": "Eine Studie in der UK Biobank fand einen Zusammenhang zwischen dem T-Allel an rs1805007 und roter Haarfarbe.",
+      "limits": "Die Auswertung zeigt einen passenden Marker. Weitere Varianten beeinflussen das Merkmal, daher lässt sich daraus die eigene Haarfarbe oder Haarform nicht ableiten.",
+      "population": "Untersuchte Personen britischer Abstammung in der UK Biobank",
+      "sources": [
+        [
+          "Morgan et al. (2018)",
+          "https://doi.org/10.1038/s41467-018-07691-z"
+        ],
+        [
+          "dbSNP",
+          "https://www.ncbi.nlm.nih.gov/snp/rs1805007"
+        ]
+      ],
+      "effect": {
+        "marker": "rs1805007",
+        "allele": "T",
+        "conclusions": [
+          "Keine Kopie von MC1R R151C.",
+          "Eine Kopie von MC1R R151C. Sie ist mit hellerer Haut und Sommersprossen verbunden, allein aber selten mit roten Haaren.",
+          "Zwei Kopien von MC1R R151C. Das ist stark mit roten Haaren und heller Haut verbunden."
+        ],
+        "confidence": "moderate",
+        "clinical": false
+      },
+      "questions": [
+        "Trage ich Gene für rote Haare?",
+        "Bekomme ich leicht Sommersprossen?"
+      ]
+    },
+    {
+      "id": "tchh-hair-shape",
+      "section": "04.2",
+      "title": "TCHH und Haarform",
+      "markers": [
+        "rs11803731"
+      ],
+      "method": "research",
+      "require_identifier": true,
+      "evidence": "Studienassoziation für Pigmentierung oder Haarform",
+      "summary": "Die Studie von Medland und Kollegen fand einen Zusammenhang zwischen rs11803731 und der Form des Kopfhaars.",
+      "limits": "Die Auswertung zeigt einen passenden Marker. Weitere Varianten beeinflussen das Merkmal, daher lässt sich daraus die eigene Haarfarbe oder Haarform nicht ableiten.",
+      "population": "Australische Studienkohorten europäischer Abstammung",
+      "sources": [
+        [
+          "Medland et al. (2009)",
+          "https://doi.org/10.1016/j.ajhg.2009.10.009"
+        ],
+        [
+          "dbSNP",
+          "https://www.ncbi.nlm.nih.gov/snp/rs11803731"
+        ]
+      ],
+      "questions": [
+        "Habe ich glatte oder lockige Haare von meinen Genen?"
+      ]
+    },
+    {
+      "id": "apoe",
+      "section": "12.1",
+      "title": "APOE-Typ",
+      "markers": [
+        "rs429358",
+        "rs7412"
+      ],
+      "method": "single",
+      "clinical": true,
+      "evidence": "Gut belegter Risikofaktor",
+      "summary": "Zwei Positionen in APOE ergeben die Typen ε2, ε3 und ε4. ε4 ist der stärkste häufige genetische Risikofaktor für die spät beginnende Alzheimer-Krankheit.",
+      "limits": "Zwei Marker decken häufige APOE-Kombinationen ab. Bei zwei gemischterbigen Positionen bleibt die Phase offen. Das Erkrankungsrisiko hängt auch von Alter, Abstammung und weiteren Faktoren ab.",
+      "population": "Mehrere untersuchte Populationen",
+      "sources": [
+        [
+          "dbSNP rs429358",
+          "https://www.ncbi.nlm.nih.gov/snp/rs429358"
+        ],
+        [
+          "dbSNP rs7412",
+          "https://www.ncbi.nlm.nih.gov/snp/rs7412"
+        ],
+        [
+          "APOE resequencing and genotyping",
+          "https://pmc.ncbi.nlm.nih.gov/articles/PMC7984319/"
+        ]
+      ],
+      "cross": [
+        "08.4"
+      ],
+      "outcomes": [
+        {
+          "calls": [
+            "TT/CC"
+          ],
+          "conclusion": "APOE ε3/ε3, der häufigste Typ",
+          "message": "Beide Kopien entsprechen ε3. Das ist der Vergleichstyp in den meisten Studien.",
+          "confidence": "high"
+        },
+        {
+          "calls": [
+            "TT/CT"
+          ],
+          "conclusion": "APOE ε2/ε3",
+          "message": "Eine Kopie ε2. ε2 ist im Mittel mit einem niedrigeren Alzheimer-Risiko verbunden.",
+          "confidence": "high"
+        },
+        {
+          "calls": [
+            "TT/TT"
+          ],
+          "conclusion": "APOE ε2/ε2",
+          "message": "Zwei Kopien ε2. Bei einem kleinen Teil der Träger tritt eine Fettstoffwechselstörung (Typ-III-Hyperlipoproteinämie) auf.",
+          "confidence": "high"
+        },
+        {
+          "calls": [
+            "CT/CC"
+          ],
+          "conclusion": "APOE ε3/ε4: eine ε4-Kopie",
+          "message": "Die Marker passen zu einer ε4-Kopie. Der Zusammenhang mit Alzheimer wurde in Populationen beobachtet und ergibt keine persönliche Risikozahl.",
+          "confidence": "high"
+        },
+        {
+          "calls": [
+            "CC/CC"
+          ],
+          "conclusion": "APOE ε4/ε4: zwei ε4-Kopien",
+          "message": "Zwei ε4-Kopien sind mit einem deutlich erhöhten Alzheimer-Risiko verbunden. Eine genetische Beratung ist sinnvoll.",
+          "confidence": "high"
+        }
+      ],
+      "questions": [
+        "Welchen APOE-Typ habe ich?",
+        "Habe ich ein erhöhtes Alzheimer-Risiko?"
+      ]
+    },
+    {
+      "id": "cyp2c9",
+      "section": "15.1",
+      "title": "CYP2C9: zwei geprüfte Marker",
+      "markers": [
+        "rs1799853",
+        "rs1057910"
+      ],
+      "method": "single",
+      "clinical": true,
+      "evidence": "Gen-Wirkstoff-Beziehung in Leitlinie",
+      "summary": "CYP2C9 baut unter anderem Warfarin, Phenytoin und einige Schmerzmittel ab. *2 und *3 verringern die Enzymaktivität.",
+      "limits": "Diese zwei Marker erfassen nur einen Teil der bekannten Varianten. Sie bestimmen keinen vollständigen Alleltyp oder Stoffwechseltyp und erlauben keine Dosisempfehlung.",
+      "population": "Mehrere untersuchte Populationen",
+      "sources": [
+        [
+          "dbSNP rs1799853",
+          "https://www.ncbi.nlm.nih.gov/snp/rs1799853"
+        ],
+        [
+          "dbSNP rs1057910",
+          "https://www.ncbi.nlm.nih.gov/snp/rs1057910"
+        ],
+        [
+          "CPIC-Leitlinie: CYP2C9",
+          "https://files.cpicpgx.org/data/guideline/publication/warfarin/2017/28198005.pdf"
+        ]
+      ],
+      "outcomes": [
+        {
+          "calls": [
+            "CC/AA"
+          ],
+          "conclusion": "CYP2C9: *2-Marker ×0, *3-Marker ×0",
+          "message": "Die Kopienzahlen gelten für die zwei geprüften Marker in dieser Rohdatei.",
+          "confidence": "moderate"
+        },
+        {
+          "calls": [
+            "CC/AC"
+          ],
+          "conclusion": "CYP2C9: *2-Marker ×0, *3-Marker ×1",
+          "message": "Die Kopienzahlen gelten für die zwei geprüften Marker in dieser Rohdatei.",
+          "confidence": "moderate"
+        },
+        {
+          "calls": [
+            "CC/CC"
+          ],
+          "conclusion": "CYP2C9: *2-Marker ×0, *3-Marker ×2",
+          "message": "Die Kopienzahlen gelten für die zwei geprüften Marker in dieser Rohdatei.",
+          "confidence": "moderate"
+        },
+        {
+          "calls": [
+            "CT/AA"
+          ],
+          "conclusion": "CYP2C9: *2-Marker ×1, *3-Marker ×0",
+          "message": "Die Kopienzahlen gelten für die zwei geprüften Marker in dieser Rohdatei.",
+          "confidence": "moderate"
+        },
+        {
+          "calls": [
+            "CT/AC"
+          ],
+          "conclusion": "CYP2C9: *2-Marker ×1, *3-Marker ×1",
+          "message": "Beide Marker sind gemischterbig. Die Rohdaten zeigen nicht, ob die Varianten auf derselben Genkopie liegen.",
+          "confidence": "moderate"
+        },
+        {
+          "calls": [
+            "CT/CC"
+          ],
+          "conclusion": "CYP2C9: *2-Marker ×1, *3-Marker ×2",
+          "message": "Die Kopienzahlen gelten für die zwei geprüften Marker in dieser Rohdatei.",
+          "confidence": "moderate"
+        },
+        {
+          "calls": [
+            "TT/AA"
+          ],
+          "conclusion": "CYP2C9: *2-Marker ×2, *3-Marker ×0",
+          "message": "Die Kopienzahlen gelten für die zwei geprüften Marker in dieser Rohdatei.",
+          "confidence": "moderate"
+        },
+        {
+          "calls": [
+            "TT/AC"
+          ],
+          "conclusion": "CYP2C9: *2-Marker ×2, *3-Marker ×1",
+          "message": "Die Kopienzahlen gelten für die zwei geprüften Marker in dieser Rohdatei.",
+          "confidence": "moderate"
+        },
+        {
+          "calls": [
+            "TT/CC"
+          ],
+          "conclusion": "CYP2C9: *2-Marker ×2, *3-Marker ×2",
+          "message": "Die Kopienzahlen gelten für die zwei geprüften Marker in dieser Rohdatei.",
+          "confidence": "moderate"
+        }
+      ],
+      "questions": [
+        "Wie baue ich Warfarin oder Ibuprofen ab?"
+      ]
+    },
+    {
+      "id": "cyp2c19",
+      "section": "15.1",
+      "title": "CYP2C19: zwei geprüfte Marker",
+      "markers": [
+        "rs4244285",
+        "rs12248560"
+      ],
+      "method": "single",
+      "clinical": true,
+      "evidence": "Gen-Wirkstoff-Beziehung in Leitlinie",
+      "summary": "CYP2C19 aktiviert Clopidogrel und baut unter anderem Protonenpumpenhemmer und einige Antidepressiva ab. *2 verringert, *17 erhöht die Aktivität.",
+      "limits": "Diese zwei Marker erfassen nur einen Teil der bekannten Varianten. Sie bestimmen keinen vollständigen Alleltyp oder Stoffwechseltyp und erlauben keine Dosisempfehlung.",
+      "population": "Mehrere untersuchte Populationen",
+      "sources": [
+        [
+          "dbSNP rs4244285",
+          "https://www.ncbi.nlm.nih.gov/snp/rs4244285"
+        ],
+        [
+          "dbSNP rs12248560",
+          "https://www.ncbi.nlm.nih.gov/snp/rs12248560"
+        ],
+        [
+          "CPIC-Leitlinie: CYP2C19",
+          "https://files.cpicpgx.org/data/guideline/publication/clopidogrel/2022/35034351.pdf"
+        ]
+      ],
+      "outcomes": [
+        {
+          "calls": [
+            "GG/CC"
+          ],
+          "conclusion": "CYP2C19: *2-Marker ×0, *17-Marker ×0",
+          "message": "Die Kopienzahlen gelten für die zwei geprüften Marker in dieser Rohdatei.",
+          "confidence": "moderate"
+        },
+        {
+          "calls": [
+            "GG/CT"
+          ],
+          "conclusion": "CYP2C19: *2-Marker ×0, *17-Marker ×1",
+          "message": "Die Kopienzahlen gelten für die zwei geprüften Marker in dieser Rohdatei.",
+          "confidence": "moderate"
+        },
+        {
+          "calls": [
+            "GG/TT"
+          ],
+          "conclusion": "CYP2C19: *2-Marker ×0, *17-Marker ×2",
+          "message": "Die Kopienzahlen gelten für die zwei geprüften Marker in dieser Rohdatei.",
+          "confidence": "moderate"
+        },
+        {
+          "calls": [
+            "AG/CC"
+          ],
+          "conclusion": "CYP2C19: *2-Marker ×1, *17-Marker ×0",
+          "message": "Die Kopienzahlen gelten für die zwei geprüften Marker in dieser Rohdatei.",
+          "confidence": "moderate"
+        },
+        {
+          "calls": [
+            "AG/CT"
+          ],
+          "conclusion": "CYP2C19: *2-Marker ×1, *17-Marker ×1",
+          "message": "Beide Marker sind gemischterbig. Die Rohdaten zeigen nicht, ob die Varianten auf derselben Genkopie liegen.",
+          "confidence": "moderate"
+        },
+        {
+          "calls": [
+            "AG/TT"
+          ],
+          "conclusion": "CYP2C19: *2-Marker ×1, *17-Marker ×2",
+          "message": "Die Kopienzahlen gelten für die zwei geprüften Marker in dieser Rohdatei.",
+          "confidence": "moderate"
+        },
+        {
+          "calls": [
+            "AA/CC"
+          ],
+          "conclusion": "CYP2C19: *2-Marker ×2, *17-Marker ×0",
+          "message": "Die Kopienzahlen gelten für die zwei geprüften Marker in dieser Rohdatei.",
+          "confidence": "moderate"
+        },
+        {
+          "calls": [
+            "AA/CT"
+          ],
+          "conclusion": "CYP2C19: *2-Marker ×2, *17-Marker ×1",
+          "message": "Die Kopienzahlen gelten für die zwei geprüften Marker in dieser Rohdatei.",
+          "confidence": "moderate"
+        },
+        {
+          "calls": [
+            "AA/TT"
+          ],
+          "conclusion": "CYP2C19: *2-Marker ×2, *17-Marker ×2",
+          "message": "Die Kopienzahlen gelten für die zwei geprüften Marker in dieser Rohdatei.",
+          "confidence": "moderate"
+        }
+      ],
+      "questions": [
+        "Wirkt Clopidogrel bei mir?",
+        "Wie baue ich Omeprazol ab?"
+      ]
+    },
+    {
+      "id": "tpmt",
+      "section": "15.1",
+      "title": "TPMT: zwei geprüfte Marker",
+      "markers": [
+        "rs1800460",
+        "rs1142345"
+      ],
+      "method": "single",
+      "clinical": true,
+      "evidence": "Gen-Wirkstoff-Beziehung in Leitlinie",
+      "summary": "TPMT baut Thiopurine wie Azathioprin ab. Die Varianten *3B und *3C, gemeinsam *3A, verringern die Aktivität.",
+      "limits": "Diese zwei Marker erfassen nur einen Teil der bekannten Varianten. Sie bestimmen keinen vollständigen Alleltyp oder Stoffwechseltyp und erlauben keine Dosisempfehlung.",
+      "population": "Mehrere untersuchte Populationen",
+      "sources": [
+        [
+          "dbSNP rs1800460",
+          "https://www.ncbi.nlm.nih.gov/snp/rs1800460"
+        ],
+        [
+          "dbSNP rs1142345",
+          "https://www.ncbi.nlm.nih.gov/snp/rs1142345"
+        ],
+        [
+          "CPIC-Leitlinie: Thiopurine",
+          "https://cpicpgx.org/guidelines/guideline-for-thiopurines-and-tpmt/"
+        ]
+      ],
+      "outcomes": [
+        {
+          "calls": [
+            "CC/TT"
+          ],
+          "conclusion": "TPMT: *3B-Marker ×0, *3C-Marker ×0",
+          "message": "Die Kopienzahlen gelten für die zwei geprüften Marker in dieser Rohdatei.",
+          "confidence": "moderate"
+        },
+        {
+          "calls": [
+            "CC/CT"
+          ],
+          "conclusion": "TPMT: *3B-Marker ×0, *3C-Marker ×1",
+          "message": "Die Kopienzahlen gelten für die zwei geprüften Marker in dieser Rohdatei.",
+          "confidence": "moderate"
+        },
+        {
+          "calls": [
+            "CC/CC"
+          ],
+          "conclusion": "TPMT: *3B-Marker ×0, *3C-Marker ×2",
+          "message": "Die Kopienzahlen gelten für die zwei geprüften Marker in dieser Rohdatei.",
+          "confidence": "moderate"
+        },
+        {
+          "calls": [
+            "CT/TT"
+          ],
+          "conclusion": "TPMT: *3B-Marker ×1, *3C-Marker ×0",
+          "message": "Die Kopienzahlen gelten für die zwei geprüften Marker in dieser Rohdatei.",
+          "confidence": "moderate"
+        },
+        {
+          "calls": [
+            "CT/CT"
+          ],
+          "conclusion": "TPMT: *3B-Marker ×1, *3C-Marker ×1",
+          "message": "Beide Marker sind gemischterbig. Die Rohdaten zeigen nicht, ob die Varianten auf derselben Genkopie liegen.",
+          "confidence": "moderate"
+        },
+        {
+          "calls": [
+            "CT/CC"
+          ],
+          "conclusion": "TPMT: *3B-Marker ×1, *3C-Marker ×2",
+          "message": "Die Kopienzahlen gelten für die zwei geprüften Marker in dieser Rohdatei.",
+          "confidence": "moderate"
+        },
+        {
+          "calls": [
+            "TT/TT"
+          ],
+          "conclusion": "TPMT: *3B-Marker ×2, *3C-Marker ×0",
+          "message": "Die Kopienzahlen gelten für die zwei geprüften Marker in dieser Rohdatei.",
+          "confidence": "moderate"
+        },
+        {
+          "calls": [
+            "TT/CT"
+          ],
+          "conclusion": "TPMT: *3B-Marker ×2, *3C-Marker ×1",
+          "message": "Die Kopienzahlen gelten für die zwei geprüften Marker in dieser Rohdatei.",
+          "confidence": "moderate"
+        },
+        {
+          "calls": [
+            "TT/CC"
+          ],
+          "conclusion": "TPMT: *3B-Marker ×2, *3C-Marker ×2",
+          "message": "Die Kopienzahlen gelten für die zwei geprüften Marker in dieser Rohdatei.",
+          "confidence": "moderate"
+        }
+      ],
+      "questions": [
+        "Vertrage ich Azathioprin?"
+      ]
+    },
+    {
+      "id": "nudt15",
+      "section": "15.1",
+      "title": "NUDT15 und Thiopurine",
+      "markers": [
+        "rs116855232"
+      ],
+      "method": "research",
+      "evidence": "Gen-Wirkstoff-Beziehung in Leitlinie",
+      "summary": "NUDT15 R139C (*3) verringert die Verträglichkeit von Thiopurinen. Die Variante ist in Ostasien häufiger.",
+      "limits": "Andere Varianten dieses Gens wurden nicht geprüft. Medikamente und Dosis nur nach ärztlicher Rücksprache ändern.",
+      "population": "Mehrere untersuchte Populationen",
+      "sources": [
+        [
+          "dbSNP rs116855232",
+          "https://www.ncbi.nlm.nih.gov/snp/rs116855232"
+        ],
+        [
+          "CPIC-Leitlinie: Thiopurine",
+          "https://cpicpgx.org/guidelines/"
+        ]
+      ],
+      "effect": {
+        "marker": "rs116855232",
+        "allele": "T",
+        "conclusions": [
+          "Keine Kopie von NUDT15 R139C.",
+          "Eine Kopie von NUDT15 R139C. Thiopurine erfordern eine ärztliche Dosisprüfung.",
+          "Zwei Kopien des geprüften NUDT15-R139C-Allels. Das Ergebnis aus Verbraucherdaten braucht eine Laborbestätigung."
+        ],
+        "confidence": "high",
+        "clinical": true
+      },
+      "questions": [
+        "Vertrage ich Thiopurine?"
+      ]
+    },
+    {
+      "id": "vkorc1",
+      "section": "15.2",
+      "title": "VKORC1 und Warfarin",
+      "markers": [
+        "rs9923231"
+      ],
+      "method": "research",
+      "evidence": "Gen-Wirkstoff-Beziehung in Leitlinie",
+      "summary": "VKORC1 −1639A senkt die Bildung des Zielenzyms von Warfarin. Träger brauchen meist eine niedrigere Dosis.",
+      "limits": "Andere Varianten dieses Gens wurden nicht geprüft. Medikamente und Dosis nur nach ärztlicher Rücksprache ändern.",
+      "population": "Mehrere untersuchte Populationen",
+      "sources": [
+        [
+          "dbSNP rs9923231",
+          "https://www.ncbi.nlm.nih.gov/snp/rs9923231"
+        ],
+        [
+          "CPIC-Leitlinie: Warfarin",
+          "https://cpicpgx.org/guidelines/"
+        ]
+      ],
+      "effect": {
+        "marker": "rs9923231",
+        "allele": "T",
+        "conclusions": [
+          "Keine Kopie des geprüften VKORC1 −1639A-Allels. Die Warfarin-Empfindlichkeit lässt sich daraus allein nicht bestimmen.",
+          "Eine Kopie von VKORC1 −1639A. Warfarin wirkt meist schon bei niedrigerer Dosis.",
+          "Zwei Kopien von VKORC1 −1639A. Deutlich höhere Warfarin-Empfindlichkeit."
+        ],
+        "confidence": "high",
+        "clinical": true
+      },
+      "questions": [
+        "Brauche ich weniger Warfarin?"
+      ]
+    },
+    {
+      "id": "prothrombin",
+      "section": "09.3",
+      "title": "Prothrombin G20210A",
+      "markers": [
+        "rs1799963"
+      ],
+      "method": "research",
+      "evidence": "Gut untersuchte Variante",
+      "summary": "Die Variante G20210A im Prothrombin-Gen F2 erhöht die Bildung von Prothrombin.",
+      "limits": "Der Rohdateneintrag ist unbestätigt. Eine Laborbestätigung ist vor jeder Entscheidung nötig.",
+      "population": "Mehrere untersuchte Populationen",
+      "sources": [
+        [
+          "dbSNP rs1799963",
+          "https://www.ncbi.nlm.nih.gov/snp/rs1799963"
+        ]
+      ],
+      "effect": {
+        "marker": "rs1799963",
+        "allele": "A",
+        "conclusions": [
+          "Keine Kopie von Prothrombin G20210A.",
+          "Eine Kopie von Prothrombin G20210A. Sie ist mit einem erhöhten Thromboserisiko verbunden.",
+          "Zwei Kopien von Prothrombin G20210A. Sie sind mit einem deutlich erhöhten Thromboserisiko verbunden."
+        ],
+        "confidence": "high",
+        "clinical": true
+      },
+      "questions": [
+        "Trage ich die Prothrombin-Mutation?"
+      ]
+    },
+    {
+      "id": "adh1b",
+      "section": "07.2",
+      "title": "ADH1B und Alkoholabbau",
+      "markers": [
+        "rs1229984"
+      ],
+      "method": "research",
+      "evidence": "Replizierter genetischer Zusammenhang",
+      "summary": "ADH1B*2 (Arg48His) wandelt Alkohol schneller in Acetaldehyd um. Die Variante ist in Ostasien häufig.",
+      "limits": "Der Befund bestimmt keine verträgliche Alkoholmenge.",
+      "population": "Mehrere untersuchte Populationen",
+      "sources": [
+        [
+          "dbSNP rs1229984",
+          "https://www.ncbi.nlm.nih.gov/snp/rs1229984"
+        ]
+      ],
+      "effect": {
+        "marker": "rs1229984",
+        "allele": "T",
+        "conclusions": [
+          "Keine Kopie von ADH1B*2. Typischer Alkoholabbau über ADH1B.",
+          "Eine Kopie von ADH1B*2. Alkohol wird schneller zu Acetaldehyd umgewandelt. In Studien ist Alkoholabhängigkeit bei Trägern seltener.",
+          "Zwei Kopien von ADH1B*2. Alkohol wird deutlich schneller zu Acetaldehyd umgewandelt."
+        ],
+        "confidence": "moderate",
+        "clinical": false
+      },
+      "questions": [
+        "Wie schnell baue ich Alkohol ab?"
+      ]
+    },
+    {
+      "id": "slc24a5-skin",
+      "section": "04.1",
+      "title": "SLC24A5 und Hautpigmentierung",
+      "markers": [
+        "rs1426654"
+      ],
+      "method": "research",
+      "require_identifier": true,
+      "evidence": "Studienassoziation für Pigmentierung oder Haarform",
+      "summary": "Die Variante A111T in SLC24A5 erklärt einen deutlichen Teil der Unterschiede in der Hautpigmentierung zwischen europäischen und afrikanischen Populationen.",
+      "limits": "Hautfarbe hängt von vielen Genen und von Sonne ab. Ein einzelner Marker sagt die eigene Hautfarbe nicht voraus.",
+      "population": "Europäische, afrikanische und gemischte Studienpopulationen",
+      "sources": [
+        [
+          "Lamason et al. · Science (2005)",
+          "https://pubmed.ncbi.nlm.nih.gov/16357253/"
+        ],
+        [
+          "dbSNP",
+          "https://www.ncbi.nlm.nih.gov/snp/rs1426654"
+        ]
+      ],
+      "effect": {
+        "marker": "rs1426654",
+        "allele": "A",
+        "conclusions": [
+          "Keine Kopie der hellen Pigmentvariante SLC24A5 Thr111.",
+          "Eine Kopie von SLC24A5 Thr111. Die Variante ist mit hellerer Haut verbunden.",
+          "Zwei Kopien von SLC24A5 Thr111. Das ist in Europa häufig und mit hellerer Haut verbunden."
+        ],
+        "confidence": "moderate",
+        "clinical": false
+      },
+      "questions": [
+        "Welche Gene beeinflussen meine Hautfarbe?"
+      ]
+    },
+    {
+      "id": "fut2-secretor",
+      "section": "11.4",
+      "title": "FUT2 und Sekretorstatus",
+      "markers": [
+        "rs601338"
+      ],
+      "method": "research",
+      "require_identifier": true,
+      "evidence": "Replizierter genetischer Zusammenhang",
+      "summary": "Die Stoppvariante W154X in FUT2 bestimmt, ob Blutgruppenantigene im Speichel und Darm ausgeschieden werden. Nicht-Sekretoren sind in Studien seltener mit häufigen Norovirus-Stämmen infiziert und haben im Mittel höhere Vitamin-B12-Spiegel.",
+      "limits": "Die Regel prüft eine Variante, die vor allem in europäischen und afrikanischen Populationen den Sekretorstatus bestimmt. In Ostasien sind andere FUT2-Varianten häufiger. Ein Schutz vor Infektionen lässt sich daraus nicht ableiten.",
+      "population": "Europäische Studienpopulationen und Infektionsstudien mit Freiwilligen",
+      "sources": [
+        [
+          "Lindesmith et al. · Nature Medicine (2003)",
+          "https://pubmed.ncbi.nlm.nih.gov/12692541/"
+        ],
+        [
+          "Hazra et al. · Nature Genetics (2008)",
+          "https://pubmed.ncbi.nlm.nih.gov/18776911/"
+        ],
+        [
+          "dbSNP",
+          "https://www.ncbi.nlm.nih.gov/snp/rs601338"
+        ]
+      ],
+      "effect": {
+        "marker": "rs601338",
+        "allele": "A",
+        "conclusions": [
+          "Keine Kopie von FUT2 W154X. Mit dieser Variante allein spricht das für Sekretorstatus.",
+          "Eine Kopie von FUT2 W154X. Mit einer funktionierenden Kopie bleibt der Sekretorstatus erhalten.",
+          "Zwei Kopien von FUT2 W154X. Das spricht für Nicht-Sekretor-Status, der in Studien mit seltenerer Norovirus-Infektion und höheren Vitamin-B12-Spiegeln verbunden ist."
+        ],
+        "confidence": "moderate",
+        "clinical": false
+      },
+      "questions": [
+        "Bin ich Sekretor?",
+        "Bin ich anfällig für Norovirus?"
+      ]
+    },
+    {
+      "id": "gc-vitamin-d",
+      "section": "07.3",
+      "title": "GC und Vitamin-D-Spiegel",
+      "markers": [
+        "rs2282679"
+      ],
+      "method": "research",
+      "require_identifier": true,
+      "evidence": "Genomweite Assoziationsstudie",
+      "summary": "GC kodiert das Vitamin-D-bindende Protein. In einer großen genomweiten Studie war rs2282679 der stärkste genetische Marker für den 25-Hydroxy-Vitamin-D-Spiegel im Blut.",
+      "limits": "Der Effekt ist klein im Vergleich zu Sonne, Jahreszeit und Ernährung. Der eigene Vitamin-D-Spiegel lässt sich nur mit einem Bluttest bestimmen.",
+      "population": "Kohorten europäischer Abstammung",
+      "sources": [
+        [
+          "Wang et al. · Lancet (2010)",
+          "https://pubmed.ncbi.nlm.nih.gov/20541252/"
+        ],
+        [
+          "dbSNP",
+          "https://www.ncbi.nlm.nih.gov/snp/rs2282679"
+        ]
+      ],
+      "effect": {
+        "marker": "rs2282679",
+        "allele": "G",
+        "conclusions": [
+          "Keine Kopie des GC-Allels, das in Studien mit etwas niedrigerem Vitamin D verbunden ist.",
+          "Eine Kopie des GC-Allels, das in Studien mit etwas niedrigerem Vitamin-D-Spiegel verbunden ist.",
+          "Zwei Kopien des GC-Allels, das in Studien mit etwas niedrigerem Vitamin-D-Spiegel verbunden ist."
+        ],
+        "confidence": "low",
+        "clinical": false
+      },
+      "questions": [
+        "Habe ich eher wenig Vitamin D?"
+      ]
+    },
+    {
+      "id": "edar-hair",
+      "section": "04.2",
+      "title": "EDAR V370A und Haardicke",
+      "markers": [
+        "rs3827760"
+      ],
+      "method": "research",
+      "require_identifier": true,
+      "evidence": "Studienassoziation für Pigmentierung oder Haarform",
+      "summary": "Die Variante EDAR 370A ist in Ostasien und bei indigenen Amerikanern häufig. Sie ist mit dickeren Kopfhaaren und weiteren Merkmalen von Haut, Zähnen und Schweißdrüsen verbunden.",
+      "limits": "In europäischen und afrikanischen Populationen ist die Variante sehr selten. Haarform und Haardicke hängen von vielen weiteren Genen ab.",
+      "population": "Ostasiatische Studienpopulationen und Mausmodelle",
+      "sources": [
+        [
+          "Kamberov et al. · Cell (2013)",
+          "https://pubmed.ncbi.nlm.nih.gov/23415220/"
+        ],
+        [
+          "dbSNP",
+          "https://www.ncbi.nlm.nih.gov/snp/rs3827760"
+        ]
+      ],
+      "effect": {
+        "marker": "rs3827760",
+        "allele": "G",
+        "conclusions": [
+          "Keine Kopie von EDAR 370A.",
+          "Eine Kopie von EDAR 370A. Die Variante ist mit dickeren Kopfhaaren verbunden.",
+          "Zwei Kopien von EDAR 370A. Das ist mit dickeren, glatteren Kopfhaaren verbunden."
+        ],
+        "confidence": "moderate",
+        "clinical": false
+      },
+      "questions": [
+        "Habe ich dicke Haare von meinen Genen?"
+      ]
+    },
+    {
+      "id": "mthfr-c677t",
+      "section": "07.3",
+      "title": "MTHFR C677T und Folatstoffwechsel",
+      "markers": [
+        "rs1801133"
+      ],
+      "method": "research",
+      "require_identifier": true,
+      "evidence": "Replizierter genetischer Zusammenhang",
+      "summary": "Die Variante C677T verringert die Aktivität des Enzyms MTHFR. Zwei Kopien gehen im Mittel mit höherem Homocystein einher, vor allem bei niedriger Folataufnahme.",
+      "limits": "Die Variante ist sehr häufig. Fachgesellschaften wie das American College of Medical Genetics empfehlen keine Testung auf MTHFR-Varianten, weil sie allein keinen Krankheitswert belegen. Eine Folatversorgung lässt sich nur im Blut messen.",
+      "population": "Verschiedene Populationen, überwiegend europäischer Abstammung",
+      "sources": [
+        [
+          "Frosst et al. · Nature Genetics (1995)",
+          "https://pubmed.ncbi.nlm.nih.gov/7647779/"
+        ],
+        [
+          "Hickey et al. · ACMG Leitlinie · Genetics in Medicine (2013)",
+          "https://pubmed.ncbi.nlm.nih.gov/23288205/"
+        ],
+        [
+          "dbSNP",
+          "https://www.ncbi.nlm.nih.gov/snp/rs1801133"
+        ]
+      ],
+      "effect": {
+        "marker": "rs1801133",
+        "allele": "A",
+        "conclusions": [
+          "Keine Kopie von MTHFR 677T.",
+          "Eine Kopie von MTHFR 677T. Das ist sehr häufig und ohne bekannte Bedeutung für die Gesundheit.",
+          "Zwei Kopien von MTHFR 677T. Das ist mit geringerer Enzymaktivität und im Mittel höherem Homocystein verbunden. Allein ist es kein Befund und kein Grund für eine Behandlung."
+        ],
+        "confidence": "moderate",
+        "clinical": true
+      },
+      "questions": [
+        "Was bedeutet MTHFR bei mir?",
+        "Brauche ich mehr Folsäure?"
+      ],
+      "clinical": true
+    },
+    {
+      "id": "mc1r-r160w",
+      "section": "04.1",
+      "title": "MC1R R160W und rote Haarfarbe",
+      "markers": [
+        "rs1805008"
+      ],
+      "method": "research",
+      "require_identifier": true,
+      "evidence": "Studienassoziation für Pigmentierung oder Haarform",
+      "summary": "R160W ist eine der häufigen MC1R-Varianten, die mit roten Haaren, heller Haut und Sommersprossen verbunden sind.",
+      "limits": "Die Auswertung zeigt einen passenden Marker. Weitere Varianten beeinflussen das Merkmal, daher lässt sich daraus die eigene Haarfarbe oder Haarform nicht ableiten.",
+      "population": "Europäische Studienpopulationen",
+      "sources": [
+        [
+          "Valverde et al. · Nature Genetics (1995)",
+          "https://pubmed.ncbi.nlm.nih.gov/7581459/"
+        ],
+        [
+          "Morgan et al. (2018)",
+          "https://doi.org/10.1038/s41467-018-07691-z"
+        ],
+        [
+          "dbSNP",
+          "https://www.ncbi.nlm.nih.gov/snp/rs1805008"
+        ]
+      ],
+      "effect": {
+        "marker": "rs1805008",
+        "allele": "T",
+        "conclusions": [
+          "Keine Kopie von MC1R R160W.",
+          "Eine Kopie von MC1R R160W. Sie ist mit hellerer Haut und Sommersprossen verbunden.",
+          "Zwei Kopien von MC1R R160W. Das ist stark mit roten Haaren und heller Haut verbunden."
+        ],
+        "confidence": "moderate",
+        "clinical": false
+      },
+      "questions": [
+        "Trage ich weitere Varianten für rote Haare?"
+      ]
+    }
+  ]
+}

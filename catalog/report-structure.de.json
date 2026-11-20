@@ -1,0 +1,501 @@
+[
+  {
+    "id": "01",
+    "title": "Herkunft, Abstammung & menschliche Evolution",
+    "part": "I · Herkunft, Familie und dein Genom",
+    "sections": [
+      {
+        "id": "01.1",
+        "title": "Geografische Herkunft",
+        "scope": "Herkunftsschätzung, Regionen, genetische Gruppen, Karten, regionale Geschichte und geeignete Referenzpanel-Vergleiche."
+      },
+      {
+        "id": "01.2",
+        "title": "Abstammung entlang der Chromosomen",
+        "scope": "Zuordnung einzelner Abschnitte, Vergleich mit globaler Herkunftsschätzung, alternative Zuordnungen und Unsicherheit."
+      },
+      {
+        "id": "01.3",
+        "title": "Direkte Mutter- und Vaterlinie",
+        "scope": "Mitochondriale und Y-DNA-Haplogruppen, Stammbaum, geografischer Kontext und Auflösung."
+      },
+      {
+        "id": "01.4",
+        "title": "Antike und archaische Herkunft",
+        "scope": "Import vorhandener Ancient Origins-Ergebnisse, Vergleich mit archäologischen Referenzgenomen, Neandertaler- und gegebenenfalls Denisova-Bezüge bei geeigneter Methode."
+      },
+      {
+        "id": "01.5",
+        "title": "Evolution und Anpassung",
+        "scope": "Historische Anpassungen etwa an Milchkonsum und Höhenlage, Kontext nach Population."
+      }
+    ]
+  },
+  {
+    "id": "02",
+    "title": "Verwandtschaft, gemeinsame DNA & Vererbung",
+    "part": "I · Herkunft, Familie und dein Genom",
+    "sections": [
+      {
+        "id": "02.1",
+        "title": "DNA-Matches",
+        "scope": "Importierte Treffer, gemeinsame Centimorgan, Anzahl und Länge der Segmente, mögliche Verwandtschaftsgrade."
+      },
+      {
+        "id": "02.2",
+        "title": "Chromosomenvergleich",
+        "scope": "Geteilte Abschnitte, triangulierte Segmente, gemeinsame Matches und Gruppen nach Familienzweig."
+      },
+      {
+        "id": "02.3",
+        "title": "Elterliche und familiäre Vererbung",
+        "scope": "Zuordnung von Abschnitten zu Mutter- oder Vaterseite, Vergleich mit Angehörigen, Verfolgung von Varianten bei passenden zusätzlichen Daten."
+      },
+      {
+        "id": "02.4",
+        "title": "Genetische Vielfalt",
+        "scope": "Verteilung homozygoter und heterozygoter Positionen, längere homozygote Abschnitte, Einordnung anhand geeigneter Referenzen."
+      }
+    ]
+  },
+  {
+    "id": "03",
+    "title": "Dein Genom, seine Varianten & die Datenqualität",
+    "part": "I · Herkunft, Familie und dein Genom",
+    "sections": [
+      {
+        "id": "03.1",
+        "title": "Datei und Testverfahren",
+        "scope": "Anbieter, Rohdatenformat, Chip oder Sequenzierung, Referenzbuild, Markerzahl, erfasste Chromosomen und fehlende Genotypen."
+      },
+      {
+        "id": "03.2",
+        "title": "Variantenarten",
+        "scope": "SNPs, kleine Insertionen und Deletionen, Strukturvarianten, Kopienzahl, Repeat-Expansionen, mitochondriale Varianten und gegebenenfalls Heteroplasmie."
+      },
+      {
+        "id": "03.3",
+        "title": "Lage und Funktion",
+        "scope": "Gen, Transkript, codierende und regulatorische Regionen, Proteinfolgen, RNA-Spleißen, Varianten auf einer Genkopie."
+      },
+      {
+        "id": "03.4",
+        "title": "Abdeckung",
+        "scope": "Auswertbare, fehlende, mehrdeutige und widersprüchliche Positionen, Lesetiefe und Qualität bei CRAM, gemessene und statistisch geschätzte Genotypen soweit ausgewiesen."
+      }
+    ]
+  },
+  {
+    "id": "04",
+    "title": "Aussehen, Haut, Haare & Körperbau",
+    "part": "II · Körper, Sinne und Alltag",
+    "sections": [
+      {
+        "id": "04.1",
+        "title": "Pigmentierung",
+        "scope": "Augen-, Haar- und Hautfarbe, Sommersprossen, Bräunung und Sonnenbrandneigung."
+      },
+      {
+        "id": "04.2",
+        "title": "Haare und Hautmerkmale",
+        "scope": "Haarstruktur, Ergrauen, Haarausfall, Hautbarriere und Trockenheit, Hautalterung, Wundheilung, Narben und Keloide."
+      },
+      {
+        "id": "04.3",
+        "title": "Gesicht und äußere Merkmale",
+        "scope": "Gesichts- und Schädelproportionen, Nase, Kinn, Ohren, Ohrenschmalztyp."
+      },
+      {
+        "id": "04.4",
+        "title": "Wachstum und Körperzusammensetzung",
+        "scope": "Körpergröße, Proportionen, Körpergewicht, Fettverteilung, Muskelmasse und fettfreie Masse."
+      }
+    ]
+  },
+  {
+    "id": "05",
+    "title": "Sinne, Wahrnehmung & Motorik",
+    "part": "II · Körper, Sinne und Alltag",
+    "sections": [
+      {
+        "id": "05.1",
+        "title": "Geschmack und Geruch",
+        "scope": "Bitterwahrnehmung, Koriander, Spargelgeruch, Geruchsrezeptoren und einzelne Geruchsstoffe."
+      },
+      {
+        "id": "05.2",
+        "title": "Sehen",
+        "scope": "Kurz- und Weitsichtigkeit, Farbsehen, Netzhaut, Linse, Sehnerv, Glaukom und weitere erbliche Augenmerkmale."
+      },
+      {
+        "id": "05.3",
+        "title": "Hören und Gleichgewicht",
+        "scope": "Hörvermögen, Hörminderung, Tinnitus, erbliche Hörstörungen und Reiseübelkeit."
+      },
+      {
+        "id": "05.4",
+        "title": "Motorik und Reizwahrnehmung",
+        "scope": "Händigkeit, Koordination, Temperaturwahrnehmung, Schmerzempfindung und Reizverarbeitung."
+      }
+    ]
+  },
+  {
+    "id": "06",
+    "title": "Sport, Muskeln, Knochen & Bewegung",
+    "part": "II · Körper, Sinne und Alltag",
+    "sections": [
+      {
+        "id": "06.1",
+        "title": "Muskelbiologie",
+        "scope": "ACTN3, Muskelfaserfunktion, Muskelstoffwechsel, Griffkraft und Muskelmasse."
+      },
+      {
+        "id": "06.2",
+        "title": "Leistung und Belastung",
+        "scope": "Studien zu Sprint, Kraft, Ausdauer, Sauerstoffaufnahme, Trainingsreaktion und Erholung."
+      },
+      {
+        "id": "06.3",
+        "title": "Knochen, Gelenke und Bindegewebe",
+        "scope": "Knochendichte, Osteoporose, Frakturen, Arthrose, Sehnen, Bänder, Dupuytren und erbliche Bindegewebserkrankungen."
+      },
+      {
+        "id": "06.4",
+        "title": "Alltagsaktivität",
+        "scope": "Organisierte und alltägliche Bewegung, Sitzverhalten, Sensormessungen als Forschungsmerkmale."
+      }
+    ]
+  },
+  {
+    "id": "07",
+    "title": "Ernährung, Verträglichkeit & Stoffwechsel",
+    "part": "II · Körper, Sinne und Alltag",
+    "sections": [
+      {
+        "id": "07.1",
+        "title": "Verdauung von Nahrungsbestandteilen",
+        "scope": "Laktaseaktivität, populationsabhängige Marker, Forschung zu Stärke und anderen Nahrungsbestandteilen, Querverweise auf Zöliakie und Allergien."
+      },
+      {
+        "id": "07.2",
+        "title": "Koffein, Alkohol und weitere Nahrungsstoffe",
+        "scope": "Metabolismus, Enzymfunktion und alkoholbedingte Gesichtsrötung."
+      },
+      {
+        "id": "07.3",
+        "title": "Vitamine, Mineralstoffe und Spurenelemente",
+        "scope": "Vitamin D, B-Vitamine, Eisenaufnahme und -speicherung sowie weitere dokumentierte Mikronährstoffe."
+      },
+      {
+        "id": "07.4",
+        "title": "Zucker, Fette und Energiebilanz",
+        "scope": "Glukose, Insulin, Typ-2-Diabetes, Cholesterin, Triglyceride, Appetit, Sättigung und Gewicht."
+      },
+      {
+        "id": "07.5",
+        "title": "Darmmikrobiom",
+        "scope": "Studien zum menschlichen Genom und zur Mikrobiomzusammensetzung, optional separat erfasste Messdaten."
+      }
+    ]
+  },
+  {
+    "id": "08",
+    "title": "Schlaf, Verhalten, Kognition & Altern",
+    "part": "II · Körper, Sinne und Alltag",
+    "sections": [
+      {
+        "id": "08.1",
+        "title": "Schlaf und innere Uhr",
+        "scope": "Chronotyp, Schlafdauer, Schlafzeitpunkt, Schlaflosigkeit, Schnarchen und Schlafapnoe."
+      },
+      {
+        "id": "08.2",
+        "title": "Persönlichkeit und Verhalten",
+        "scope": "Forschung zu Big Five, Gewohnheiten, Tabak, Alkohol, anderem Substanzkonsum und Abhängigkeit."
+      },
+      {
+        "id": "08.3",
+        "title": "Gedächtnis, Aufmerksamkeit und Lernen",
+        "scope": "Forschung zu Gedächtnis, Aufmerksamkeit, Reaktionszeit und weiteren kognitiven Merkmalen."
+      },
+      {
+        "id": "08.4",
+        "title": "Altern und Lebensverlauf",
+        "scope": "Telomere, Lebensspanne, gesundes Altern, altersbezogene Merkmale und optional gemessene Alterungsmarker."
+      }
+    ]
+  },
+  {
+    "id": "09",
+    "title": "Herz, Gefäße, Blut & Atmung",
+    "part": "III · Gesundheit nach Körpersystemen",
+    "sections": [
+      {
+        "id": "09.1",
+        "title": "Herz",
+        "scope": "Herzinfarkt, koronare Herzkrankheit, Rhythmus, Vorhofflimmern, Kardiomyopathien und Herzstruktur."
+      },
+      {
+        "id": "09.2",
+        "title": "Gefäße und Kreislauf",
+        "scope": "Blutdruck, arterielle und venöse Erkrankungen, Gefäßstruktur und Schlaganfall."
+      },
+      {
+        "id": "09.3",
+        "title": "Gerinnung",
+        "scope": "Thrombose, Blutungsneigung und erbliche Gerinnungsstörungen."
+      },
+      {
+        "id": "09.4",
+        "title": "Blutbild und Blutgruppen",
+        "scope": "Erythrozyten, Leukozyten, Hämoglobin, Thrombozyten, ABO, Rhesus und weitere Blutgruppensysteme bei geeigneten Daten."
+      },
+      {
+        "id": "09.5",
+        "title": "Lunge und Atemwege",
+        "scope": "Lungenfunktion, COPD, weitere Atemwegserkrankungen und Querverweise auf Asthma, Schlafatmung und Exposition."
+      }
+    ]
+  },
+  {
+    "id": "10",
+    "title": "Verdauungsorgane, Nieren, Hormone & weitere Organsysteme",
+    "part": "III · Gesundheit nach Körpersystemen",
+    "sections": [
+      {
+        "id": "10.1",
+        "title": "Mund, Zähne und Zahnfleisch",
+        "scope": "Karies, Parodontitis, Zahnschmelz und erbliche Zahnmerkmale."
+      },
+      {
+        "id": "10.2",
+        "title": "Magen und Darm",
+        "scope": "Reflux, Reizdarm, Divertikel, entzündliche Darmerkrankungen und Zöliakie."
+      },
+      {
+        "id": "10.3",
+        "title": "Leber, Galle und Bauchspeicheldrüse",
+        "scope": "Leberenzyme, Fettleber, Eisenüberladung, Gallensteine und Pankreaserkrankungen."
+      },
+      {
+        "id": "10.4",
+        "title": "Niere, Harnwege und Beckenboden",
+        "scope": "Nierenfunktion, Steine, Harnsäure, Gicht, Blase, Harnwege und Beckenboden."
+      },
+      {
+        "id": "10.5",
+        "title": "Hormone und endokrine Organe",
+        "scope": "Schilddrüse, Nebennieren, Hormonachsen, Hormonwerte und Querverweise zu Insulin."
+      },
+      {
+        "id": "10.6",
+        "title": "Dermatologie",
+        "scope": "Akne, Psoriasis, atopische und weitere Hauterkrankungen, Hautbarriere und Heilung."
+      }
+    ]
+  },
+  {
+    "id": "11",
+    "title": "Immunsystem, Entzündung, Allergien & Infektionen",
+    "part": "III · Gesundheit nach Körpersystemen",
+    "sections": [
+      {
+        "id": "11.1",
+        "title": "Immungenetik",
+        "scope": "HLA, Antigenpräsentation, Immunregulation, Antikörper und Zytokine."
+      },
+      {
+        "id": "11.2",
+        "title": "Allergien und Atopie",
+        "scope": "Heuschnupfen, Neurodermitis, allergisches Asthma und weitere allergische Veranlagungen."
+      },
+      {
+        "id": "11.3",
+        "title": "Autoimmunität",
+        "scope": "Zöliakie, Typ-1-Diabetes, Schilddrüsenautoimmunität, rheumatologische und weitere Erkrankungen."
+      },
+      {
+        "id": "11.4",
+        "title": "Infektanfälligkeit und Immunantwort",
+        "scope": "Beobachtete Zusammenhänge menschlicher Varianten mit Infektanfälligkeit und Immunmesswerten."
+      },
+      {
+        "id": "11.5",
+        "title": "Erbliche Immunstörungen und Lymphsystem",
+        "scope": "Angeborene Immundefekte, Komplement, primäre Lymphödeme und Lymphgefäße."
+      }
+    ]
+  },
+  {
+    "id": "12",
+    "title": "Gehirn, Nerven, Schmerz & psychische Gesundheit",
+    "part": "III · Gesundheit nach Körpersystemen",
+    "sections": [
+      {
+        "id": "12.1",
+        "title": "Neurologie",
+        "scope": "Migräne und Unterformen, Epilepsie, Bewegungsstörungen, erbliche Nervenerkrankungen, Parkinson und Alzheimer."
+      },
+      {
+        "id": "12.2",
+        "title": "Schmerz und Reizverarbeitung",
+        "scope": "Chronische Schmerzsyndrome, neuropathischer Schmerz und Schmerzempfindung."
+      },
+      {
+        "id": "12.3",
+        "title": "Neuroentwicklung",
+        "scope": "Forschungsbefunde zu Entwicklungsmerkmalen, neuroentwicklungsbezogenen Erkrankungen und seltenen Syndromen."
+      },
+      {
+        "id": "12.4",
+        "title": "Psychische Gesundheit",
+        "scope": "Forschung zu Depression, Angst und weiteren psychiatrischen Erkrankungen, gemeinsame genetische Einflüsse."
+      }
+    ]
+  },
+  {
+    "id": "13",
+    "title": "Fortpflanzung, Schwangerschaft & Entwicklung",
+    "part": "III · Gesundheit nach Körpersystemen",
+    "sections": [
+      {
+        "id": "13.1",
+        "title": "Reproduktive Gesundheit",
+        "scope": "Fortpflanzungsorgane, Fruchtbarkeit, Endometriose, Zyklus und Menopause."
+      },
+      {
+        "id": "13.2",
+        "title": "Schwangerschaft und Geburt",
+        "scope": "Schwangerschaftsmerkmale, Geburtsgewicht sowie mütterliche und kindliche genetische Beiträge."
+      },
+      {
+        "id": "13.3",
+        "title": "Angeborene und frühkindliche Entwicklung",
+        "scope": "Organentwicklung, Wachstum, Entwicklungssyndrome und Multiorganmerkmale."
+      },
+      {
+        "id": "13.4",
+        "title": "Familienplanung und Trägerstatus",
+        "scope": "Rezessive und X-chromosomale Varianten, Erbgang, Umfang der geprüften Positionen und gegebenenfalls bestätigte Vergleichsbefunde."
+      }
+    ]
+  },
+  {
+    "id": "14",
+    "title": "Erbliche Erkrankungen, Krebsgenetik & Krankheitsrisiken",
+    "part": "IV · Medizinische Genetik und Wirkstoffe",
+    "sections": [
+      {
+        "id": "14.1",
+        "title": "Erbliche Erkrankungen und Erbgänge",
+        "scope": "Monogene Erkrankungen, autosomal-dominante und rezessive, X-chromosomale und mitochondriale Vererbung, variantenspezifische Bewertungen."
+      },
+      {
+        "id": "14.2",
+        "title": "Seltene Krankheitsgruppen",
+        "scope": "Angeborene Stoffwechselerkrankungen, lysosomale und peroxisomale Erkrankungen, mitochondriale Energieversorgung, Multiorgansyndrome und Erkrankungen durch komplexe Varianten."
+      },
+      {
+        "id": "14.3",
+        "title": "Krebsgenetik",
+        "scope": "Erbliche Tumorveranlagung, familiäre Syndrome, organspezifische Studien und separat importierte bestätigte Befunde."
+      },
+      {
+        "id": "14.4",
+        "title": "Häufige Erkrankungen und polygenetische Scores",
+        "scope": "Modelle nach Erkrankung, Genotypabdeckung, Vergleichspopulation, Kalibrierung und Verweise auf das jeweilige Organkapitel."
+      }
+    ]
+  },
+  {
+    "id": "15",
+    "title": "Medikamente, Wirkstoffabbau & Anästhesie",
+    "part": "IV · Medizinische Genetik und Wirkstoffe",
+    "sections": [
+      {
+        "id": "15.1",
+        "title": "Pharmakogenetisches Profil",
+        "scope": "Genotyp, Haplotyp, Diplotyp, Kopienzahl, Enzymaktivität und Arzneimitteltransport."
+      },
+      {
+        "id": "15.2",
+        "title": "Wirkstoffgruppen",
+        "scope": "Herz-Kreislauf-Medikamente, Gerinnungshemmer, Schmerzmittel, Psychopharmaka, onkologische, immunologische und antiinfektive Wirkstoffe."
+      },
+      {
+        "id": "15.3",
+        "title": "Unerwünschte Wirkungen",
+        "scope": "Dokumentierte Varianten und HLA-Typen, passende Wirkstoffzuordnung."
+      },
+      {
+        "id": "15.4",
+        "title": "Narkose und Anästhesie",
+        "scope": "Ausgewählte genetische Zusammenhänge mit Narkosereaktionen und Anforderungen an bestätigte Befunde."
+      }
+    ]
+  },
+  {
+    "id": "16",
+    "title": "Laborwerte, Proteine, Stoffwechselprodukte & Bildgebung",
+    "part": "V · Molekulare Forschung und Zusammenhänge",
+    "sections": [
+      {
+        "id": "16.1",
+        "title": "Klinische Laborwerte",
+        "scope": "Blutbild, Blutfette, Glukose, Leber, Niere, Hormone, Vitamine, Mineralstoffe und Entzündungswerte. Optional tatsächlich gemessene Werte."
+      },
+      {
+        "id": "16.2",
+        "title": "Proteine und Botenstoffe",
+        "scope": "Proteom, Immunproteine, Zytokine und weitere Proteinmarker."
+      },
+      {
+        "id": "16.3",
+        "title": "Stoffwechselprodukte und Fettmoleküle",
+        "scope": "Metabolom, Aminosäuren, kleine Stoffwechselprodukte und Lipidom."
+      },
+      {
+        "id": "16.4",
+        "title": "Glykobiologie",
+        "scope": "Zuckerstrukturen an Proteinen, darunter Antikörper-Glykosylierung."
+      },
+      {
+        "id": "16.5",
+        "title": "Organstruktur und medizinische Bildgebung",
+        "scope": "Forschung zu MRT-Merkmalen, Herz, Gehirn und Netzhaut, optional zusätzliche persönliche Messbefunde."
+      }
+    ]
+  },
+  {
+    "id": "17",
+    "title": "Genregulation, Epigenetik & Umwelteinflüsse",
+    "part": "V · Molekulare Forschung und Zusammenhänge",
+    "sections": [
+      {
+        "id": "17.1",
+        "title": "Genaktivität nach Gewebe",
+        "scope": "Genexpression, eQTLs und gewebespezifische Zusammenhänge."
+      },
+      {
+        "id": "17.2",
+        "title": "RNA-Verarbeitung und Spleißen",
+        "scope": "Transkripte, sQTLs und Zusammenhänge mit Protein- und klinischen Befunden."
+      },
+      {
+        "id": "17.3",
+        "title": "Epigenetik",
+        "scope": "Assoziationen mit DNA-Methylierung, gegebenenfalls ergänzende Methylierungsmessungen."
+      },
+      {
+        "id": "17.4",
+        "title": "Gene und Umwelt",
+        "scope": "Ernährung, Bewegung, Tabakrauch, Luftverschmutzung, Höhenlage und optionale Expositionsangaben."
+      },
+      {
+        "id": "17.5",
+        "title": "Ein Befund, mehrere Zusammenhänge",
+        "scope": "Pleiotropie, organübergreifende Merkmale und Querverweise zum vollständigen Befund."
+      }
+    ]
+  }
+]
