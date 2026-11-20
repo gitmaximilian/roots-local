@@ -1443,7 +1443,7 @@ function App() {
                       onShowMedical={() => setShowMedical(true)}
                       onOpen={(finding) => setInspected(finding.id)}
                     />
-                    <div>
+                    <div className="radar-wrap">
                     <NucleusRadar
                       findings={results.filter((finding) => finding.method !== "score")}
                       showMedical={showMedical}
