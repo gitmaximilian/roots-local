@@ -15,8 +15,12 @@ async function precache() {
     for (let start = 0; start < FILES.length; start += 4) {
       const batch = FILES.slice(start, start + 4);
       const results = await Promise.allSettled(batch.map(async ([path, integrity]) => {
-        const response = await staticFile(path, integrity, "default").catch(() =>
-          staticFile(path, integrity, "reload"),
+        // The WebAssembly modules bypass the HTTP cache: Chromium's in-memory
+        // cache in private windows fails on files of this size, and this cache
+        // already keeps them for offline use.
+        const mode = path.endsWith(".wasm") ? "no-store" : "default";
+        const response = await staticFile(path, integrity, mode).catch(() =>
+          staticFile(path, integrity, mode === "no-store" ? "no-store" : "reload"),
         );
         await cache.put(path, response);
       }));

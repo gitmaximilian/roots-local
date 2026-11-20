@@ -19,6 +19,7 @@ test("decodes a local CRAM with its FASTA without any request", async ({ page, c
     if (!/^(blob|data):/.test(request.url())) requests.push(request.url());
   });
   await page.getByRole("button", { name: "View example" }).first().click();
+  await expect(page.getByRole("heading", { name: "What your DNA says" })).toBeVisible();
   if ((page.viewportSize()?.width ?? 1000) < 700) await page.getByRole("button", { name: "Menu" }).click();
   await page.getByRole("navigation").getByRole("button", { name: "Data sources" }).click();
   const chooser = page.waitForEvent("filechooser");
