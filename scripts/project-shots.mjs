@@ -3,6 +3,7 @@
 // Usage: node scripts/project-shots.mjs <output dir> [base URL]
 import { chromium, webkit, devices } from "@playwright/test";
 import { mkdirSync } from "node:fs";
+import { fileURLToPath } from "node:url";
 
 const out = process.argv[2] ?? "output/project";
 const base = process.argv[3] ?? "http://127.0.0.1:4173/";
@@ -41,6 +42,27 @@ for (const scheme of ["light", "dark"]) {
     await page.waitForTimeout(400);
     await shot(page, "rootslocal-pass-dark");
   }
+  await context.close();
+}
+
+// Genetic scores need a file with score variants: the synthetic score fixture.
+const scores = fileURLToPath(new URL("../fixtures/synthetic-scores.csv", import.meta.url));
+for (const scheme of ["light", "dark"]) {
+  const context = await desktop.newContext({ ...wide, colorScheme: scheme, locale: "en-US" });
+  const page = await context.newPage();
+  await page.goto(base);
+  await page.waitForSelector("html[data-pdf=ready]", { timeout: 120_000 });
+  const chooser = page.waitForEvent("filechooser");
+  await page.getByRole("button", { name: /^Open DNA file/ }).first().click();
+  await (await chooser).setFiles(scores);
+  await page.getByRole("heading", { name: "What your DNA says" }).waitFor();
+  const overview = page.locator(".score-overview");
+  await overview.scrollIntoViewIfNeeded();
+  await page.evaluate(() => document.querySelector(".score-overview")?.scrollIntoView({ block: "start" }));
+  await overview.getByRole("button").nth(scheme === "light" ? 0 : 1).click();
+  await page.locator(".inspector .score-meter").waitFor();
+  await page.waitForTimeout(400);
+  await shot(page, `rootslocal-scores-${scheme}`);
   await context.close();
 }
 await desktop.close();
