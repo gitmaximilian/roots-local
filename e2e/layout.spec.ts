@@ -41,3 +41,13 @@ test("search marks stay inline and the active result stays readable", async ({ p
   });
   if (colours[1]) expect(colours[1]).toBe(colours[0]);
 });
+
+test("positions use the number format of the interface language", async ({ page }) => {
+  await example(page);
+  const menu = page.getByRole("button", { name: "Menu", exact: true });
+  if (await menu.isVisible()) await menu.click();
+  await page.getByRole("navigation").getByRole("button", { name: "Atlas", exact: true }).click();
+  await page.getByLabel("Choose chromosome").selectOption("2");
+  await expect(page.locator(".atlas-side")).toContainText("136,608,646");
+  await expect(page.locator(".atlas-side")).not.toContainText("136.608.646");
+});

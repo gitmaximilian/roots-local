@@ -36,6 +36,13 @@ export function setLanguage(value: Language) {
   }
 }
 
+/** Numbers in the UI language: 136,608,646 in English, 136.608.646 in German. */
+export function formatNumber(value: number, digits?: number) {
+  return new Intl.NumberFormat(language === "de" ? "de-AT" : "en-US", {
+    maximumFractionDigits: digits,
+  }).format(value);
+}
+
 export function t(message: keyof typeof strings): string {
   return language === "de" ? message : strings[message];
 }

@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { resultText, t } from "./locale";
+import { formatNumber, resultText, t } from "./locale";
 import { StatusLabel, isMedical } from "./finding-ui";
 import type { Finding, Status } from "./types";
 
@@ -250,7 +250,7 @@ export function Atlas({
               <strong>{resultText(item.finding.title)}</strong>
               <span className="mono">
                 {item.marker} ·{" "}
-                {Math.round(item.position * 1e6).toLocaleString()}
+                {formatNumber(Math.round(item.position * 1e6))}
               </span>
             </button>
           ))

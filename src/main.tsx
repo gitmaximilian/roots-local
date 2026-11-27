@@ -3,6 +3,7 @@ import {
   getLanguage,
   setLanguage,
   resultText,
+  formatNumber,
   type Language,
 } from "./locale";
 import starterCatalog from "../catalog/starter.json";
@@ -98,13 +99,7 @@ import type {
   Options,
 } from "./types";
 
-const number = {
-  format(value: number) {
-    return new Intl.NumberFormat(
-      getLanguage() === "de" ? "de-AT" : "en-US",
-    ).format(value);
-  },
-};
+const number = { format: (value: number) => formatNumber(value) };
 const MedicalContext = createContext(false);
 const defaultOptions: Options = {
   short: false,
