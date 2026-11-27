@@ -18,6 +18,11 @@ test("shows genetic scores with percentile and coverage", async ({ page }) => {
   await expect(overview.getByRole("heading", { name: "Genetic scores" })).toBeVisible();
   await expect(overview.getByText(/medical scores are hidden/)).toBeVisible();
   await expect(overview.getByRole("button")).toHaveCount(8);
+  // Every percentile uses the same face with equal-width digits.
+  const faces = await overview.locator("li .num").evaluateAll((items) =>
+    items.map((item) => `${getComputedStyle(item).fontFamily}|${getComputedStyle(item).fontVariantNumeric}`));
+  expect(new Set(faces).size).toBe(1);
+  expect(faces[0]).toContain("tabular-nums");
   await overview.screenshot({ path: `test-results/score-overview-${test.info().project.name}.png` });
 
   await overview.getByRole("button").first().click();
@@ -25,6 +30,9 @@ test("shows genetic scores with percentile and coverage", async ({ page }) => {
   await expect(inspector.getByText(/Estimated percentile/)).toBeVisible();
   await expect(inspector.getByText(/of the score's loci are in your file/)).toBeVisible();
   await expect(inspector.getByText(/Raises the score|Lowers the score/).first()).toBeVisible();
+  // For a score the last column says how each locus moves the score.
+  await expect(inspector.locator("th", { hasText: /^Effect$/ })).toBeVisible();
+  await expect(inspector.locator("th", { hasText: /^Data quality$/ })).toHaveCount(0);
   await page.screenshot({ path: "test-results/score-detail.png" });
   await inspector.getByRole("button", { name: /Close details|Details schließen/ }).click();
 

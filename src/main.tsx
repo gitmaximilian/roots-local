@@ -204,7 +204,7 @@ function FindingDetail({
               <th>Marker</th>
               <th>Position</th>
               <th>{t("Genotyp")}</th>
-              <th>{t("Datenqualität")}</th>
+              <th>{finding.score ? t("Wirkung") : t("Datenqualität")}</th>
             </tr>
           </thead>
           <tbody>
