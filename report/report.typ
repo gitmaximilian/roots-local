@@ -46,8 +46,19 @@
     #parbreak()
     #if "score" in finding and finding.score.percentile != none [
       #let p = finding.score.percentile
-      #box(width: 60%, height: 5pt, radius: 2.5pt, fill: paper, place(dx: calc.min(calc.max(p, 1), 99) * 1% - 1.5pt, dy: -2.5pt, rect(width: 3pt, height: 10pt, radius: 1.5pt, fill: theme)))
-      #h(0.6em) #caption([#tr("Geschätztes Perzentil", "Estimated percentile") #calc.round(p)])
+      // A coarse range instead of a point: the score is a low-confidence estimate.
+      #let bands = ((0, 10), (10, 30), (30, 70), (70, 90), (90, 100))
+      #let band = bands.position(b => p < b.at(1) or b.at(1) == 100)
+      #let range = bands.at(band)
+      #let labels = (
+        tr("untere 10 %", "bottom 10%"),
+        tr("10–30 %", "10–30%"),
+        tr("mittlerer Bereich, 30–70 %", "middle range, 30–70%"),
+        tr("70–90 %", "70–90%"),
+        tr("obere 10 %", "top 10%"),
+      )
+      #box(width: 60%, height: 5pt, radius: 2.5pt, fill: paper, place(dx: range.at(0) * 1%, rect(width: (range.at(1) - range.at(0)) * 1%, height: 5pt, radius: 2.5pt, fill: theme)))
+      #h(0.6em) #caption([#tr("Geschätzter Bereich", "Estimated range") · #labels.at(band)])
       #linebreak()
       #caption([#finding.score.matched / #finding.score.total #tr("Genorte des Scores in der Datei", "of the score's loci in the file") · GWAS Catalog #finding.score.release])
       #parbreak()
@@ -107,7 +118,7 @@
 #v(11mm)
 #text(size: 41pt, fill: theme, weight: "bold")[#tr("Dein DNA-Report", "Your DNA report")]
 #v(4mm)
-#text(size: 16pt, fill: secondary)[#tr("Entdecke deine DNA. Offline.", "Explore your DNA. Offline.")]
+#text(size: 16pt, fill: secondary)[#tr("Deine DNA. Dein Gerät.", "Your DNA. Your device.")]
 #v(10mm)
 #karyogram(34mm)
 #v(9mm)

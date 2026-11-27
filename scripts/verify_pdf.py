@@ -21,8 +21,8 @@ assert all(f"{section} ·" in text for section in sections)
 arguments = [value for value in sys.argv[2:] if not value.startswith("--")]
 language = arguments[0] if arguments else "en"
 expected = {
-    "en": ["Explore your DNA. Offline.", "Synthetic profile", "Lactase activity in adulthood", "Variant index"],
-    "de": ["Entdecke deine DNA. Offline.", "Synthetisches Profil", "Laktaseaktivität im Erwachsenenalter", "Variantenregister"],
+    "en": ["Your DNA. Your device.", "Synthetic profile", "Lactase activity in adulthood", "Variant index"],
+    "de": ["Deine DNA. Dein Gerät.", "Synthetisches Profil", "Laktaseaktivität im Erwachsenenalter", "Variantenregister"],
 }[language]
 if "--imported" in sys.argv:
     expected = [value for value in expected if value not in ("Synthetic profile", "Synthetisches Profil")]

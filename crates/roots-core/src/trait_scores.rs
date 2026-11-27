@@ -52,6 +52,8 @@ pub struct ScoreDetail {
     /// Estimated percentile in the study population, 0–100.
     pub percentile: Option<f64>,
     pub z: Option<f64>,
+    /// True when the trait is a disease, false for a measurement.
+    pub disease: bool,
     pub release: String,
 }
 
@@ -69,18 +71,18 @@ pub fn count() -> usize {
 }
 
 const MEASURE: [&str; 5] = [
-    "Der genetische Score liegt deutlich unter dem Durchschnitt. Das spricht für eher niedrigere Werte.",
-    "Der genetische Score liegt unter dem Durchschnitt. Das spricht für etwas niedrigere Werte.",
-    "Der genetische Score liegt im mittleren Bereich.",
-    "Der genetische Score liegt über dem Durchschnitt. Das spricht für etwas höhere Werte.",
-    "Der genetische Score liegt deutlich über dem Durchschnitt. Das spricht für eher höhere Werte.",
+    "Dein Score ist niedriger als bei den meisten Menschen in der Studie. Das deutet leicht auf niedrigere Werte hin.",
+    "Dein Score liegt etwas unter der Mitte der Studienpopulation.",
+    "Dein Score liegt im mittleren Bereich der Studienpopulation.",
+    "Dein Score liegt etwas über der Mitte der Studienpopulation.",
+    "Dein Score ist höher als bei den meisten Menschen in der Studie. Das deutet leicht auf höhere Werte hin.",
 ];
 const DISEASE: [&str; 5] = [
-    "Die genetische Veranlagung liegt deutlich unter dem Durchschnitt.",
-    "Die genetische Veranlagung liegt unter dem Durchschnitt.",
-    "Die genetische Veranlagung liegt im mittleren Bereich.",
-    "Die genetische Veranlagung liegt über dem Durchschnitt.",
-    "Die genetische Veranlagung liegt deutlich über dem Durchschnitt.",
+    "Dein Score ist niedriger als bei den meisten Menschen in der Studie. Über dein persönliches Risiko sagt das wenig.",
+    "Dein Score liegt etwas unter der Mitte der Studienpopulation. Über dein persönliches Risiko sagt das wenig.",
+    "Dein Score liegt im mittleren Bereich der Studienpopulation.",
+    "Dein Score liegt etwas über der Mitte der Studienpopulation. Über dein persönliches Risiko sagt das wenig.",
+    "Dein Score ist höher als bei den meisten Menschen in der Studie. Das ist keine Diagnose und sagt wenig über dein persönliches Risiko.",
 ];
 pub const SUMMARY: &str = "Der Score fasst unabhängige Varianten aus der größten Studie zu diesem Merkmal im GWAS-Katalog zusammen. Jede Variante zählt mit ihrem Effekt aus der Studie.";
 pub const LIMITS: &str = "Ein genetischer Score erklärt meist nur einen kleinen Teil der Unterschiede zwischen Menschen. Lebensstil, Umwelt und seltene Varianten fehlen. Der Vergleich gilt für die Studienpopulation, meist europäischer Abstammung, und ist keine Diagnose.";
@@ -248,6 +250,7 @@ pub fn evaluate(data: &Import) -> Vec<Finding> {
                     // estimate is reported between the 1st and 99th percentile.
                     percentile: z.map(|z| ((phi(z) * 1000.0).round() / 10.0).clamp(1.0, 99.0)),
                     z: z.map(|z| (z * 100.0).round() / 100.0),
+                    disease: score.disease,
                     release: set.release.clone(),
                 }),
             })
