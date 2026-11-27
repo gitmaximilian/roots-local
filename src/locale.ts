@@ -11,7 +11,16 @@ function stored(): string | null {
     return null;
   }
 }
-let language: Language = stored() === "de" ? "de" : "en";
+// Without a stored choice, follow the browser: German for any de-* language
+// ranked first among the languages Roots Local offers, otherwise English.
+function preferred(): Language {
+  const value = stored();
+  if (value === "de" || value === "en") return value;
+  const languages = typeof navigator === "undefined" ? [] : navigator.languages ?? [navigator.language];
+  const first = languages.map((tag) => tag.toLowerCase()).find((tag) => /^(de|en)\b/.test(tag));
+  return first?.startsWith("de") ? "de" : "en";
+}
+let language: Language = preferred();
 
 export function getLanguage() {
   return language;
