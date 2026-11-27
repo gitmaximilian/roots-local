@@ -177,3 +177,24 @@ test("keyboard focus stays visible", async ({ page }, info) => {
   });
   expect(outline).not.toMatch(/^none|0px/);
 });
+
+test("ask and radar never overlap, also with the inspector open", async ({ page }, info) => {
+  test.skip(!!info.project.use.isMobile, "the phone layout has no radar");
+  await example(page);
+  for (const width of [1000, 1150, 1280, 1440, 1700]) {
+    await page.setViewportSize({ width, height: 900 });
+    for (const inspector of [false, true]) {
+      if (inspector) await page.locator(".result-list li button").first().click();
+      const ask = (await page.locator(".ask").boundingBox())!;
+      const radar = (await page.locator(".radar-wrap").boundingBox())!;
+      const apart =
+        ask.x + ask.width <= radar.x + 1 ||
+        radar.x + radar.width <= ask.x + 1 ||
+        ask.y + ask.height <= radar.y + 1;
+      expect(apart, `${width}px, inspector ${inspector}`).toBe(true);
+      // The ask card has room for its question field.
+      expect(ask.width, `${width}px, inspector ${inspector}`).toBeGreaterThan(320);
+      if (inspector) await page.keyboard.press("Escape");
+    }
+  }
+});
