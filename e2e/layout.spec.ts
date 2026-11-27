@@ -19,3 +19,25 @@ test("overview figures keep their height at common window sizes", async ({ page 
     expect((await figure.boundingBox())!.height).toBeGreaterThanOrEqual(40);
   }
 });
+
+test("search marks stay inline and the active result stays readable", async ({ page }) => {
+  await example(page);
+  const search = page.getByRole("button", { name: "Search", exact: true }).first();
+  await search.click();
+  await page.getByRole("dialog").getByRole("combobox").fill("milk");
+  const option = page.getByRole("option").first();
+  await expect(option).toHaveAttribute("aria-selected", "true");
+  const label = option.locator(".palette-label > span").first();
+  const mark = label.locator("mark").first();
+  await expect(mark).toBeVisible();
+  // A mark inside a line has the line's height, not a row of its own.
+  const [line, marked] = [await label.boundingBox(), await mark.boundingBox()];
+  expect(marked!.width).toBeLessThan(line!.width);
+  expect(line!.height).toBeLessThan(marked!.height * 1.8);
+  // Detail text on the active result uses the result's own text colour.
+  const colours = await option.evaluate((button) => {
+    const small = button.querySelector("small");
+    return [getComputedStyle(button).color, small && getComputedStyle(small).color];
+  });
+  if (colours[1]) expect(colours[1]).toBe(colours[0]);
+});

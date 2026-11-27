@@ -1108,8 +1108,13 @@ main {
   background: none;
   text-align: left;
 }
-#palette-results button span:last-child {
+#palette-results .palette-hint {
   margin-left: auto;
+  flex: none;
+  max-width: 40%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   font-size: 11px;
   color: var(--muted);
 }
@@ -1117,8 +1122,14 @@ main {
   background: var(--accent);
   color: var(--accent-ink);
 }
-#palette-results button[aria-selected="true"] span:last-child {
+#palette-results button[aria-selected="true"] .palette-hint,
+#palette-results button[aria-selected="true"] small {
   color: inherit;
+}
+#palette-results button[aria-selected="true"] mark {
+  background: color-mix(in srgb, var(--accent-ink) 22%, transparent);
+  text-decoration: underline;
+  text-underline-offset: 2px;
 }
 .palette .none {
   padding: 14px;
@@ -1796,6 +1807,7 @@ tr.clickable:hover td {
 }
 .palette mark,
 .ask mark {
+  display: inline;
   background: color-mix(in srgb, var(--accent) 24%, transparent);
   color: inherit;
   border-radius: 3px;
