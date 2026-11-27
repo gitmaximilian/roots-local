@@ -29,10 +29,10 @@ test("finding can be closed by its button and by Escape without losing focus", a
 test.describe("first visit with German browser preferences", () => {
   test.use({ locale: "de-DE" });
 
-test("starts in English, preserves the profile on language switch, and restores focus", async ({ page }) => {
+test("starts in German, preserves the profile on language switch, and restores focus", async ({ page }) => {
   await started(page);
-  await expect(page.locator("html")).toHaveAttribute("lang", "en");
-  const search = page.getByRole("button", { name: "Search", exact: true });
+  await expect(page.locator("html")).toHaveAttribute("lang", "de");
+  const search = page.getByRole("button", { name: "Suchen", exact: true });
   await search.focus();
   await search.press("Enter");
   const dialog = page.getByRole("dialog");
@@ -40,34 +40,41 @@ test("starts in English, preserves the profile on language switch, and restores 
   await page.keyboard.press("Escape");
   await expect(dialog).toBeHidden();
   await expect(search).toBeFocused();
-  await page.getByRole("button", { name: "View example", exact: true }).click();
-  await expect(page.getByRole("heading", { name: "What your DNA says" })).toBeVisible();
-  const mobileMenu = page.getByRole("button", { name: "Menu", exact: true });
-  if (await mobileMenu.isVisible()) await mobileMenu.click();
-  const german = page.getByRole("button", { name: "Deutsch", exact: true });
-  await german.focus();
-  await german.press("Enter");
-  await expect(german).toHaveAttribute("aria-pressed", "true");
-  await expect(page.locator("html")).toHaveAttribute("lang", "de");
-  const closeMenu = page.getByRole("button", { name: "Menü schließen" });
-  if (await closeMenu.isVisible()) await closeMenu.click();
+  await page.getByRole("button", { name: "Beispiel ansehen", exact: true }).click();
   await expect(page.getByRole("heading", { name: "Was deine DNA sagt" })).toBeVisible();
-  const menu = page.getByRole("button", { name: "Menü", exact: true });
+  const mobileMenu = page.getByRole("button", { name: "Menü", exact: true });
+  if (await mobileMenu.isVisible()) await mobileMenu.click();
+  const english = page.getByRole("button", { name: "English", exact: true });
+  await english.focus();
+  await english.press("Enter");
+  await expect(english).toHaveAttribute("aria-pressed", "true");
+  await expect(page.locator("html")).toHaveAttribute("lang", "en");
+  const closeMenu = page.getByRole("button", { name: "Close menu" });
+  if (await closeMenu.isVisible()) await closeMenu.click();
+  await expect(page.getByRole("heading", { name: "What your DNA says" })).toBeVisible();
+  const menu = page.getByRole("button", { name: "Menu", exact: true });
   if (await menu.isVisible()) {
     await menu.focus();
     await menu.press("Enter");
-    await expect(page.getByRole("button", { name: "Menü schließen" })).toBeFocused();
+    await expect(page.getByRole("button", { name: "Close menu" })).toBeFocused();
     await page.keyboard.press("Escape");
     await expect(menu).toHaveAttribute("aria-expanded", "false");
     await expect(menu).toBeFocused();
     await page.setViewportSize({ width: 320, height: 630 });
     await menu.click();
-    await page.getByRole("navigation").getByRole("button", { name: /^Kapitel/ }).first().click();
+    await page.getByRole("navigation").getByRole("button", { name: /^Chapters/ }).first().click();
     expect(await page.locator(".content").evaluate((content) => content.scrollWidth - content.clientWidth)).toBeLessThanOrEqual(1);
   }
+  // The explicit choice wins over the browser language.
   await page.reload();
-  await expect(page.locator("html")).toHaveAttribute("lang", "de");
+  await expect(page.locator("html")).toHaveAttribute("lang", "en");
 });
+});
+
+test("first visit with English browser preferences starts in English", async ({ page }) => {
+  await started(page);
+  await expect(page.locator("html")).toHaveAttribute("lang", "en");
+  await expect(page.getByRole("button", { name: "View example", exact: true }).first()).toBeVisible();
 });
 
 test("catalog questions abstain on misleading wording and PDF medical content is opt-in", async ({ page }) => {

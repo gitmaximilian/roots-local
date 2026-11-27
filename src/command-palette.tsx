@@ -171,12 +171,12 @@ export function CommandPalette({
                     onClick={() => choose(index)}
                   >
                     <span className="palette-label">
-                      <Marked text={command.label} query={query} />
+                      <span><Marked text={command.label} query={query} /></span>
                       {command.detail && (
                         <small><Marked text={command.detail} query={query} /></small>
                       )}
                     </span>
-                    <span>{command.hint}</span>
+                    <span className="palette-hint">{command.hint}</span>
                   </button>
                 </div>
               );

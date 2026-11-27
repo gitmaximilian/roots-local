@@ -59,7 +59,7 @@ for (const scheme of ["light", "dark"]) {
   const overview = page.locator(".score-overview");
   await overview.scrollIntoViewIfNeeded();
   await page.evaluate(() => document.querySelector(".score-overview")?.scrollIntoView({ block: "start" }));
-  await overview.getByRole("button").nth(scheme === "light" ? 0 : 1).click();
+  await overview.locator(".score-row").nth(scheme === "light" ? 0 : 1).click();
   await page.locator(".inspector .score-meter").waitFor();
   await page.waitForTimeout(400);
   await shot(page, `rootslocal-scores-${scheme}`);

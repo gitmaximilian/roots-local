@@ -1,14 +1,72 @@
-import { useRef, useState } from "react";
-import { ArrowRight, X } from "lucide-react";
+import { useId, useRef, useState, type ReactNode } from "react";
+import { ArrowRight, ExternalLink, X } from "lucide-react";
 import { resultText, t } from "./locale";
 import type { Confidence, Finding, MarkerCheck, Status } from "./types";
 import { usePanelFocus } from "./panel-focus";
 
 export const statusLabels = () => ({
-  personal: t("Auswertbar"),
-  research: t("Studienbezug"),
-  missing: t("Offen"),
+  personal: t("Ergebnis"),
+  research: t("Nur Studienhinweis"),
+  missing: t("Ohne Ergebnis"),
 });
+
+/** Short explanations for terms people meet for the first time. */
+const terms = () => ({
+  genotype: t("Die zwei Buchstaben an einer Stelle deiner DNA, je einer von jedem Elternteil."),
+  locus: t("Eine Stelle im Genom, die in einer Studie mit dem Merkmal zusammenhing."),
+  percentile: t("Wie viel Prozent der Studienpopulation einen niedrigeren Score haben."),
+});
+
+/** A term with a short explanation that opens on click or tap. */
+export function Term({ name, children }: { name: keyof ReturnType<typeof terms>; children: ReactNode }) {
+  const [open, setOpen] = useState(false);
+  const id = useId();
+  return (
+    <span className="term">
+      <button type="button" aria-expanded={open} aria-describedby={open ? id : undefined}
+        onClick={() => setOpen(!open)} onBlur={() => setOpen(false)}>
+        {children}
+      </button>
+      {open && <span role="tooltip" id={id}>{terms()[name]}</span>}
+    </span>
+  );
+}
+
+/** The coarse range of a score, from the same cut-offs as the conclusion text. */
+export function scoreBand(z: number) {
+  return z <= -1.2816 ? 0 : z <= -0.5244 ? 1 : z < 0.5244 ? 2 : z < 1.2816 ? 3 : 4;
+}
+const BANDS: [number, number][] = [[0, 10], [10, 30], [30, 70], [70, 90], [90, 100]];
+const bandLabels = () => [
+  t("untere 10 %"),
+  t("10–30 %"),
+  t("mittlerer Bereich, 30–70 %"),
+  t("70–90 %"),
+  t("obere 10 %"),
+];
+/** A few words on what the range means for this kind of trait. */
+export function scoreDirection(score: NonNullable<Finding["score"]>) {
+  if (score.z == null) return "";
+  const band = scoreBand(score.z);
+  if (band === 2) return t("im Mittelfeld");
+  const higher = band > 2;
+  if (score.disease) return higher ? t("eher höhere Veranlagung") : t("eher niedrigere Veranlagung");
+  return higher ? t("eher höhere Werte") : t("eher niedrigere Werte");
+}
+
+/** A genotype such as "AG" with each base in its colour; other calls stay text. */
+export function Genotype({ call }: { call: string | null | undefined }) {
+  if (!call) return <>–</>;
+  if (!/^[ACGT]{1,2}$/.test(call)) return <>{call}</>;
+  return (
+    <span className="genotype">
+      <span className="sr-only">{call}</span>
+      {[...call].map((base, index) => (
+        <span key={index} className={`base ${base}`} aria-hidden="true">{base}</span>
+      ))}
+    </span>
+  );
+}
 
 export function StatusLabel({ status }: { status: Status }) {
   return (
@@ -43,38 +101,41 @@ export function ConfidenceMeter({ value }: { value: Confidence }) {
   );
 }
 
-/** Position of a genetic score in the study population, as an estimate. */
+/** Position of a genetic score in the study population, as a coarse range. */
 export function ScoreMeter({ score }: { score: NonNullable<Finding["score"]> }) {
-  const percent = score.percentile;
+  const band = score.z == null ? null : scoreBand(score.z);
   return (
     <div className="score-meter">
-      {percent !== null && (
+      {band !== null && (
         <>
           <div className="track" aria-hidden="true">
-            <span className="band low" />
-            <span className="band mid" />
-            <span className="band high" />
-            <i style={{ left: `${Math.min(99, Math.max(1, percent))}%` }} />
+            <span className="range" style={{ left: `${BANDS[band][0]}%`, width: `${BANDS[band][1] - BANDS[band][0]}%` }} />
+            <span className="tick" style={{ left: "50%" }} />
           </div>
           <div className="scale" aria-hidden="true">
             <span>{t("niedriger")}</span>
-            <span>{t("Durchschnitt")}</span>
+            <span>{t("Mitte")}</span>
             <span>{t("höher")}</span>
           </div>
           <p>
-            {t("Geschätztes Perzentil")}: <b>{Math.round(percent)}</b>{" "}
-            <small>{t("(Schätzung im Vergleich zur Studienpopulation)")}</small>
+            {t("Geschätzter Bereich")}: <b>{bandLabels()[band]}</b> · {scoreDirection(score)}
+          </p>
+          <p className="muted">
+            {t("Grobe Schätzung mit geringer Sicherheit. Ein")}{" "}
+            <Term name="percentile">{t("Perzentil")}</Term>{" "}
+            {t("von 90 hieße: 90 % der Studienpopulation liegen darunter.")}
           </p>
         </>
       )}
       <p className="muted">
-        {score.matched} / {score.total} {t("Genorte des Scores in deiner Datei")} · GWAS Catalog {score.release}
+        {score.matched} / {score.total} <Term name="locus">{t("Genorte")}</Term>{" "}
+        {t("des Scores sind in deiner Datei")} · GWAS Catalog {score.release}
       </p>
     </div>
   );
 }
 
-/** The most notable genetic scores, furthest from the average first. */
+/** The most notable genetic scores, furthest from the middle first. */
 export function ScoreOverview({
   findings,
   showMedical,
@@ -84,34 +145,47 @@ export function ScoreOverview({
   showMedical: boolean;
   onOpen: (finding: Finding) => void;
 }) {
+  const [all, setAll] = useState(false);
   const scored = findings.filter((f) => f.score?.z != null);
   const visible = scored
     .filter((f) => showMedical || !isMedical(f))
     .sort((a, b) => Math.abs(b.score!.z!) - Math.abs(a.score!.z!));
   if (!scored.length) return null;
   const hidden = scored.length - visible.length;
+  const shown = all ? visible : visible.slice(0, 5);
   return (
-    <section className="score-overview">
+    <section className="score-overview" aria-labelledby="score-heading">
       <header className="section-heading">
-        <h2>{t("Genetische Scores")}</h2>
+        <h2 id="score-heading">{t("Genetische Scores")}</h2>
       </header>
       <p className="muted">
-        {scored.length} {t("Merkmale aus großen Studien, verglichen mit der Studienpopulation. Am weitesten vom Durchschnitt zuerst.")}
+        {scored.length} {t("Merkmale aus großen Studien, verglichen mit der Studienpopulation. Am weitesten von der Mitte zuerst. Jeder Score ist eine grobe Schätzung.")}
         {hidden > 0 && ` ${hidden} ${t("medizinische Scores sind ausgeblendet.")}`}
       </p>
       <ul>
-        {visible.slice(0, 8).map((f) => (
-          <li key={f.id}>
-            <button className="text-button" onClick={() => onOpen(f)}>
-              <span>{resultText(f.title)}</span>
-              <span className="mini-track" aria-hidden="true">
-                <i style={{ left: `${f.score!.percentile}%` }} />
-              </span>
-              <span className="mono">{Math.round(f.score!.percentile!)}</span>
-            </button>
-          </li>
-        ))}
+        {shown.map((f) => {
+          const band = scoreBand(f.score!.z!);
+          return (
+            <li key={f.id}>
+              <button className="score-row" data-finding={f.id} onClick={() => onOpen(f)}>
+                <span className="score-name">{resultText(f.title)}</span>
+                <span className="mini-track" aria-hidden="true">
+                  <i style={{ left: `${BANDS[band][0]}%`, width: `${BANDS[band][1] - BANDS[band][0]}%` }} />
+                </span>
+                <span className="score-read">
+                  <span className="num">{bandLabels()[band]}</span>
+                  <small>{scoreDirection(f.score!)}</small>
+                </span>
+              </button>
+            </li>
+          );
+        })}
       </ul>
+      {visible.length > 5 && (
+        <button className="text-button more-findings" aria-expanded={all} onClick={() => setAll(!all)}>
+          {all ? t("Weniger anzeigen") : `${t("Alle anzeigen")} (${visible.length})`}
+        </button>
+      )}
     </section>
   );
 }
@@ -145,7 +219,6 @@ export function Inspector({
 }) {
   const panel = useRef<HTMLElement>(null);
   usePanelFocus(panel, true, modal, onClose);
-  const [copied, setCopied] = useState<string>();
   const conclusion = visibleConclusion(finding, showMedical);
   const hidden = isMedical(finding) && !showMedical;
   return (
@@ -194,12 +267,12 @@ export function Inspector({
           <dt>{t("Grenzen")}</dt>
           <dd>{resultText(finding.limits)}</dd>
         </dl>
-        <table>
+        <table className="marker-table">
           <thead>
             <tr>
               <th>Marker</th>
-              <th>{t("Genotyp")}</th>
-              <th>{t("Datenqualität")}</th>
+              <th><Term name="genotype">{t("Genotyp")}</Term></th>
+              <th>{finding.score ? t("Wirkung") : t("Datenqualität")}</th>
             </tr>
           </thead>
           <tbody>
@@ -218,33 +291,46 @@ export function Inspector({
                     {check.coordinate ? ` · ${check.coordinate}` : ""}
                   </small>
                 </td>
-                <td className="mono">{hidden ? "•••" : check.call || "–"}</td>
-                <td>{resultText(check.status)}</td>
+                <td className="mono" data-label={t("Genotyp")}>{hidden ? "•••" : <Genotype call={check.call} />}</td>
+                <td data-label={finding.score ? t("Wirkung") : t("Datenqualität")}>{resultText(check.status)}</td>
               </tr>
             ))}
           </tbody>
         </table>
-        <div className="sources">
-          {finding.sources.map(([label, url]) => (
-            <div key={url}>
-              <span>{resultText(label)}</span>
-              <button
-                className="text-button"
-                onClick={async () => {
-                  try {
-                    await navigator.clipboard.writeText(url);
-                    setCopied(url);
-                  } catch {
-                    setCopied(undefined);
-                  }
-                }}
-              >
-                {copied === url ? t("Kopiert") : t("Link kopieren")}
-              </button>
-            </div>
-          ))}
-        </div>
+        <SourceList sources={finding.sources} />
       </div>
     </aside>
+  );
+}
+
+
+/** Sources as links that open in a new tab, with a copy button for the address. */
+export function SourceList({ sources }: { sources: [string, string][] }) {
+  const [copied, setCopied] = useState<string>();
+  return (
+    <div className="sources">
+      <h3>{t("Quellen")}</h3>
+      {sources.map(([label, url]) => (
+        <div key={url}>
+          <a href={url} target="_blank" rel="noopener noreferrer"
+            title={t("Öffnet die Quelle in einem neuen Tab. Die Website sieht, welche Quelle du aufrufst.")}>
+            {resultText(label)} <ExternalLink size={12} aria-hidden="true" />
+          </a>
+          <button
+            className="text-button"
+            onClick={async () => {
+              try {
+                await navigator.clipboard.writeText(url);
+                setCopied(url);
+              } catch {
+                setCopied(undefined);
+              }
+            }}
+          >
+            {copied === url ? t("Adresse kopiert") : t("Adresse kopieren")}
+          </button>
+        </div>
+      ))}
+    </div>
   );
 }

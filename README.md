@@ -1,6 +1,6 @@
 # Roots Local
 
-*Explore your DNA. Offline.*
+*Your DNA. Your device.*
 
 Roots Local is an open-source web app that explains the raw data of consumer DNA tests in your browser. Your file is read and analyzed on your device: nothing is uploaded. It matches selected genotypes against a versioned reference catalog and creates a PDF report with 17 chapters and 76 sections. Roots Local is for information and learning. It is not a medical device and does not diagnose anything.
 

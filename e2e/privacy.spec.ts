@@ -81,7 +81,7 @@ async function workflow(page: Page, source: "file" | "example" = "file") {
   await page.getByRole("button", { name: /^(Ask|Fragen)$/ }).click();
 
   await go(page, /PDF report|PDF-Report/);
-  await page.getByRole("button", { name: "Preview", exact: true }).click();
+  await page.getByRole("button", { name: "Create preview", exact: true }).click();
   // Rendering the full report takes several seconds on shared CI machines.
   await expect(page.locator("canvas[aria-label^='PDF preview, page']")).toBeVisible({ timeout: 30_000 });
   await page.getByRole("button", { name: "Next PDF page", exact: true }).click();

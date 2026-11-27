@@ -39,6 +39,7 @@ export type Finding = {
     total: number;
     percentile: number | null;
     z: number | null;
+    disease: boolean;
     release: string;
   };
   study?: {

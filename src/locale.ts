@@ -11,7 +11,16 @@ function stored(): string | null {
     return null;
   }
 }
-let language: Language = stored() === "de" ? "de" : "en";
+// Without a stored choice, follow the browser: German for any de-* language
+// ranked first among the languages Roots Local offers, otherwise English.
+function preferred(): Language {
+  const value = stored();
+  if (value === "de" || value === "en") return value;
+  const languages = typeof navigator === "undefined" ? [] : navigator.languages ?? [navigator.language];
+  const first = languages.map((tag) => tag.toLowerCase()).find((tag) => /^(de|en)\b/.test(tag));
+  return first?.startsWith("de") ? "de" : "en";
+}
+let language: Language = preferred();
 
 export function getLanguage() {
   return language;
@@ -25,6 +34,19 @@ export function setLanguage(value: Language) {
   } catch {
     // Private browsing may refuse storage; the choice then lasts for this tab.
   }
+}
+
+/** Numbers in the UI language: 136,608,646 in English, 136.608.646 in German. */
+export function formatNumber(value: number, digits?: number) {
+  return new Intl.NumberFormat(language === "de" ? "de-AT" : "en-US", {
+    maximumFractionDigits: digits,
+  }).format(value);
+}
+
+/** "3 results" / "3 Ergebnisse": English nouns after a count are lower case. */
+export function count(value: number, one: keyof typeof strings, many: keyof typeof strings) {
+  const word = t(value === 1 ? one : many);
+  return `${formatNumber(value)} ${language === "de" ? word : word.toLowerCase()}`;
 }
 
 export function t(message: keyof typeof strings): string {

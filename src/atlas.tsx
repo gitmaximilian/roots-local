@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { resultText, t } from "./locale";
+import { formatNumber, resultText, t } from "./locale";
 import { StatusLabel, isMedical } from "./finding-ui";
 import type { Finding, Status } from "./types";
 
@@ -143,8 +143,35 @@ export function Atlas({
       </div>
     );
   }
+  const [length, centromere] = sizes[chromosome] ?? sizes["1"];
   return (
     <div className="atlas">
+      <div className="atlas-chromosomes" role="group" aria-label={t("Chromosom auswählen")}>
+        {ORDER.map((name) => {
+          const count = placed.filter((item) => item.chromosome === name).length;
+          return (
+            <button key={name} type="button" aria-pressed={name === chromosome}
+              className={count ? undefined : "empty"}
+              aria-label={`${t("Chromosom")} ${name}, ${count} ${t("Marker")}`}
+              onClick={() => setChromosome(name)}>
+              <strong>{name}</strong>
+              <small className="num">{count}</small>
+            </button>
+          );
+        })}
+      </div>
+      <div className="atlas-strip" aria-hidden="true">
+        <svg viewBox="0 0 320 44">
+          <rect className="chromosome-bar" x={4} y={14} width={312} height={14} rx={7} />
+          <path className="centromere" d={`M${4 + (centromere / length) * 312} 14 v14`} />
+          {here.map((item) => (
+            <line key={`${item.finding.id}-${item.marker}`} className={`marker ${item.status}`}
+              x1={4 + (item.position / length) * 312} x2={4 + (item.position / length) * 312} y1={8} y2={34} />
+          ))}
+          <text x={4} y={43}>0</text>
+          <text x={316} y={43} textAnchor="end">{formatNumber(Math.round(length))} Mb</text>
+        </svg>
+      </div>
       <div className="atlas-board">
         <svg
           viewBox={`0 0 ${width} ${rowHeight * 2 + 30}`}
@@ -250,7 +277,7 @@ export function Atlas({
               <strong>{resultText(item.finding.title)}</strong>
               <span className="mono">
                 {item.marker} ·{" "}
-                {Math.round(item.position * 1e6).toLocaleString()}
+                {formatNumber(Math.round(item.position * 1e6))}
               </span>
             </button>
           ))
