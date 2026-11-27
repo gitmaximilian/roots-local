@@ -62,7 +62,7 @@ export function ScoreMeter({ score }: { score: NonNullable<Finding["score"]> }) 
             <span>{t("höher")}</span>
           </div>
           <p>
-            {t("Geschätztes Perzentil")}: <b>{Math.round(percent)}</b>{" "}
+            {t("Geschätztes Perzentil")}: <b className="num">{Math.round(percent)}</b>{" "}
             <small>{t("(Schätzung im Vergleich zur Studienpopulation)")}</small>
           </p>
         </>
@@ -107,7 +107,7 @@ export function ScoreOverview({
               <span className="mini-track" aria-hidden="true">
                 <i style={{ left: `${f.score!.percentile}%` }} />
               </span>
-              <span className="mono">{Math.round(f.score!.percentile!)}</span>
+              <span className="num">{Math.round(f.score!.percentile!)}</span>
             </button>
           </li>
         ))}
@@ -199,7 +199,7 @@ export function Inspector({
             <tr>
               <th>Marker</th>
               <th>{t("Genotyp")}</th>
-              <th>{t("Datenqualität")}</th>
+              <th>{finding.score ? t("Wirkung") : t("Datenqualität")}</th>
             </tr>
           </thead>
           <tbody>
