@@ -2254,3 +2254,10 @@ h2 { font-size: 19px; font-weight: 750; letter-spacing: -0.02em; }
 .result-list .confidence { white-space: nowrap; }
 .result-list .confidence { justify-self: end; }
 @media (max-width: 760px) { .result-list li button { grid-template-columns: minmax(0, 1fr); } .result-list .confidence { justify-self: start; } }
+/* Result rows follow the width of their column, not the window: with the
+   inspector open the column can be narrow on a wide screen. */
+.result-list { container-type: inline-size; }
+@container (max-width: 760px) {
+  .result-list li button { grid-template-columns: minmax(0, 1fr); gap: 3px; }
+  .result-list .confidence { justify-self: start; }
+}

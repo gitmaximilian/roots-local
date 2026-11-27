@@ -141,6 +141,9 @@ test("sources are links and the inspector keeps the chosen entry in view", async
   const inspector = page.locator(".inspector");
   await expect(inspector).toBeVisible();
   await expect(entry).toBeInViewport();
+  // The answer keeps a readable width next to the open inspector.
+  const answer = (await page.locator(".result-list .result-answer").first().boundingBox())!;
+  expect(answer.width).toBeGreaterThan(240);
   expect((await inspector.boundingBox())!.width).toBeGreaterThanOrEqual(430);
   const link = inspector.locator(".sources a").first();
   await expect(link).toHaveAttribute("target", "_blank");
