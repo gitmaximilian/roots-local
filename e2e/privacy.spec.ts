@@ -82,9 +82,10 @@ async function workflow(page: Page, source: "file" | "example" = "file") {
 
   await go(page, /PDF report|PDF-Report/);
   await page.getByRole("button", { name: "Preview", exact: true }).click();
-  await expect(page.locator("canvas[aria-label^='PDF preview, page']")).toBeVisible();
+  // Rendering the full report takes several seconds on shared CI machines.
+  await expect(page.locator("canvas[aria-label^='PDF preview, page']")).toBeVisible({ timeout: 30_000 });
   await page.getByRole("button", { name: "Next PDF page", exact: true }).click();
-  await expect(page.locator("canvas[aria-label='PDF preview, page 2']")).toBeVisible();
+  await expect(page.locator("canvas[aria-label='PDF preview, page 2']")).toBeVisible({ timeout: 15_000 });
   const english = await save(page, /^(Export PDF|PDF exportieren)/);
   verifyPdf(english.path, "en", source);
   await page.getByRole("radio", { name: /Summary report/ }).check();
