@@ -248,7 +248,8 @@ export function NucleusRadar({
   return (
     <svg
       className="radar"
-      viewBox={`0 0 ${size} ${size}`}
+      // Room around the rings so the area labels stay inside the drawing.
+      viewBox={`-36 -8 ${size + 72} ${size + 16}`}
       role="img"
       aria-label={t("Kern-Radar deiner Schlussfolgerungen")}
     >

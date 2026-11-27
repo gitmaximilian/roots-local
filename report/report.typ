@@ -1,10 +1,10 @@
 #let report = json("report.json")
 #let lang = report.options.language
 #let tr(de, en) = if lang == "de" { de } else { en }
-#let theme = rgb("#1b6b59")
-#let ink = rgb("#202f2c")
-#let secondary = rgb("#526861")
-#let paper = rgb("#e9f2ee")
+#let theme = rgb("#2456c9")
+#let ink = rgb("#1b1f24")
+#let secondary = rgb("#5a6472")
+#let paper = rgb("#e6edfb")
 #set document(title: "Roots Local · " + tr("DNA-Report", "DNA report"))
 #set text(font: "Libertinus Serif", lang: lang, size: 11pt, fill: ink)
 #set par(leading: 0.67em, justify: false)
@@ -15,13 +15,13 @@
   paper: "a4", margin: (left: 20mm, right: 20mm, top: 21mm, bottom: 20mm),
   header: context if counter(page).get().first() > 1 {
     text(size: 9pt, fill: secondary)[Roots Local #h(1fr) #tr("DNA-Report", "DNA report")]
-    line(length: 100%, stroke: 0.5pt + rgb("#dbe4df"))
+    line(length: 100%, stroke: 0.5pt + rgb("#e1e5eb"))
   },
   footer: context if counter(page).get().first() > 1 {
     text(size: 9pt, fill: secondary)[#tr("Referenzkatalog", "Reference catalog") #report.catalog_version #h(1fr) #counter(page).display()]
   }
 )
-#let status(value) = (personal: tr("Persönlich auswertbar", "Interpretable"), research: tr("Studienbezug", "Research association"), missing: tr("Nicht beurteilbar", "Unresolved")).at(value)
+#let status(value) = (personal: tr("Ergebnis", "Result"), research: tr("Nur Studienhinweis", "Study hint only"), missing: tr("Ohne Ergebnis", "No result")).at(value)
 #let confidence(value) = (high: tr("Hohe Sicherheit", "High confidence"), moderate: tr("Mittlere Sicherheit", "Moderate confidence"), low: tr("Geringe Sicherheit", "Low confidence")).at(value)
 #let box-stat(number, title) = block(width: 100%, fill: paper, inset: 12pt, radius: 5pt)[
   #text(size: 20pt, fill: theme, weight: "bold")[#number]
@@ -102,7 +102,7 @@
     let (name, length) = entry
     stack(spacing: 1.6mm,
       box(width: 3.2mm, height: height, {
-        place(top, rect(width: 3.2mm, height: height * length / longest, radius: 1.6mm, fill: rgb("#e3ebe7")))
+        place(top, rect(width: 3.2mm, height: height * length / longest, radius: 1.6mm, fill: rgb("#e3e8f0")))
         for m in marks.filter(m => m.at(0) == name) {
           place(top + left, dx: -0.7mm, dy: height * m.at(1) / longest - 0.3mm, rect(width: 4.6mm, height: 0.7mm, fill: theme))
         }
@@ -125,8 +125,8 @@
 #if report.options.name != none { text(size: 17pt, report.options.name); v(4mm) }
 #if report.example { block(fill: paper, inset: 8pt, radius: 4pt)[#tr("Synthetisches Profil", "Synthetic profile")] }
 #grid(columns: (1fr, 1fr, 1fr), gutter: 7pt,
-  box-stat(report.personal, tr("Schlussfolgerungen", "Conclusions")),
-  box-stat(report.research, tr("Studienbezüge", "Research associations")),
+  box-stat(report.personal, tr("Ergebnisse", "Results")),
+  box-stat(report.research, tr("Nur Studienhinweise", "Study hints only")),
   box-stat(report.summary.rows, tr("Genotypzeilen", "Genotype rows"))
 )
 #v(11mm)
@@ -141,7 +141,7 @@
 ] else [
   #tr("Jede Zeile beantwortet, was ein Befund für dich bedeutet. Details und Quellen stehen im jeweiligen Kapitel.", "Each row answers what a finding means for you. Details and sources are in the chapter for each finding.")
   #v(3mm)
-  #table(columns: (34%, 1fr, 22%), stroke: (x, y) => if y > 0 { (top: 0.5pt + rgb("#dbe4df")) }, inset: (x: 0pt, y: 6pt), column-gutter: 4mm,
+  #table(columns: (34%, 1fr, 22%), stroke: (x, y) => if y > 0 { (top: 0.5pt + rgb("#e1e5eb")) }, inset: (x: 0pt, y: 6pt), column-gutter: 4mm,
     text(size: 9pt, fill: secondary)[#tr("Befund", "Finding")],
     text(size: 9pt, fill: secondary)[#tr("Schlussfolgerung", "Conclusion")],
     text(size: 9pt, fill: secondary)[#tr("Sicherheit", "Confidence")],
@@ -165,7 +165,7 @@
 
 #heading(level: 1, [#tr("Datenübersicht", "Data overview")])
 #grid(columns: (1fr, 1fr, 1fr), gutter: 7pt,
-  box-stat(report.missing, tr("Offene Merkmalsregeln", "Unresolved trait rules")),
+  box-stat(report.missing, tr("Themen ohne Ergebnis", "Topics without a result")),
   box-stat(report.summary.no_call, tr("Zeilen ohne Genotyp", "Rows without a genotype")),
   box-stat(report.summary.conflicts, tr("Widersprüchliche Positionen", "Conflicting positions"))
 )
@@ -341,7 +341,7 @@
 - #tr("Analysiert werden nur die im Referenzkatalog beschriebenen Positionen. Zuordnung anhand von Referenzbuild, Chromosom, Koordinate und unterstützten Allelen.", "The analysis covers positions documented in the active catalog. Rules match on assembly, chromosome, position, and supported alleles.")
 - #tr("Fehlende und widersprüchliche Positionen bleiben offen. Die Messmethode einzelner Genotypen ist ohne entsprechende Daten im Export unbekannt.", "Missing or conflicting positions remain unresolved. The source of a genotype call is unknown unless the export provides it.")
 - #tr("GWAS-Studienbezüge erscheinen für übereinstimmende rsIDs und Koordinaten. Der Abgleich berücksichtigt keine Effektallele. Der Bericht weist fehlende Marker bei den kuratierten Einzelregeln aus.", "GWAS associations require matching rsIDs and positions. The match does not consider effect alleles. The report identifies missing markers for curated rules.")
-- #tr("Studienbezüge beschreiben veröffentlichte Zusammenhänge. Medizinisch relevante Consumer-Befunde benötigen klinische Bestätigung.", "Research associations summarize published findings. Clinically relevant consumer findings require clinical confirmation.")
+- #tr("Studienhinweise beschreiben veröffentlichte Zusammenhänge. Medizinisch relevante Consumer-Befunde benötigen klinische Bestätigung.", "Study hints summarize published findings. Clinically relevant consumer findings require clinical confirmation.")
 - #tr("Bei ausgeschalteter Genotypanzeige bleiben Aussagen im Report erhalten. Sie können indirekt Hinweise auf Varianten enthalten.", "Hiding explicit genotypes preserves the report's conclusions, which may indirectly identify variants.")
 
 #if not report.options.short {
