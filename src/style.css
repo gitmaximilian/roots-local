@@ -338,6 +338,9 @@ main {
 .content > * {
   max-width: 1080px;
   width: 100%;
+  /* The column scrolls; its children keep their height instead of shrinking
+     (blocks with overflow: hidden would otherwise collapse to nothing). */
+  flex-shrink: 0;
 }
 .heading {
   display: grid;
