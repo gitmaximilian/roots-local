@@ -147,3 +147,30 @@ test("sources are links and the inspector keeps the chosen entry in view", async
   await expect(link).toHaveAttribute("rel", /noreferrer/);
   await expect(inspector.getByRole("button", { name: "Copy address" }).first()).toBeVisible();
 });
+
+test("variant rows name medical findings only after the medical opt-in", async ({ page }) => {
+  await example(page);
+  const menu = page.getByRole("button", { name: "Menu", exact: true });
+  if (await menu.isVisible()) await menu.click();
+  await page.getByRole("navigation", { name: "Main navigation" }).getByRole("button", { name: "Variants" }).click();
+  const table = page.locator(".variant-table");
+  await expect(table).toContainText("Lactase");
+  await expect(table).not.toContainText("Factor V Leiden");
+  await expect(table).toContainText("Medical finding, hidden");
+  // Genotype letters are readable as text, not only as coloured chips.
+  await expect(table.locator(".genotype .sr-only").first()).toHaveText(/^[ACGT]{2}$/);
+});
+
+test("keyboard focus stays visible", async ({ page }, info) => {
+  test.skip(Boolean(info.project.use.isMobile), "keyboard");
+  await example(page);
+  // Safari reaches buttons with Option-Tab, other browsers with Tab.
+  await page.locator(".result-list li button").first().focus();
+  await page.keyboard.press(info.project.name === "webkit" ? "Alt+Tab" : "Tab");
+  expect(await page.evaluate(() => document.activeElement?.tagName)).toBe("BUTTON");
+  const outline = await page.evaluate(() => {
+    const style = getComputedStyle(document.activeElement!);
+    return `${style.outlineStyle} ${style.outlineWidth}`;
+  });
+  expect(outline).not.toMatch(/^none|0px/);
+});

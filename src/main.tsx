@@ -38,6 +38,7 @@ import { Logo, Mark } from "./brand";
 import { CommandPalette, type Command } from "./command-palette";
 import {
   ConfidenceMeter,
+  Genotype,
   ScoreMeter,
   ScoreOverview,
   Inspector,
@@ -225,7 +226,7 @@ function FindingDetail({
                   <small>{resultText(c.gene)}</small>
                 </td>
                 <td>{c.coordinate || "–"}</td>
-                <td className="mono">{hidden ? "•••" : c.call || "–"}</td>
+                <td className="mono">{hidden ? "•••" : <Genotype call={c.call} />}</td>
                 <td>{resultText(c.status)}</td>
               </tr>
             ))}
@@ -294,6 +295,7 @@ function VariantRegister({
   chromosomes: Report["summary"]["chromosomes"];
   onBack?: () => void;
 }) {
+  const showMedical = useContext(MedicalContext);
   // Catalog findings by marker, so a raw row links to what it is used for.
   const byMarker = useMemo(() => {
     const map = new Map<string, Finding>();
@@ -432,13 +434,17 @@ function VariantRegister({
                   <td className="mono">{row.id || "–"}</td>
                   <td className="mono">{row.chromosome}</td>
                   <td className="mono numeric">{number.format(row.position)}</td>
-                  <td className="mono">{row.alleles || t("Fehlt")}</td>
+                  <td className="mono">{row.alleles ? <Genotype call={row.alleles} /> : t("Fehlt")}</td>
                   <td>{variantQualityLabel(row.quality)}</td>
                   <td>
                     {byMarker.get(row.id) ? (
-                      <button className="text-button" onClick={() => onOpenFinding(byMarker.get(row.id)!)}>
-                        {resultText(byMarker.get(row.id)!.title)}
-                      </button>
+                      isMedical(byMarker.get(row.id)!) && !showMedical ? (
+                        <span className="muted">{t("Medizinischer Befund, ausgeblendet")}</span>
+                      ) : (
+                        <button className="text-button" onClick={() => onOpenFinding(byMarker.get(row.id)!)}>
+                          {resultText(byMarker.get(row.id)!.title)}
+                        </button>
+                      )
                     ) : (
                       <span className="muted">–</span>
                     )}
@@ -840,7 +846,10 @@ function App() {
     setArea(id);
     if (id) {
       requestAnimationFrame(() =>
-        document.getElementById("results")?.scrollIntoView({ block: "start", behavior: "smooth" }),
+        document.getElementById("results")?.scrollIntoView({
+          block: "start",
+          behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth",
+        }),
       );
     }
   }

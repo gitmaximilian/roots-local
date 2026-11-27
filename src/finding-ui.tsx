@@ -54,6 +54,20 @@ export function scoreDirection(score: NonNullable<Finding["score"]>) {
   return higher ? t("eher höhere Werte") : t("eher niedrigere Werte");
 }
 
+/** A genotype such as "AG" with each base in its colour; other calls stay text. */
+export function Genotype({ call }: { call: string | null | undefined }) {
+  if (!call) return <>–</>;
+  if (!/^[ACGT]{1,2}$/.test(call)) return <>{call}</>;
+  return (
+    <span className="genotype">
+      <span className="sr-only">{call}</span>
+      {[...call].map((base, index) => (
+        <span key={index} className={`base ${base}`} aria-hidden="true">{base}</span>
+      ))}
+    </span>
+  );
+}
+
 export function StatusLabel({ status }: { status: Status }) {
   return (
     <span className={`status ${status}`}>
@@ -277,7 +291,7 @@ export function Inspector({
                     {check.coordinate ? ` · ${check.coordinate}` : ""}
                   </small>
                 </td>
-                <td className="mono" data-label={t("Genotyp")}>{hidden ? "•••" : check.call || "–"}</td>
+                <td className="mono" data-label={t("Genotyp")}>{hidden ? "•••" : <Genotype call={check.call} />}</td>
                 <td data-label={finding.score ? t("Wirkung") : t("Datenqualität")}>{resultText(check.status)}</td>
               </tr>
             ))}

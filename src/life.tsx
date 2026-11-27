@@ -264,9 +264,12 @@ export function NucleusRadar({
       {present.map((area, index) => {
         const angle = -Math.PI / 2 + index * sector;
         const mid = angle + sector / 2;
-        const items = findings.filter(
+        const inArea = findings.filter(
           (f) => areaOf(f) === area.id && f.status !== "missing",
         );
+        // Hidden medical findings collapse into one point per area.
+        const hiddenItems = inArea.filter((f) => isMedical(f) && !showMedical);
+        const items = inArea.filter((f) => !(isMedical(f) && !showMedical));
         return (
           <g key={area.id}>
             <line
@@ -314,6 +317,19 @@ export function NucleusRadar({
                 </circle>
               );
             })}
+                {hiddenItems.length > 0 && (
+              <circle
+                className="dot hidden"
+                cx={center + Math.cos(mid) * outer * 0.95}
+                cy={center + Math.sin(mid) * outer * 0.95}
+                r={6}
+                onClick={() => onSelectArea(area.id)}
+              >
+                <title>
+                  {hiddenItems.length} {t("medizinische Befunde ausgeblendet.")}
+                </title>
+              </circle>
+            )}
           </g>
         );
       })}
