@@ -47,7 +47,103 @@ test("positions use the number format of the interface language", async ({ page 
   const menu = page.getByRole("button", { name: "Menu", exact: true });
   if (await menu.isVisible()) await menu.click();
   await page.getByRole("navigation").getByRole("button", { name: "Atlas", exact: true }).click();
-  await page.getByLabel("Choose chromosome").selectOption("2");
+  if (await menu.isVisible()) {
+    await page.getByRole("group", { name: "Choose chromosome" }).getByRole("button", { name: /^Chromosome 2,/ }).click();
+  } else {
+    await page.locator(".atlas-side select").selectOption("2");
+  }
   await expect(page.locator(".atlas-side")).toContainText("136,608,646");
   await expect(page.locator(".atlas-side")).not.toContainText("136.608.646");
+});
+
+test("overview names each conclusion once and counts consistently", async ({ page }) => {
+  await example(page);
+  // The count beside Chapters equals results, scores and study hints together.
+  const figures = await page.locator(".stats strong").allTextContents();
+  const [results, scores, hints] = figures.map(Number);
+  const menu = page.getByRole("button", { name: "Menu", exact: true });
+  if (await menu.isVisible()) await menu.click();
+  await expect(page.getByRole("navigation", { name: "Main navigation" }).getByRole("button", { name: /^Chapters/ }).locator(".count"))
+    .toHaveText(String(results + scores + hints));
+  const closeMenu = page.getByRole("button", { name: "Close menu" });
+  if (await closeMenu.isVisible()) await closeMenu.click();
+  // Every visible conclusion appears exactly once on the overview.
+  const answers = await page.locator(".result-answer").allTextContents();
+  const content = await page.locator(".content").innerText();
+  for (const answer of answers) {
+    expect(content.split(answer).length - 1, answer).toBe(1);
+  }
+  // The medical notice is neutral and keeps the confirmation step.
+  const notice = page.locator(".notice-card");
+  await expect(notice).toContainText("medical findings hidden");
+  const background = await notice.evaluate((el) => getComputedStyle(el).backgroundColor);
+  const danger = await page.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue("--danger-soft").trim());
+  expect(background).not.toBe(danger);
+  await notice.getByRole("button", { name: "Show" }).click();
+  await expect(page.getByRole("dialog", { name: "Before you show medical topics" })).toBeVisible();
+});
+
+test("chapters fold topics without a matching rule into one line", async ({ page }) => {
+  await example(page);
+  const menu = page.getByRole("button", { name: "Menu", exact: true });
+  if (await menu.isVisible()) await menu.click();
+  await page.getByRole("navigation", { name: "Main navigation" }).getByRole("button", { name: /^Chapters/ }).click();
+  await expect(page.getByText("No applicable trait rule", { exact: false })).toHaveCount(0);
+  const folded = page.locator(".empty-sections summary");
+  await expect(folded).toContainText(/more topics? without a matching rule/);
+  // The sidebar no longer repeats the chapter list.
+  await expect(page.locator(".sidebar nav .group")).not.toContainText(["Chapters"]);
+});
+
+test("phone layout: language below the intro, nothing under the dock, list atlas", async ({ page }, info) => {
+  test.skip(!info.project.use.isMobile, "phone layout");
+  await started(page);
+  const heading = await page.getByRole("heading", { name: "Your DNA. Your device." }).boundingBox();
+  const language = await page.getByRole("button", { name: "Deutsch", exact: true }).boundingBox();
+  expect(language!.y).toBeGreaterThan(heading!.y);
+  await page.getByRole("button", { name: "View example", exact: true }).first().click();
+  await expect(page.getByRole("heading", { name: "What your DNA says" })).toBeVisible();
+  // The last element of the page can be scrolled above the dock.
+  const content = page.locator(".content");
+  await content.evaluate((el) => el.scrollTo(0, el.scrollHeight));
+  const dock = (await page.getByRole("navigation", { name: "Quick navigation" }).boundingBox())!;
+  const last = (await page.locator(".quality-note").boundingBox())!;
+  expect(last.y + last.height).toBeLessThanOrEqual(dock.y);
+  // The overview stays short enough to scan.
+  const height = await content.evaluate((el) => el.scrollHeight);
+  expect(height).toBeLessThan(page.viewportSize()!.height * 5);
+  // Atlas: chromosomes as a list with large targets.
+  await page.getByRole("button", { name: "Menu", exact: true }).click();
+  await page.getByRole("navigation", { name: "Main navigation" }).getByRole("button", { name: "Atlas" }).click();
+  const chromosomes = page.getByRole("group", { name: "Choose chromosome" }).getByRole("button");
+  await expect(chromosomes).toHaveCount(24);
+  for (const box of await chromosomes.evaluateAll((items) => items.map((i) => i.getBoundingClientRect().height))) {
+    expect(box).toBeGreaterThanOrEqual(44);
+  }
+  await page.getByRole("button", { name: /^Chromosome 2,/ }).click();
+  await expect(page.locator(".atlas-side")).toContainText("Chromosome 2");
+  await page.locator(".atlas-side button").first().click();
+  // Marker rows in the inspector are blocks, not a squeezed table.
+  await expect(page.locator(".inspector .marker-table thead")).toBeHidden();
+  // Data sources stay reachable from the phone menu.
+  await page.getByRole("button", { name: "Close details" }).click();
+  await page.getByRole("button", { name: "Menu", exact: true }).click();
+  await expect(page.getByRole("navigation", { name: "Main navigation" }).getByRole("button", { name: "Data sources" })).toBeInViewport();
+});
+
+test("sources are links and the inspector keeps the chosen entry in view", async ({ page }, info) => {
+  test.skip(Boolean(info.project.use.isMobile), "desktop inspector");
+  await page.setViewportSize({ width: 1280, height: 800 });
+  await example(page);
+  const entry = page.locator(".result-list li button").last();
+  await entry.scrollIntoViewIfNeeded();
+  await entry.click();
+  const inspector = page.locator(".inspector");
+  await expect(inspector).toBeVisible();
+  await expect(entry).toBeInViewport();
+  expect((await inspector.boundingBox())!.width).toBeGreaterThanOrEqual(430);
+  const link = inspector.locator(".sources a").first();
+  await expect(link).toHaveAttribute("target", "_blank");
+  await expect(link).toHaveAttribute("rel", /noreferrer/);
+  await expect(inspector.getByRole("button", { name: "Copy address" }).first()).toBeVisible();
 });

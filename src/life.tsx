@@ -12,7 +12,7 @@ import {
   Utensils,
   type LucideIcon,
 } from "lucide-react";
-import { getLanguage, resultText, t } from "./locale";
+import { count, getLanguage, resultText, t } from "./locale";
 import { clearWinner, prepare, search } from "./search";
 import { ConfidenceMeter, isMedical, visibleConclusion } from "./finding-ui";
 import type { Confidence, Finding } from "./types";
@@ -82,69 +82,141 @@ export function LifeAreas({
   const groups = areas()
     .map((area) => {
       const items = findings.filter((f) => areaOf(f) === area.id);
-      const concluded = items.filter((f) => f.conclusion);
+      const concluded = items.filter((f) => f.conclusion && f.method !== "score");
       const visible = concluded.filter((f) => showMedical || !isMedical(f));
-      // Curated rules first; a genetic score only when nothing else concludes.
-      const best = [...visible].sort(
-        (a, b) =>
-          Number(a.method === "score") - Number(b.method === "score") ||
-          confidenceValue[b.confidence ?? "low"] -
-            confidenceValue[a.confidence ?? "low"],
-      )[0];
+      const scores = items.filter((f) => f.method === "score" && f.score?.z != null && (showMedical || !isMedical(f)));
+      const hiddenScores = items.filter((f) => f.method === "score" && f.score?.z != null && isMedical(f) && !showMedical).length;
+      const research = items.filter((f) => f.status === "research").length;
       const score = visible.length
         ? visible.reduce(
             (sum, f) => sum + confidenceValue[f.confidence ?? "low"],
             0,
           ) / visible.length
         : 0;
-      return { ...area, items, concluded, visible, best, score };
+      return { ...area, items, concluded, visible, scores, hiddenScores, research, score };
     })
     .filter((group) => group.items.some((f) => f.status !== "missing"));
   return (
     <div className="areas">
-      {groups.map(
-        ({ id, label, Icon, concluded, visible, best, score, items }) => {
-          const locked = concluded.length > visible.length;
-          const research = items.filter((f) => f.status === "research").length;
-          return (
-            <button
-              key={id}
-              className={`area${selected === id ? " active" : ""}`}
-              aria-pressed={selected === id}
-              onClick={() => (id === "medicines" ? onOpenPass() : onSelect(id))}
-            >
-              <span className="area-top">
-                <Icon size={16} />
-                <span>{label}</span>
-                {id === "medicines" && <ArrowRight size={14} />}
-              </span>
-              <strong>
-                {best
-                  ? best.method === "score"
-                    ? `${resultText(best.title)}: ${resultText(best.conclusion!)}`
-                    : resultText(best.conclusion!)
-                  : locked
-                    ? t("Gesperrt, bis du medizinische Befunde einschaltest")
-                    : t("Bisher nur Studienbezüge")}
-              </strong>
-              <span className="area-meta">
-                {visible.length}{" "}
-                {visible.length === 1
-                  ? t("Schlussfolgerung")
-                  : t("Schlussfolgerungen")}
-                {locked &&
-                  ` · ${concluded.length - visible.length} ${t("gesperrt")}`}
-                {research > 0 &&
-                  ` · ${research} ${research === 1 ? t("Studienbezug") : t("Studienbezüge")}`}
-              </span>
-              <span className="area-bar" aria-hidden="true">
-                <i style={{ width: `${Math.round(score * 100)}%` }} />
-              </span>
-            </button>
-          );
-        },
+      {groups.map(({ id, label, Icon, concluded, visible, scores, hiddenScores, research, score }) => {
+        const locked = concluded.length - visible.length + hiddenScores;
+        // The tile names the topics; the statements follow in the list below.
+        const topics = visible
+          .slice()
+          .sort((a, b) => confidenceValue[b.confidence ?? "low"] - confidenceValue[a.confidence ?? "low"])
+          .slice(0, 3)
+          .map((f) => resultText(f.title));
+        const parts = [
+          visible.length > 0 && count(visible.length, "Ergebnis", "Ergebnisse"),
+          scores.length > 0 && count(scores.length, "Score", "Scores"),
+          research > 0 && count(research, "Studienhinweis", "Studienhinweise"),
+          locked > 0 && `${locked} ${t("ausgeblendet")}`,
+        ].filter(Boolean);
+        return (
+          <button
+            key={id}
+            className={`area${selected === id ? " active" : ""}`}
+            aria-pressed={id === "medicines" ? undefined : selected === id}
+            onClick={() => (id === "medicines" ? onOpenPass() : onSelect(id))}
+          >
+            <span className="area-top">
+              <Icon size={16} aria-hidden="true" />
+              <span>{label}</span>
+              {id === "medicines" && <ArrowRight size={14} aria-hidden="true" />}
+            </span>
+            <strong>
+              {topics.length
+                ? topics.join(", ")
+                : locked
+                  ? t("Ausgeblendet, bis du medizinische Befunde einschaltest")
+                  : scores.length
+                    ? t("Nur genetische Scores")
+                    : t("Bisher nur Studienhinweise")}
+            </strong>
+            <span className="area-meta">{parts.join(" · ")}</span>
+            <span className="area-bar" aria-hidden="true">
+              <i style={{ width: `${Math.round(score * 100)}%` }} />
+            </span>
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+/** Conclusions as a compact list, grouped by life area when no area is chosen. */
+export function ResultList({
+  findings,
+  showMedical,
+  inspected,
+  grouped,
+  limit,
+  onOpen,
+}: {
+  findings: Finding[];
+  showMedical: boolean;
+  inspected?: string;
+  grouped: boolean;
+  limit?: number;
+  onOpen: (finding: Finding) => void;
+}) {
+  const [all, setAll] = useState(false);
+  const order = areas().map((area) => area.id);
+  const sorted = [...findings].sort(
+    (a, b) =>
+      order.indexOf(areaOf(a)) - order.indexOf(areaOf(b)) ||
+      confidenceValue[b.confidence ?? "low"] - confidenceValue[a.confidence ?? "low"],
+  );
+  const shown = limit && !all ? sorted.slice(0, limit) : sorted;
+  const sections = grouped
+    ? areas()
+        .map((area) => ({ area, items: shown.filter((f) => areaOf(f) === area.id) }))
+        .filter((entry) => entry.items.length)
+    : [{ area: undefined, items: shown }];
+  return (
+    <div className="result-list">
+      {sections.map(({ area, items }) => (
+        <div className="result-group" key={area?.id ?? "all"}>
+          {area && <h3>{area.label}</h3>}
+          <ul>
+            {items.map((finding) => (
+              <li key={finding.id}>
+                <button
+                  data-finding={finding.id}
+                  className={inspected === finding.id ? "active" : ""}
+                  aria-pressed={inspected === finding.id}
+                  onClick={() => onOpen(finding)}
+                >
+                  <span className="result-title">
+                    {resultText(finding.title)}
+                    {isMedical(finding) && <span className="medical">{t("Medizinisch")}</span>}
+                  </span>
+                  <span className="result-answer">{visibleConclusion(finding, showMedical)}</span>
+                  {finding.confidence && <ConfidenceMeter value={finding.confidence} />}
+                </button>
+              </li>
+            ))}
+          </ul>
+        </div>
+      ))}
+      {limit && sorted.length > limit && (
+        <button className="text-button more-findings" aria-expanded={all} onClick={() => setAll(!all)}>
+          {all ? t("Weniger anzeigen") : `${t("Alle anzeigen")} (${sorted.length})`}
+        </button>
       )}
     </div>
+  );
+}
+
+/** What the three kinds of points in the radar mean. */
+export function RadarLegend() {
+  return (
+    <figcaption className="radar-legend">
+      <span><i className="concluded" aria-hidden="true" />{t("Ergebnis")}</span>
+      <span><i className="research" aria-hidden="true" />{t("Nur Studienhinweis")}</span>
+      <span><i className="hidden" aria-hidden="true" />{t("Medizinisch, ausgeblendet")}</span>
+      <small>{t("Je näher am Zentrum, desto höher die Einstufung der Katalogregel.")}</small>
+    </figcaption>
   );
 }
 
@@ -165,9 +237,9 @@ export function NucleusRadar({
   const present = areas().filter((area) =>
     findings.some((f) => areaOf(f) === area.id && f.status !== "missing"),
   );
-  const size = 300;
+  const size = 340;
   const center = size / 2;
-  const outer = 118;
+  const outer = 112;
   const ringFor = (f: Finding) => {
     if (!f.conclusion) return 0.95;
     return { high: 0.42, moderate: 0.64, low: 0.84 }[f.confidence ?? "low"];
@@ -206,8 +278,8 @@ export function NucleusRadar({
             />
             <text
               className="sector-label"
-              x={center + Math.cos(mid) * (outer + 26)}
-              y={center + Math.sin(mid) * (outer + 26)}
+              x={center + Math.cos(mid) * (outer + 30)}
+              y={center + Math.sin(mid) * (outer + 30)}
               textAnchor="middle"
               dominantBaseline="middle"
               onClick={() => onSelectArea(area.id)}
@@ -326,7 +398,7 @@ export function AskDna({
   return (
     <section className="ask" aria-label={t("Frag deine DNA")}>
       <h2>{t("Frag deine DNA")}</h2>
-      <p className="ask-help">{t("Die Suche gleicht deine Frage mit lokalen Katalogregeln ab.")}</p>
+      <p className="ask-help">{t("Stell eine Alltagsfrage, etwa zu Milch, Kaffee oder Sonne. Die Antwort zeigt, was deine Datei dazu hergibt und wo die Grenzen liegen.")}</p>
       <form
         className="ask-field"
         onSubmit={(event) => {

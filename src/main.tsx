@@ -14,6 +14,7 @@ import React, {
   Suspense,
   useContext,
   useEffect,
+  useLayoutEffect,
   useMemo,
   useState,
 } from "react";
@@ -40,7 +41,9 @@ import {
   ScoreMeter,
   ScoreOverview,
   Inspector,
+  SourceList,
   StatusLabel,
+  Term,
   isMedical,
   visibleConclusion,
 } from "./finding-ui";
@@ -49,6 +52,8 @@ import {
   AskDna,
   LifeAreas,
   NucleusRadar,
+  RadarLegend,
+  ResultList,
   areaOf,
   areas,
   type AreaId,
@@ -143,7 +148,6 @@ function FindingDetail({
   finding: Finding;
   openVariant: OpenVariant;
 }) {
-  const [copied, setCopied] = useState<string>();
   const showMedical = useContext(MedicalContext);
   const conclusion = visibleConclusion(finding, showMedical);
   const hidden = isMedical(finding) && !showMedical;
@@ -203,7 +207,7 @@ function FindingDetail({
             <tr>
               <th>Marker</th>
               <th>Position</th>
-              <th>{t("Genotyp")}</th>
+              <th><Term name="genotype">{t("Genotyp")}</Term></th>
               <th>{finding.score ? t("Wirkung") : t("Datenqualität")}</th>
             </tr>
           </thead>
@@ -227,26 +231,7 @@ function FindingDetail({
             ))}
           </tbody>
         </table>
-        <div className="sources">
-          {finding.sources.map(([label, url]) => (
-            <div key={url}>
-              <span>{resultText(label)}</span>
-              <button
-                className="text-button"
-                onClick={async () => {
-                  try {
-                    await navigator.clipboard.writeText(url);
-                    setCopied(url);
-                  } catch {
-                    setCopied(undefined);
-                  }
-                }}
-              >
-                {copied === url ? t("Kopiert") : t("Link kopieren")}
-              </button>
-            </div>
-          ))}
-        </div>
+        <SourceList sources={finding.sources} />
       </div>
     </details>
   );
@@ -297,14 +282,28 @@ function variantQualityLabel(quality: VariantQuality) {
 }
 
 function VariantRegister({
+  findings,
+  onOpenFinding,
   initialQuery,
   chromosomes,
   onBack,
 }: {
+  findings: Finding[];
+  onOpenFinding: (finding: Finding) => void;
   initialQuery: string;
   chromosomes: Report["summary"]["chromosomes"];
   onBack?: () => void;
 }) {
+  // Catalog findings by marker, so a raw row links to what it is used for.
+  const byMarker = useMemo(() => {
+    const map = new Map<string, Finding>();
+    for (const finding of findings) {
+      for (const check of finding.checks) {
+        if (!map.has(check.id)) map.set(check.id, finding);
+      }
+    }
+    return map;
+  }, [findings]);
   const [query, setQuery] = useState(initialQuery);
   const [chromosome, setChromosome] = useState("");
   const [quality, setQuality] = useState<VariantQuality | "">("");
@@ -421,19 +420,29 @@ function VariantRegister({
               <tr>
                 <th>Marker</th>
                 <th>{t("Chromosom")}</th>
-                <th>Position</th>
+                <th className="numeric">Position</th>
                 <th>{t("Genotyp")}</th>
                 <th>{t("Datenqualität")}</th>
+                <th>{t("Befund")}</th>
               </tr>
             </thead>
             <tbody>
               {result.rows.map((row, i) => (
                 <tr key={i}>
                   <td className="mono">{row.id || "–"}</td>
-                  <td>{row.chromosome}</td>
-                  <td>{number.format(row.position)}</td>
+                  <td className="mono">{row.chromosome}</td>
+                  <td className="mono numeric">{number.format(row.position)}</td>
                   <td className="mono">{row.alleles || t("Fehlt")}</td>
                   <td>{variantQualityLabel(row.quality)}</td>
+                  <td>
+                    {byMarker.get(row.id) ? (
+                      <button className="text-button" onClick={() => onOpenFinding(byMarker.get(row.id)!)}>
+                        {resultText(byMarker.get(row.id)!.title)}
+                      </button>
+                    ) : (
+                      <span className="muted">–</span>
+                    )}
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -783,6 +792,20 @@ function App() {
     }),
     [model],
   );
+  // One set of counts for the navigation and the overview: rules with a
+  // result, genetic scores with a value, study hints, and topics without result.
+  const tally = useMemo(() => {
+    // Hidden medical findings are counted in the notice, not here.
+    const all = (model?.findings ?? []).filter((f) => showMedical || !isMedical(f));
+    const personal = all.filter((f) => f.status === "personal");
+    return {
+      results: personal.filter((f) => f.method !== "score").length,
+      scores: personal.filter((f) => f.method === "score").length,
+      hints: all.filter((f) => f.status === "research").length,
+      none: all.filter((f) => f.status === "missing").length,
+      hidden: (model?.findings ?? []).filter((f) => isMedical(f) && f.status !== "missing").length,
+    };
+  }, [model, showMedical]);
   const groups = [...new Set(chapters.map((c) => c.part))];
   const chapter = chapters.find((c) => c.id === activeChapter);
   const results = model?.findings || [];
@@ -812,6 +835,14 @@ function App() {
     setNavOpen(false);
     setInspected(undefined);
     document.querySelector(".content")?.scrollTo(0, 0);
+  }
+  function selectArea(id: AreaId | undefined) {
+    setArea(id);
+    if (id) {
+      requestAnimationFrame(() =>
+        document.getElementById("results")?.scrollIntoView({ block: "start", behavior: "smooth" }),
+      );
+    }
   }
   function selectChapter(id: string) {
     setActiveChapter(id);
@@ -1061,23 +1092,31 @@ function App() {
   }, []);
 
   const inspectedFinding = results.find((finding) => finding.id === inspected);
+  // Opening the inspector narrows the content column; keep the entry that
+  // was chosen in view instead of letting the reflow move it away.
+  useLayoutEffect(() => {
+    if (!inspected || phone) return;
+    document
+      .querySelector(`.content [data-finding="${CSS.escape(inspected)}"]`)
+      ?.scrollIntoView({ block: "nearest" });
+  }, [inspected, phone]);
   const mobileInspector = phone && Boolean(inspectedFinding);
   const counts = useMemo(() => {
     const map = new Map<string, number>();
     for (const finding of results) {
-      if (finding.status === "missing") continue;
+      if (finding.status === "missing" || (isMedical(finding) && !showMedical)) continue;
       const id = finding.section.split(".")[0];
       map.set(id, (map.get(id) ?? 0) + 1);
     }
     return map;
-  }, [results]);
+  }, [results, showMedical]);
   const conclusions = results.filter(
     (finding) => finding.status === "personal" && finding.conclusion,
   );
   const shownConclusions = conclusions.filter(
     (finding) => showMedical || !isMedical(finding),
   );
-  const hiddenMedical = conclusions.length - shownConclusions.length;
+  const hiddenMedical = showMedical ? 0 : tally.hidden;
   const medicines = results.filter(
     (finding) => finding.section.startsWith("15.") && finding.conclusion,
   );
@@ -1246,36 +1285,12 @@ function App() {
                   <Icon size={16} />
                   <span>{label}</span>
                   {id === "chapters" && model && (
-                    <span className="count">
-                      {totals.personal + totals.research}
+                    <span className="count num" title={t("Ergebnisse, genetische Scores und Studienhinweise")}>
+                      {tally.results + tally.scores + tally.hints}
                     </span>
                   )}
                 </button>
               ))}
-            {model && !phone && (
-              <>
-                <div className="group">{t("Kapitel")}</div>
-                {chapters
-                  .filter((chapter) => counts.has(chapter.id))
-                  .map((chapter) => (
-                    <button
-                      key={chapter.id}
-                      className={
-                        page === "chapters" && activeChapter === chapter.id
-                          ? "selected"
-                          : ""
-                      }
-                      onClick={() => selectChapter(chapter.id)}
-                    >
-                      <span>
-                        <span className="mono">{chapter.id}</span>{" "}
-                        {chapter.title}
-                      </span>
-                      <span className="count">{counts.get(chapter.id)}</span>
-                    </button>
-                  ))}
-              </>
-            )}
             <div className="group">{t("Quellen")}</div>
             {navigation()
               .filter(({ id }) => id === "data")
@@ -1394,26 +1409,27 @@ function App() {
                       .join(" · ")}
                   />
                   {model.example && <p className="example example-mobile">{t("Synthetisches Beispielprofil")}</p>}
-                  <div className="stats">
+                  <div className="stats" aria-label={t("Auswertung in Zahlen")}>
                     <div>
-                      <small>{t("Schlussfolgerungen")}</small>
-                      <strong>{shownConclusions.length}</strong>
+                      <strong className="num">{tally.results}</strong>
+                      <small>{t("Ergebnisse")}</small>
                     </div>
                     <div>
-                      <small>{t("Studienbezüge")}</small>
-                      <strong>{totals.research}</strong>
+                      <strong className="num">{tally.scores}</strong>
+                      <small>{t("Genetische Scores")}</small>
                     </div>
                     <div>
-                      <small>{t("Offen")}</small>
-                      <strong>{totals.missing}</strong>
+                      <strong className="num">{tally.hints}</strong>
+                      <small>{t("Nur Studienhinweis")}</small>
                     </div>
                     <div>
-                      <small>{t("Genotypzeilen")}</small>
-                      <strong>{number.format(model.summary.rows)}</strong>
+                      <strong className="num">{tally.none}</strong>
+                      <small>{t("Ohne Ergebnis")}</small>
                     </div>
                   </div>
                   {hiddenMedical > 0 && (
                     <div className="notice-card">
+                      <LockKeyhole size={18} aria-hidden="true" />
                       <p>
                         <strong>
                           {hiddenMedical}{" "}
@@ -1438,18 +1454,20 @@ function App() {
                       onShowMedical={() => setShowMedical(true)}
                       onOpen={(finding) => setInspected(finding.id)}
                     />
-                    <div className="radar-wrap">
-                    <NucleusRadar
-                      findings={results.filter((finding) => finding.method !== "score")}
-                      showMedical={showMedical}
-                      selected={inspected}
-                      onOpen={(finding) => setInspected(finding.id)}
-                      onSelectArea={(id) =>
-                        id === "medicines" ? navigate("pass") : setArea(id)
-                      }
-                    />
-                    <p className="radar-key">{t("Je näher am Zentrum, desto höher die Einstufung der Katalogregel.")}</p>
-                    </div>
+                    {!phone && (
+                      <figure className="radar-wrap">
+                        <NucleusRadar
+                          findings={results.filter((finding) => finding.method !== "score")}
+                          showMedical={showMedical}
+                          selected={inspected}
+                          onOpen={(finding) => setInspected(finding.id)}
+                          onSelectArea={(id) =>
+                            id === "medicines" ? navigate("pass") : selectArea(id)
+                          }
+                        />
+                        <RadarLegend />
+                      </figure>
+                    )}
                   </div>
                   <header className="section-heading">
                     <h2>{t("Deine Lebensbereiche")}</h2>
@@ -1458,86 +1476,37 @@ function App() {
                     findings={results}
                     showMedical={showMedical}
                     selected={area}
-                    onSelect={(id) => setArea(area === id ? undefined : id)}
+                    onSelect={(id) => selectArea(area === id ? undefined : id)}
                     onOpenPass={() => navigate("pass")}
                   />
-                  <ScoreOverview
-                    findings={results}
-                    showMedical={showMedical}
-                    onOpen={(finding) => setInspected(finding.id)}
-                  />
-                  <header className="section-heading">
-                    <h2>
-                      {area
-                        ? areas().find((a) => a.id === area)?.label
-                        : t("Alle Schlussfolgerungen")}
-                    </h2>
-                    {area && (
-                      <button
-                        className="text-button"
-                        onClick={() => setArea(undefined)}
-                      >
-                        {t("Alle anzeigen")}
-                      </button>
-                    )}
-                    <button
-                      className="text-button"
-                      onClick={() => {
-                        setQuery("");
-                        setFilter("all");
-                        navigate("chapters");
-                      }}
-                    >
-                      {t("Alle Kapitel")}
-                      <ArrowRight size={15} />
-                    </button>
-                  </header>
-                  {shownConclusions.length ? (
-                    <div className="conclusions">
-                      {shownConclusions
-                        .filter((finding) =>
+                  <section className="results-block" id="results" aria-labelledby="results-heading">
+                    <header className="section-heading">
+                      <h2 id="results-heading">
+                        {area
+                          ? areas().find((a) => a.id === area)?.label
+                          : t("Ergebnisse")}
+                      </h2>
+                      {area && (
+                        <button className="text-button" onClick={() => setArea(undefined)}>
+                          {t("Alle Bereiche")}
+                        </button>
+                      )}
+                    </header>
+                    {shownConclusions.length ? (
+                      <ResultList
+                        key={area ?? "all"}
+                        findings={shownConclusions.filter((finding) =>
                           area ? areaOf(finding) === area : finding.method !== "score",
-                        )
-                        .map((finding) => (
-                          <button
-                            key={finding.id}
-                            className={`conclusion-tile${inspected === finding.id ? " active" : ""}`}
-                            onClick={() =>
-                              setInspected(
-                                inspected === finding.id
-                                  ? undefined
-                                  : finding.id,
-                              )
-                            }
-                          >
-                            <span className="top">
-                              <strong>{resultText(finding.title)}</strong>
-                              {isMedical(finding) && (
-                                <span className="medical">
-                                  {t("Medizinisch")}
-                                </span>
-                              )}
-                            </span>
-                            <span className="answer">
-                              {visibleConclusion(finding, showMedical)}
-                            </span>
-                            {finding.confidence && (
-                              <ConfidenceMeter value={finding.confidence} />
-                            )}
-                            <span className="gene">
-                              {finding.score
-                                ? `${finding.score.matched} / ${finding.score.total} ${t("Genorte des Scores in deiner Datei")}`
-                                : finding.checks
-                                    .map(
-                                      (check) =>
-                                        `${resultText(check.gene)} · ${check.id}`,
-                                    )
-                                    .join("  ")}
-                            </span>
-                          </button>
-                        ))}
-                    </div>
-                  ) : (
+                        )}
+                        showMedical={showMedical}
+                        inspected={inspected}
+                        grouped={!area}
+                        limit={area ? undefined : 6}
+                        onOpen={(finding) =>
+                          setInspected(inspected === finding.id ? undefined : finding.id)
+                        }
+                      />
+                    ) : (
                     <div className="empty">
                       <CircleHelp size={20} />
                       {model.summary.build
@@ -1577,66 +1546,74 @@ function App() {
                           </div>
                         )}
                     </div>
+                    )}
+                  </section>
+                  {!area && (
+                    <ScoreOverview
+                      findings={results}
+                      showMedical={showMedical}
+                      onOpen={(finding) => setInspected(finding.id)}
+                    />
                   )}
-                  {totals.research > 0 && (
-                    <>
+                  {!area && tally.hints > 0 && (
+                    <section aria-labelledby="hints-heading">
                       <header className="section-heading">
-                        <h2>{t("Studienbezüge")}</h2>
+                        <h2 id="hints-heading">{t("Nur Studienhinweise")}</h2>
                       </header>
-                      <div className="result-grid">
+                      <p className="muted">
+                        {t("Eine Studie fand einen Zusammenhang mit deinem Genotyp. Für eine Aussage über dich reicht das nicht.")}
+                      </p>
+                      <ul className="hint-list">
                         {results
-                          .filter((f) => f.status === "research")
-                          .slice(0, 9)
+                          .filter((f) => f.status === "research" && (showMedical || !isMedical(f)))
+                          .slice(0, 4)
                           .map((f) => (
-                            <button
-                              key={f.id}
-                              className={`conclusion-tile${inspected === f.id ? " active" : ""}`}
-                              onClick={() => setInspected(f.id)}
-                            >
-                              <StatusLabel status={f.status} />
-                              <strong>{resultText(f.title)}</strong>
-                              <span className="gene">
-                                {f.checks.map((check) => check.id).join(", ")}
-                              </span>
-                            </button>
+                            <li key={f.id}>
+                              <button
+                                data-finding={f.id}
+                                className={inspected === f.id ? "active" : ""}
+                                onClick={() => setInspected(f.id)}
+                              >
+                                <span>{resultText(f.title)}</span>
+                                <small className="mono">
+                                  {f.checks.map((check) => check.id).join(", ")}
+                                </small>
+                              </button>
+                            </li>
                           ))}
-                      </div>
-                    </>
+                      </ul>
+                      <button
+                        className="text-button more-findings"
+                        onClick={() => {
+                          setQuery("");
+                          setFilter("research");
+                          navigate("chapters");
+                        }}
+                      >
+                        {t("In den Kapiteln ansehen")} ({tally.hints})
+                        <ArrowRight size={15} aria-hidden="true" />
+                      </button>
+                    </section>
                   )}
-                  <header className="section-heading">
-                    <h2>{t("Datenqualität")}</h2>
-                  </header>
-                  <div className="panel quality">
-                    <span>
-                      <strong>{number.format(model.summary.no_call)}</strong>
-                      {t("ohne Genotyp")}
-                    </span>
-                    <span>
-                      <strong>{number.format(model.summary.conflicts)}</strong>{" "}
-                      {t("widersprüchlich")}
-                    </span>
-                    <span>
-                      <strong>{number.format(model.summary.skipped)}</strong>{" "}
-                      {t("übersprungen")}
-                    </span>
-                    <span>
-                      <strong>
-                        {model.summary.sex_check.pattern === "xx"
-                          ? t("XX-Muster")
-                          : model.summary.sex_check.pattern === "xy"
-                            ? t("XY-Muster")
-                            : t("nicht bestimmbar")}
-                      </strong>{" "}
-                      {t("Geschlechtschromosomen")} ·{" "}
-                      {number.format(model.summary.sex_check.x_called)}{" "}
-                      {t("X-Positionen")}
-                    </span>
-                  </div>
+                  <p className="quality-note">
+                    {t("Deine Datei hat")} {number.format(model.summary.rows)}{" "}
+                    {t("Genotypzeilen.")} {number.format(model.summary.no_call)}{" "}
+                    {t("davon ohne Genotyp,")} {number.format(model.summary.conflicts)}{" "}
+                    {t("widersprüchlich und")} {number.format(model.summary.skipped)}{" "}
+                    {t("übersprungen.")}{" "}
+                    {model.summary.sex_check.pattern === "xx"
+                      ? t("Die Geschlechtschromosomen zeigen ein XX-Muster.")
+                      : model.summary.sex_check.pattern === "xy"
+                        ? t("Die Geschlechtschromosomen zeigen ein XY-Muster.")
+                        : t("Das Muster der Geschlechtschromosomen ist nicht bestimmbar.")}{" "}
+                    <button className="text-button" onClick={() => navigate("data")}>
+                      {t("Datenquellen")}
+                    </button>
+                  </p>
                 </>
               ) : (
                 <section className="welcome">
                   <div className="welcome-copy">
-                    {phone && languageControl}
                     <Heading
                       title={t("Deine DNA. Dein Gerät.")}
                       description={t(
@@ -1677,6 +1654,7 @@ function App() {
                   <div className="helix" aria-hidden="true">
                     <Mark size={200} />
                   </div>
+                  {phone && <div className="welcome-language">{languageControl}</div>}
                 </section>
               ))}
             {page === "pass" && (
@@ -1757,7 +1735,7 @@ function App() {
                         disabled={!!busy}
                         onClick={renderPass}
                       >
-                        {t("Vorschau")}
+                        {t("Vorschau erstellen")}
                       </button>
                     </div>
                     <div className="variant-table">
@@ -1765,7 +1743,7 @@ function App() {
                         <thead>
                           <tr>
                             <th>{t("Gen")}</th>
-                            <th>{t("Ergebnis und Bedeutung")}</th>
+                            <th>{t("Was die Studien zeigen")}</th>
                             <th>{t("Sicherheit")}</th>
                           </tr>
                         </thead>
@@ -1774,6 +1752,7 @@ function App() {
                             <tr
                               key={finding.id}
                               className="clickable"
+                              data-finding={finding.id}
                               onClick={() => setInspected(finding.id)}
                             >
                               <td>
@@ -1782,10 +1761,7 @@ function App() {
                                   {finding.checks.map((c) => c.id).join(", ")}
                                 </small>
                               </td>
-                              <td>
-                                {resultText(finding.conclusion!)}
-                                <small>{resultText(finding.summary)}</small>
-                              </td>
+                              <td>{resultText(finding.summary)}</td>
                               <td>
                                 {finding.confidence && (
                                   <ConfidenceMeter value={finding.confidence} />
@@ -1844,15 +1820,18 @@ function App() {
                           .map((c) => (
                             <button
                               key={c.id}
-                              className={
-                                c.id === activeChapter && !search
-                                  ? "selected"
-                                  : ""
-                              }
+                              className={[
+                                c.id === activeChapter && !search ? "selected" : "",
+                                model && !counts.has(c.id) ? "empty-chapter" : "",
+                              ].join(" ").trim()}
+                              aria-current={c.id === activeChapter && !search ? "true" : undefined}
                               onClick={() => selectChapter(c.id)}
                             >
                               <span className="mono">{c.id}</span>
-                              {c.title}
+                              <span className="chapter-title">{c.title}</span>
+                              {model && counts.has(c.id) && (
+                                <span className="count num">{counts.get(c.id)}</span>
+                              )}
                             </button>
                           ))}
                       </div>
@@ -1877,9 +1856,9 @@ function App() {
                           }
                         >
                           <option value="all">{t("Alle Status")}</option>
-                          <option value="personal">{t("Auswertbar")}</option>
-                          <option value="research">{t("Studienbezug")}</option>
-                          <option value="missing">{t("Offen")}</option>
+                          <option value="personal">{t("Ergebnis")}</option>
+                          <option value="research">{t("Nur Studienhinweis")}</option>
+                          <option value="missing">{t("Ohne Ergebnis")}</option>
                         </select>
                       </div>
                     )}
@@ -1901,76 +1880,85 @@ function App() {
                       chapter && (
                         <>
                           <h2>{chapter.title}</h2>
-                          {chapter.sections.map((section) => {
-                            const maternal =
-                              section.id === "01.3"
-                                ? model?.maternal_lineage
-                                : null;
-                            const findings = visible.filter(
-                              (item) => item.section === section.id,
-                            );
-                            const cross = visible.filter((item) =>
-                              item.cross.includes(section.id),
-                            );
+                          {(() => {
+                            const sections = chapter.sections.map((section) => {
+                              const maternal = section.id === "01.3" ? model?.maternal_lineage : null;
+                              const findings = visible.filter((item) => item.section === section.id);
+                              const cross = visible.filter((item) => item.cross.includes(section.id));
+                              const scores = section.id === "14.4" ? model?.scores ?? [] : [];
+                              const empty = Boolean(model) && !findings.length && !cross.length && !maternal && !scores.length;
+                              return { section, maternal, findings, cross, scores, empty };
+                            });
+                            const filled = sections.filter((entry) => !entry.empty);
+                            const empty = sections.filter((entry) => entry.empty);
                             return (
-                              <section className="subchapter" key={section.id}>
-                                <h3>
-                                  <span className="mono">{section.id}</span>{" "}
-                                  {section.title}
-                                </h3>
-                                <p>{section.scope}</p>
-                                {maternal && <MaternalResult data={maternal} />}
-                                {section.id === "14.4" &&
-                                  model?.scores.map((score) => (
-                                    <div className="score" key={score.id}>
-                                      <strong>{resultText(score.title)}</strong>
-                                      <p>
-                                        {score.matched} / {score.total}{" "}
-                                        {t("Modellpositionen ·")}{" "}
-                                        {score.raw === null
-                                          ? t("Kein Rohscore")
-                                          : `${t("Rohscore")} ${number.format(score.raw)}`}
-                                      </p>
-                                      <p>
-                                        {t("Vergleichspopulation der Studie:")}{" "}
-                                        {resultText(score.population)}
-                                        {t(
-                                          ". Forschungswert ohne persönliches Risiko.",
-                                        )}
-                                      </p>
-                                      <small>
-                                        {score.id} · {score.source}
-                                      </small>
-                                    </div>
-                                  ))}
-                                <FindingList
-                                  findings={findings}
-                                  anchor={anchor}
-                                  openVariant={openVariant}
-                                />
-                                {cross.map((f) => (
-                                  <button
-                                    className="text-button"
-                                    key={f.id}
-                                    onClick={() => openFinding(f)}
-                                  >
-                                    {t("Siehe")} {resultText(f.title)}{" "}
-                                    <ArrowRight size={14} />
-                                  </button>
+                              <>
+                                {filled.map(({ section, maternal, findings, cross, scores }) => (
+                                  <section className="subchapter" key={section.id}>
+                                    <h3>
+                                      <span className="mono">{section.id}</span>{" "}
+                                      {section.title}
+                                    </h3>
+                                    <p>{section.scope}</p>
+                                    {maternal && <MaternalResult data={maternal} />}
+                                    {scores.map((score) => (
+                                      <div className="score" key={score.id}>
+                                        <strong>{resultText(score.title)}</strong>
+                                        <p>
+                                          {score.matched} / {score.total}{" "}
+                                          {t("Modellpositionen ·")}{" "}
+                                          {score.raw === null
+                                            ? t("Kein Rohscore")
+                                            : `${t("Rohscore")} ${number.format(score.raw)}`}
+                                        </p>
+                                        <p>
+                                          {t("Vergleichspopulation der Studie:")}{" "}
+                                          {resultText(score.population)}
+                                          {t(". Forschungswert ohne persönliches Risiko.")}
+                                        </p>
+                                        <small>
+                                          {score.id} · {score.source}
+                                        </small>
+                                      </div>
+                                    ))}
+                                    <FindingList
+                                      findings={findings}
+                                      anchor={anchor}
+                                      openVariant={openVariant}
+                                    />
+                                    {cross.map((f) => (
+                                      <button
+                                        className="text-button"
+                                        key={f.id}
+                                        onClick={() => openFinding(f)}
+                                      >
+                                        {t("Siehe")} {resultText(f.title)}{" "}
+                                        <ArrowRight size={14} />
+                                      </button>
+                                    ))}
+                                  </section>
                                 ))}
-                                {model &&
-                                  !findings.length &&
-                                  !cross.length &&
-                                  !maternal && (
-                                    <small>
-                                      {t(
-                                        "Für diesen Abschnitt liegt aktuell keine passende Merkmalsregel vor.",
-                                      )}
-                                    </small>
-                                  )}
-                              </section>
+                                {empty.length > 0 && (
+                                  <details className="empty-sections">
+                                    <summary>
+                                      {empty.length}{" "}
+                                      {empty.length === 1
+                                        ? t("weiteres Thema ohne passende Regel")
+                                        : t("weitere Themen ohne passende Regel")}
+                                    </summary>
+                                    <ul>
+                                      {empty.map(({ section }) => (
+                                        <li key={section.id}>
+                                          <span className="mono">{section.id}</span> {section.title}
+                                          <small>{section.scope}</small>
+                                        </li>
+                                      ))}
+                                    </ul>
+                                  </details>
+                                )}
+                              </>
                             );
-                          })}
+                          })()}
                         </>
                       )
                     )}
@@ -1980,6 +1968,8 @@ function App() {
             )}
             {page === "variants" && model && (
               <VariantRegister
+                findings={results}
+                onOpenFinding={(finding) => setInspected(finding.id)}
                 key={variantJump?.query ?? ""}
                 initialQuery={variantJump?.query ?? ""}
                 chromosomes={model.summary.chromosomes}
@@ -2071,7 +2061,7 @@ function App() {
                         />
                         {t("Konkrete Genotypen anzeigen")}
                       </label>
-                      <label className="choice">
+                      {model.external.matches.length > 0 && <label className="choice">
                         <input
                           type="checkbox"
                           checked={options.include_relatives}
@@ -2085,7 +2075,7 @@ function App() {
                           }}
                         />
                         {t("Namen von DNA-Matches anzeigen")}
-                      </label>
+                      </label>}
                       {
                         <label className="choice">
                           <input
@@ -2143,11 +2133,11 @@ function App() {
                           disabled={!!busy}
                           onClick={renderPdf}
                         >
-                          {t("Vorschau")}
+                          {t("Vorschau erstellen")}
                         </button>
                       </div>
                     </div>
-                    <div className="preview" role="region" aria-label={t("Vorschau")} tabIndex={0}>
+                    <div className="preview" role="region" aria-label={t("PDF-Vorschau")} tabIndex={0}>
                       {preview ? (
                         <Suspense
                           fallback={
@@ -2157,20 +2147,23 @@ function App() {
                           <PdfPreview bytes={preview} />
                         </Suspense>
                       ) : (
-                        <div className="mock-report">
-                          <span>ROOTS LOCAL</span>
-                          <strong>
-                            {t("Dein")}
-                            <br />
-                            {t("DNA-Report")}
-                          </strong>
-                          <i />
-                          <p>{t("Entdecke deine DNA. Offline.")}</p>
-                          <small>
-                            {options.short
-                              ? t("Kurzreport")
-                              : t("Vollreport · 17 Kapitel")}
-                          </small>
+                        <div className="preview-empty">
+                          <div className="mock-report" aria-hidden="true">
+                            <span>Roots Local</span>
+                            <strong>
+                              {t("Dein")}
+                              <br />
+                              {t("DNA-Report")}
+                            </strong>
+                            <i />
+                            <p>{t("Deine DNA. Dein Gerät.")}</p>
+                            <small>
+                              {options.short
+                                ? t("Kurzreport")
+                                : t("Vollreport · 17 Kapitel")}
+                            </small>
+                          </div>
+                          <p>{t("Erstelle eine Vorschau, um die Seiten deines Reports mit den gewählten Einstellungen zu sehen.")}</p>
                         </div>
                       )}
                     </div>

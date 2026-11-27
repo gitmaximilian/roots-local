@@ -31,7 +31,7 @@
   --radius: 10px;
   --radius-small: 6px;
   --sidebar-width: 232px;
-  --inspector-width: 360px;
+  --inspector-width: 440px;
 
   color-scheme: light;
   font-family: var(--font);
@@ -319,6 +319,7 @@ main {
 .ask-help,
 .radar-key { color: var(--muted); }
 .radar-wrap {
+  margin: 0;
   display: grid;
   justify-items: center;
   align-content: center;
@@ -646,9 +647,10 @@ main {
 }
 .stats div {
   background: var(--bg);
-  padding: 11px 14px;
+  padding: 12px 14px;
   display: grid;
-  gap: 1px;
+  gap: 2px;
+  align-content: start;
 }
 .stats small {
   font-size: 11px;
@@ -709,7 +711,12 @@ main {
   gap: 12px;
   padding: 12px 14px;
   border-radius: var(--radius);
-  background: var(--danger-soft);
+  background: var(--surface);
+  border: 1px solid var(--line);
+}
+.notice-card > svg {
+  flex: none;
+  color: var(--muted);
 }
 .notice-card p {
   flex: 1;
@@ -1217,7 +1224,7 @@ main {
 
 @media (max-width: 1100px) {
   .app.with-inspector {
-    grid-template-columns: var(--sidebar-width) minmax(0, 1fr) 300px;
+    grid-template-columns: var(--sidebar-width) minmax(0, 1fr) 340px;
   }
   .atlas,
   .report-layout,
@@ -1246,9 +1253,9 @@ main {
 /* ---------- overview hero: ask + nucleus radar ---------- */
 .overview-hero {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 300px;
+  grid-template-columns: minmax(0, 1fr) 340px;
   gap: 18px;
-  align-items: stretch;
+  align-items: start;
 }
 .ask {
   display: grid;
@@ -1316,8 +1323,8 @@ main {
 }
 .radar {
   width: 100%;
-  max-width: 300px;
-  padding: 18px;
+  max-width: 340px;
+  padding: 0;
   justify-self: center;
   align-self: center;
   overflow: visible;
@@ -1331,7 +1338,7 @@ main {
 }
 .radar .sector-label {
   fill: var(--muted);
-  font-size: 9.5px;
+  font-size: 12.5px;
   font-weight: 600;
   cursor: pointer;
 }
@@ -1890,20 +1897,7 @@ tr.clickable:hover td {
   grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
   gap: 6px 18px;
 }
-.score-overview button {
-  display: grid;
-  grid-template-columns: 1fr 90px 28px;
-  align-items: center;
-  gap: 10px;
-  width: 100%;
-  min-height: 32px;
-  text-align: left;
-  color: var(--ink);
-}
-.score-overview .num {
-  text-align: right;
-  color: var(--muted);
-}
+
 .mini-track {
   position: relative;
   height: 6px;
@@ -1918,4 +1912,261 @@ tr.clickable:hover td {
   margin-left: -1.5px;
   border-radius: 2px;
   background: var(--accent);
+}
+
+/* ---------- overview lists (design review) ---------- */
+.muted { color: var(--muted); }
+.result-list { display: grid; gap: 14px; }
+.result-group { display: grid; gap: 4px; }
+.result-group h3 {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--muted);
+  padding: 0 2px;
+}
+.result-list ul,
+.hint-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 2px;
+}
+.result-list li button,
+.hint-list button {
+  width: 100%;
+  display: grid;
+  grid-template-columns: minmax(150px, 0.8fr) minmax(0, 2fr) auto;
+  gap: 4px 16px;
+  align-items: baseline;
+  padding: 10px 12px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-small);
+  background: var(--surface);
+  text-align: left;
+}
+.result-list li button:hover,
+.hint-list button:hover { border-color: var(--line); }
+.result-list li button.active,
+.hint-list button.active {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+.result-title {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  color: var(--muted);
+  font-weight: 600;
+}
+.result-answer { font-weight: 600; font-size: 14px; line-height: 1.35; }
+.hint-list button { grid-template-columns: minmax(0, 1fr) auto; }
+.hint-list small { color: var(--muted); }
+.quality-note {
+  color: var(--muted);
+  font-size: 12.5px;
+  max-width: 80ch;
+}
+.quality-note .text-button { display: inline; padding: 0; min-height: 0; }
+.area strong { color: var(--ink); }
+
+/* Radar legend */
+.radar-legend {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px 14px;
+  font-size: 12px;
+  color: var(--muted);
+}
+.radar-legend span { display: inline-flex; align-items: center; gap: 6px; }
+.radar-legend i {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  display: inline-block;
+}
+.radar-legend i.concluded { background: var(--accent); }
+.radar-legend i.research { box-shadow: inset 0 0 0 2px var(--warn); }
+.radar-legend i.hidden { border: 1.5px dashed var(--danger); }
+.radar-legend small { flex-basis: 100%; text-align: center; }
+
+/* Terms with a short explanation */
+.term { position: relative; display: inline; }
+.term button {
+  border: 0;
+  padding: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-decoration: underline dotted;
+  text-underline-offset: 3px;
+  cursor: help;
+}
+.term [role="tooltip"] {
+  position: absolute;
+  z-index: 30;
+  left: 0;
+  top: calc(100% + 6px);
+  width: max-content;
+  max-width: 240px;
+  padding: 8px 10px;
+  border-radius: var(--radius-small);
+  background: var(--ink);
+  color: var(--bg);
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.4;
+  white-space: normal;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+/* Score range */
+.score-meter .track {
+  position: relative;
+  display: block;
+  height: 10px;
+  border-radius: 5px;
+  background: color-mix(in srgb, var(--ink) 10%, transparent);
+}
+.score-meter .track .range {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  border-radius: 5px;
+  background: var(--accent);
+  opacity: 0.85;
+}
+.score-meter .track .tick {
+  position: absolute;
+  top: -3px;
+  bottom: -3px;
+  width: 2px;
+  margin-left: -1px;
+  background: var(--ink);
+  opacity: 0.45;
+}
+.score-overview .score-row {
+  width: 100%;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 96px minmax(118px, auto);
+  align-items: center;
+  gap: 12px;
+  min-height: 40px;
+  padding: 4px 2px;
+  border: 0;
+  background: none;
+  text-align: left;
+  color: var(--ink);
+}
+.score-overview .score-row:hover .score-name { color: var(--accent); }
+.score-read { display: grid; text-align: right; line-height: 1.25; }
+.score-read .num { font-weight: 600; }
+.score-read small { font-size: 11.5px; }
+.mini-track {
+  position: relative;
+  height: 8px;
+  border-radius: 4px;
+  background: color-mix(in srgb, var(--ink) 12%, transparent);
+}
+.mini-track i {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  border-radius: 4px;
+  background: var(--accent);
+}
+.score-overview ul { grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); }
+
+/* Sources */
+.sources h3 { font-size: 12px; color: var(--muted); }
+.sources a { color: var(--accent); display: inline-flex; gap: 4px; align-items: baseline; }
+
+/* Chapters */
+.chapter-list button { align-items: baseline; }
+.chapter-list .chapter-title { flex: 1; }
+.chapter-list .count { font-size: 11px; color: var(--muted); }
+.chapter-list button.empty-chapter { color: var(--muted); }
+.chapter-list button.empty-chapter .mono { opacity: 0.7; }
+.empty-sections {
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+  color: var(--muted);
+}
+.empty-sections summary { cursor: pointer; font-weight: 500; }
+.empty-sections ul { margin: 8px 0 0; padding-left: 18px; display: grid; gap: 6px; }
+.empty-sections small { display: block; }
+
+/* Variants */
+th.numeric, td.numeric { text-align: right; }
+.variant-table td .text-button { text-align: left; padding: 0; }
+
+/* Report preview placeholder */
+.preview-empty { display: grid; justify-items: center; gap: 14px; max-width: 300px; text-align: center; color: var(--muted); }
+.mock-report > span { text-transform: none; letter-spacing: 0.02em; }
+
+/* Medicine card grows with its content */
+.pass-card { aspect-ratio: auto; min-height: 0; }
+.pass-card small { margin-top: 8px; }
+
+/* ---------- phone (design review) ---------- */
+.welcome-language { display: none; }
+.atlas-chromosomes, .atlas-strip { display: none; }
+@media (max-width: 760px) {
+  .content { padding-bottom: calc(112px + env(safe-area-inset-bottom)); scroll-padding-bottom: calc(112px + env(safe-area-inset-bottom)); }
+  .welcome-language { display: block; grid-column: 1 / -1; }
+  .welcome-language .language-control { font-size: 12px; }
+  .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .result-list li button,
+  .hint-list button { grid-template-columns: minmax(0, 1fr); gap: 3px; }
+  .score-overview ul { grid-template-columns: minmax(0, 1fr); }
+  .score-overview .score-row { grid-template-columns: minmax(0, 1fr) minmax(104px, auto); }
+  .score-overview .mini-track { display: none; }
+  .notice-card { flex-wrap: wrap; }
+  .areas { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+  .area { padding: 11px 12px; }
+  .area strong { font-size: 13px; }
+  /* Marker rows in the inspector and chapters become blocks. */
+  .marker-table thead { display: none; }
+  .marker-table, .marker-table tbody, .marker-table tr, .marker-table td { display: block; }
+  .marker-table tr { padding: 10px 0; border-bottom: 1px solid var(--line); }
+  .marker-table td { border: 0; padding: 2px 0; }
+  .marker-table td[data-label]::before { content: attr(data-label) ": "; color: var(--muted); font-family: var(--font); }
+  /* Atlas: a list of chromosomes and one chromosome at full width. */
+  .atlas-board, .atlas-side .field { display: none; }
+  .atlas-chromosomes {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 6px;
+  }
+  .atlas-chromosomes button {
+    min-height: 48px;
+    display: grid;
+    place-content: center;
+    gap: 1px;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-small);
+    background: var(--surface);
+  }
+  .atlas-chromosomes button[aria-pressed="true"] { border-color: var(--accent); background: var(--accent-soft); }
+  .atlas-chromosomes strong { font-size: 15px; }
+  .atlas-chromosomes small { font-size: 11px; }
+  .atlas-strip { display: block; background: var(--surface); border-radius: var(--radius); padding: 12px; }
+  .atlas-strip svg { width: 100%; height: auto; display: block; }
+  .atlas-side button { min-height: 44px; }
+  .term [role="tooltip"] { max-width: min(240px, 70vw); }
+}
+.atlas-strip .chromosome-bar { fill: var(--chromosome); stroke: color-mix(in srgb, var(--ink) 18%, transparent); }
+.atlas-strip .centromere { stroke: var(--surface); stroke-width: 3; }
+.atlas-strip .marker { stroke-width: 2.5; }
+.atlas-strip .marker.personal { stroke: var(--accent); }
+.atlas-strip .marker.research { stroke: var(--warn); }
+.atlas-strip .marker.missing { stroke: var(--muted); }
+.atlas-strip text { fill: var(--muted); font-size: 9px; }
+.atlas-chromosomes button.empty { color: var(--muted); background: transparent; }
+@media (max-width: 760px) {
+  /* The sheet scrolls as a whole; the navigation must not clip its last group. */
+  .sidebar nav { overflow: visible; min-height: auto; flex: none; }
 }

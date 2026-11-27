@@ -43,6 +43,12 @@ export function formatNumber(value: number, digits?: number) {
   }).format(value);
 }
 
+/** "3 results" / "3 Ergebnisse": English nouns after a count are lower case. */
+export function count(value: number, one: keyof typeof strings, many: keyof typeof strings) {
+  const word = t(value === 1 ? one : many);
+  return `${formatNumber(value)} ${language === "de" ? word : word.toLowerCase()}`;
+}
+
 export function t(message: keyof typeof strings): string {
   return language === "de" ? message : strings[message];
 }
