@@ -67,7 +67,7 @@ npm run preview
 
 `npm run build` writes the static site to `dist/`, adds Subresource Integrity, generates the service worker, and writes `dist/SHA256SUMS`. The [web workflow](.github/workflows/web.yml) runs the same steps with all tests.
 
-The macOS desktop app (v0.2.0, Homebrew cask) was retired on 2026-11-15. Roots Local is now web only.
+[Releases](https://github.com/gitmaximilian/roots-local/releases) record each production build with its build ID and `SHA256SUMS`. The macOS desktop app (v0.2.0, Homebrew cask) was retired on 2026-11-15. Roots Local is now web only.
 
 ## What the app analyzes
 

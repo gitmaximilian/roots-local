@@ -1,6 +1,6 @@
 # Roots Local product review and delivery plan
 
-Roots Local helps a MyHeritage customer inspect a DNA export on their own computer and share a report with the detail they choose. The first product milestone is a trustworthy offline workflow from import to export with reproducible findings, visible gaps, and clear release evidence.
+Roots Local helps someone inspect a consumer DNA export in their own browser and share a report with the detail they choose. The first product milestone is a trustworthy local workflow from import to export with reproducible findings, visible gaps, and clear release evidence.
 
 ## What the implementation brief leaves unresolved
 
@@ -11,7 +11,7 @@ Roots Local helps a MyHeritage customer inspect a DNA export on their own comput
 | Export privacy | Hiding genotype strings still lets a ClinVar hit identify the observed alternate allele through its public record. The renderer previously received optional detail it did not display. | Make clinical annotations opt-in per profile. Apply export settings before sending data to the renderer. Other report interpretations can still reveal genetic information. |
 | Research score export | The report template includes the score section title in compact mode, then suppresses the score body. It can also suppress score content when a finding occupies the same section. | Show imported score status and coverage in either report format, alongside other findings. Test the extracted content. |
 | Validated interpretation | Research results, case-specific observations, and clinical claims have different data requirements. A measured genotype, reported association, or raw score alone cannot establish individual risk. | Ship evidence, method, match quality, and limits with each rule. Require input and model validation specific to every advanced method. |
-| Platform support | Roots Local targets Apple Silicon Macs only. CI builds the app; interactive offline use and the Homebrew install require separate evidence. | Keep CI, interactive testing, and the Homebrew install as three separate checks. [Verified platforms](test-status.md) |
+| Platform support | Roots Local is a static web app for current desktop browsers, iOS Safari, and Android Chrome. The macOS desktop app (v0.2.0) was retired on 2026-11-15. | Run the privacy, score, CRAM, and layout suites in Chromium, WebKit, iPhone, and Android emulation, locally and against the live site. [Verified platforms](test-status.md) |
 
 ## Delivery order and acceptance
 
@@ -19,7 +19,7 @@ Roots Local helps a MyHeritage customer inspect a DNA export on their own comput
 |---|---|---|
 | P0 | Fix PDF sharing controls, score rendering, and the test gap | In both report formats and languages, the default PDF omits imported clinical records. The same PDF includes them when explicitly selected. Allele detail follows its own choice. Incomplete scores state marker coverage and omit a raw value. Complete scores render with their coverage and source even if the section contains another finding. |
 | P1 | Validate source formats and measure coverage | Use synthetic fixtures for automated regressions. Explain a missing assembly in the app and both PDF formats. Separately document accepted MyHeritage export versions after testing consented local files. For CRAM, compare depth and base counts at selected sites with a trusted tool and record reference identity. Show assay limitations and missing coverage in the report. |
-| P1 | Prepare release candidates | Retain an auditable offline macOS run. Test installation, app operation, export, upgrade, and removal on an offline Apple Silicon Mac. Install the release DMG through the Homebrew cask and verify its checksum and ad-hoc signature. [Release acceptance](test-status.md#release-acceptance) |
+| P1 | Prepare releases | Deploy to a preview first, then production. Every served file matches `SHA256SUMS`, the live test suites pass, and the previous deployment stays available as a rollback target. Tag each release on GitHub with its build ID and checksum manifest. [Deployment](deployment.md) |
 | P2 | Add evidence in reviewable batches | Each rule has source, assembly, allele orientation, coverage, and expected positive, negative, and unresolved cases. Add a curated topic only after those checks. Track reference licensing and version in the catalog. |
 | P2 | Validate advanced inference | Benchmark haplogroups on the supported assay and tree. Compare family estimates against known pedigrees. Validate any clinical diplotype or copy-number method on data that supports phase or dosage. Validate absolute risk on the intended population, endpoint, and time horizon before exposing it in a report. |
 
